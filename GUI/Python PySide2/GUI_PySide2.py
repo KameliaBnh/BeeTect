@@ -34,7 +34,7 @@ class MainWindow(QMainWindow):
 
         if filename:
             # Load the image and add it to the scene
-            self.ui.image_label.setPixmap(QtGui.QPixmap(filename))
+            self.ui.image_label.setPixmap(QtGui.QPixmap(filename).scaledToWidth(self.ui.image_label.width()))
 
 
 

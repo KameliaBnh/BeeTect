@@ -57,10 +57,10 @@
        <widget class="QLabel" name="image_label">
         <property name="geometry">
          <rect>
-          <x>10</x>
-          <y>40</y>
-          <width>371</width>
-          <height>461</height>
+          <x>0</x>
+          <y>110</y>
+          <width>381</width>
+          <height>286</height>
          </rect>
         </property>
         <property name="font">
@@ -354,7 +354,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>31</height>
+     <height>21</height>
     </rect>
    </property>
    <property name="locale">
