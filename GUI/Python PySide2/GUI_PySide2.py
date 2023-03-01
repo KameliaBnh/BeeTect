@@ -3,7 +3,9 @@ import os
 from PySide2 import QtGui, QtCore, QtWidgets
 from PySide2.QtCore import QFile, Qt, QCoreApplication
 from PySide2.QtUiTools import QUiLoader
-from PySide2.QtWidgets import QApplication, QMainWindow, QDialog, QFileDialog, QMessageBox, QAction, QMenu
+from PySide2.QtWidgets import QApplication, QMainWindow, QDialog, QFileDialog
+
+##ADD PATH TO PLUGING FOLDER TO SYSTEM VARIABLES TO BE ABLE TO OPEN JPG FILES##
 
 # Get the path to the directory containing the PySide2 modules
 pyside2_dir = os.path.dirname(QtWidgets.__file__)
@@ -25,23 +27,16 @@ class MainWindow(QMainWindow):
         self.setWindowIcon(QtGui.QIcon("C:/Users/benha/Documents/Cranfield/Group Project/BPT_Cranfield/GUI/bee.png"))
         self.ui.Open.triggered.connect(self.open_image)
 
+
     def open_image(self):
-        # Display a file dialog to select a file
-        file_dialog = QFileDialog(self)
-        file_dialog.setNameFilter("Images (*.png *.xpm *.jpg *.bmp *.JPEG *.JPG *.PNG *.BMP *.XPM *.jpeg)")
-        file_dialog.setViewMode(QFileDialog.Detail)
-        file_dialog.setFileMode(QFileDialog.ExistingFile)
+        # Open a file dialog to select an image file
+        filename, _ = QFileDialog.getOpenFileName(self, "Open Image", "", "Image Files (*.png *.jpg *.bmp)")
 
-        if file_dialog.exec_() == QDialog.Accepted:
-            # Get the path to the selected file
-            image_path = file_dialog.selectedFiles()[0]
+        if filename:
+            # Load the image and add it to the scene
+            self.ui.image_label.setPixmap(QtGui.QPixmap(filename))
 
-            # Load the image and display it in the QLabel widget
-            image = QtGui.QImage(image_path)
-            if image.isNull():
-                QMessageBox.information(self, "Image Viewer", "Unable to load image.")
-            else:
-                self.ui.image_label.setPixmap(QtGui.QPixmap.fromImage(image).scaled(self.ui.image_label.size(), QtCore.Qt.KeepAspectRatio))
+
 
 if __name__ == "__main__":
     # Set the Qt::AA_ShareOpenGLContexts attribute
