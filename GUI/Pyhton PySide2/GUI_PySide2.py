@@ -5,6 +5,9 @@ from PySide2.QtCore import QFile, Qt, QCoreApplication
 from PySide2.QtUiTools import QUiLoader
 from PySide2.QtWidgets import QApplication, QMainWindow, QDialog, QFileDialog, QMessageBox, QAction, QMenu
 
+
+#Hello
+
 # Obtenir le chemin du répertoire contenant les modules PySide2
 pyside2_dir = os.path.dirname(QtWidgets.__file__)
 
