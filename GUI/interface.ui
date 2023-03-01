@@ -147,7 +147,7 @@
                 <number>0</number>
                </property>
                <property name="text">
-                <string>Species Name: </string>
+                <string>Number of Pollinators: </string>
                </property>
               </widget>
              </item>
@@ -157,7 +157,7 @@
                 <number>0</number>
                </property>
                <property name="text">
-                <string>Species Info: </string>
+                <string>Number of Images:</string>
                </property>
               </widget>
              </item>
@@ -354,7 +354,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>22</height>
+     <height>31</height>
     </rect>
    </property>
    <property name="locale">
