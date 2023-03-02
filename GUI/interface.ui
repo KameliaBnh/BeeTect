@@ -136,6 +136,16 @@
              <number>0</number>
             </property>
             <layout class="QGridLayout" name="gridLayout_2">
+             <item row="2" column="0">
+              <widget class="QLabel" name="SpeciesInfoLabel">
+               <property name="lineWidth">
+                <number>0</number>
+               </property>
+               <property name="text">
+                <string>Number of Images without Pollinators:</string>
+               </property>
+              </widget>
+             </item>
              <item row="0" column="0">
               <widget class="QLabel" name="SpeciesNameLabel">
                <property name="font">
@@ -147,17 +157,21 @@
                 <number>0</number>
                </property>
                <property name="text">
-                <string>Number of Pollinators: </string>
+                <string>Number of Images with Pollinators: </string>
                </property>
               </widget>
              </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="SpeciesInfoLabel">
-               <property name="lineWidth">
-                <number>0</number>
-               </property>
+             <item row="3" column="0">
+              <widget class="QLabel" name="label">
                <property name="text">
-                <string>Number of Images:</string>
+                <string>Most Abundant Specie:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="0">
+              <widget class="QLabel" name="label_2">
+               <property name="text">
+                <string>Most Abundant Rare Specie:</string>
                </property>
               </widget>
              </item>
@@ -354,7 +368,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>21</height>
+     <height>31</height>
     </rect>
    </property>
    <property name="locale">
@@ -389,9 +403,7 @@
     <string>Open File</string>
    </property>
    <property name="font">
-    <font>
-     <pointsize>8</pointsize>
-    </font>
+    <font/>
    </property>
   </action>
  </widget>
