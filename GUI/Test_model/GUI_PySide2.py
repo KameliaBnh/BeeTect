@@ -6,7 +6,7 @@ from PySide2.QtUiTools import QUiLoader
 from PySide2.QtWidgets import QApplication, QMainWindow, QFileDialog
 
 import cv2
-from yolov5.detect import detect
+from yolov5.detect import run
 
 ##ADD PATH TO PLUGING FOLDER TO SYSTEM VARIABLES TO BE ABLE TO OPEN JPG FILES##
 
@@ -48,7 +48,7 @@ class MainWindow(QMainWindow):
     def run_detection(self, filename):
         model_weights = "C:/Users/benha/Documents/Cranfield/Group_Project/BPT_Cranfield/GUI/Test_model/yolov5/weights/best.pt"
         image = cv2.imread(filename)
-        results = detect(image, model_weights, conf_thres=0.4)
+        results = run(image, model_weights, conf_thres=0.4)
         return results
     
     def run_detection_and_display(self):
