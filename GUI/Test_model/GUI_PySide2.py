@@ -8,13 +8,12 @@ from PySide2.QtWidgets import QApplication, QMainWindow, QFileDialog
 import cv2
 from yolov5.detect import run
 
-##ADD PATH TO PLUGING FOLDER TO SYSTEM VARIABLES TO BE ABLE TO OPEN JPG FILES##
-
 # Get the path to the directory containing the PySide2 modules
 pyside2_dir = os.path.dirname(QtWidgets.__file__)
 
 # Add the PySide2 plugins directory to the Qt plugin search path
-os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = os.path.join(pyside2_dir, "plugins", "platforms")
+os.environ["QT_PLUGIN_PATH"] = os.path.join(pyside2_dir, "plugins") #qt5_applications\Qt\plugins
+#os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = os.path.join(pyside2_dir, "plugins", "platforms")
 
 class MainWindow(QMainWindow):
     def __init__(self):
