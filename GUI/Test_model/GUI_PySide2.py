@@ -19,7 +19,7 @@ os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = os.path.join(pyside2_dir, "plugins",
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        ui_file = QFile("C:/Users/benha/Documents/Cranfield/Group_Project/BPT_Cranfield/GUI/interface.ui", self)
+        ui_file = QFile("C:/Users/benha/OneDrive - Cranfield University/Documents/Cranfield/Group_Project/BPT_Cranfield/GUI/interface.ui", self)
         ui_file.open(QFile.ReadOnly)
         # Load the .ui file as a widget
         loader = QUiLoader()
@@ -27,7 +27,7 @@ class MainWindow(QMainWindow):
         ui_file.close()
         self.setCentralWidget(self.ui)
         self.setWindowTitle("Automated Pollinator Monitoring")
-        self.setWindowIcon(QtGui.QIcon("C:/Users/benha/Documents/Cranfield/Group_Project/BPT_Cranfield/GUI/bee.png"))
+        self.setWindowIcon(QtGui.QIcon("C:/Users/benha/OneDrive - Cranfield University/Documents/Cranfield/Group_Project/BPT_Cranfield/GUI/bee.png"))
         self.ui.Open.triggered.connect(self.open_image)
 
         # Connect the button to the function on_click
@@ -46,7 +46,7 @@ class MainWindow(QMainWindow):
             self.ui.image_label.setPixmap(QtGui.QPixmap(filename).scaledToWidth(self.ui.image_label.width()))
 
     def run_detection(self, filename):
-        model_weights = "C:/Users/benha/Documents/Cranfield/Group_Project/BPT_Cranfield/GUI/Test_model/yolov5/weights/best.pt"
+        model_weights = "C:/Users/benha/OneDrive - Cranfield University/Documents/Cranfield/Group_Project/BPT_Cranfield/GUI/Test_model/yolov5/weights/best.pt"
         image = cv2.imread(filename)
         results = run(image, model_weights, conf_thres=0.4)
         return results
@@ -70,7 +70,7 @@ class MainWindow(QMainWindow):
         image_name = os.path.basename(image_path)
         
         # create path for detected image
-        output_image = "C:/Users/benha/Documents/Cranfield/Group_Project/BPT_Cranfield/GUI/Test_model/yolov5/runs/detect/exp/" + image_name
+        output_image = "C:/Users/benha/OneDrive - Cranfield University/Documents/Cranfield/Group_Project/BPT_Cranfield/GUI/Test_model/yolov5/runs/detect/exp/" + image_name
 
         # display image
         self.ui.image_label.setPixmap(QtGui.QPixmap(output_image).scaledToWidth(self.ui.image_label.width()))
