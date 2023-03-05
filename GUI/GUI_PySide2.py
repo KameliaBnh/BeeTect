@@ -93,7 +93,7 @@ class MainWindow(QMainWindow):
             image = cv2.imread(self.image_path)
             model = torch.hub.load('ultralytics/yolov5', 'custom', model_weights)
             results = model(image)
-            results.save(save_dir)
+            results.save(save_dir, exist_ok=True)
             
             # Save results
 
@@ -121,7 +121,7 @@ class MainWindow(QMainWindow):
                     print(image_path)
                     image = cv2.imread(image_path)
                     results = model(image)
-                    results.save(save_dir)
+                    results.save(save_dir, exist_ok=True)
 
                     # Save results
                     # get class names
@@ -135,7 +135,7 @@ class MainWindow(QMainWindow):
                     # get output path of detected image
                     output_path = os.path.join(save_dir, image_name + '_detected' + image_extension)
                     # rename output image according to the name of the input image
-                    #os.rename(os.path.join(save_dir, "image0.jpg"), output_path)
+                    os.rename(os.path.join(save_dir, "image0.jpg"), output_path)
 
             self.folderSelected = False
         
