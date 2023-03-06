@@ -1,3 +1,4 @@
+import shutil
 import sys
 import os
 from PySide2 import QtGui, QtWidgets
@@ -7,8 +8,6 @@ from PySide2.QtWidgets import QApplication, QMainWindow, QFileDialog, QSizePolic
 
 import cv2
 import torch
-
-from PIL import Image
 
 # Get the path to the directory containing the PySide2 modules
 pyside2_dir = os.path.dirname(QtWidgets.__file__)
@@ -51,11 +50,24 @@ class MainWindow(QMainWindow):
         self.fileSelected = False
 
 
+        # Create dictionary to store the results for each image
+        self.resultsImage = {}
+
+
 
     def open_image(self):
         # Open a file dialog to select an image file
-        filepath, _ = QFileDialog.getOpenFileName(self, "Open Image", "", "Image Files (*.png *.jpg *.bmp)")
+        filepath, _ = QFileDialog.getOpenFileName(self, "Open Image", "", "Image Files (*.jpg *.jpeg *.png *.bmp)")
         self.image_path = filepath
+        # If the image is of the wrong format, open a message box
+        if filepath.endswith((".jpg", ".jpeg", ".png", ".bmp", ".JPG", ".JPEG", ".PNG", ".BMP")) == False:
+            msg = QtWidgets.QMessageBox()
+            msg.setIcon(QtWidgets.QMessageBox.Critical)
+            msg.setText("Error")
+            msg.setInformativeText("Please select an image file of accepted format.")
+            msg.setWindowTitle("Error")
+            msg.exec_()
+            return
 
         if filepath:
             self.fileSelected = True
@@ -74,7 +86,7 @@ class MainWindow(QMainWindow):
             self.folderSelected = True
             # Loop through the files in the folder and display the first image found
             for file_name in os.listdir(folder_path):
-                if file_name.endswith((".jpg", ".JPG")):
+                if file_name.endswith((".jpg", ".JPG", "*.jpeg", "*.JPEG", "*.png", "*.PNG", "*.bmp", "*.BMP")):
                     self.image_path = os.path.join(folder_path, file_name)
                     # Load the image and add it to the scene
                     pixmap = QtGui.QPixmap(self.image_path)
@@ -87,15 +99,36 @@ class MainWindow(QMainWindow):
 
     def run_detection(self):
         model_weights = os.path.join(cwd, "yolov5\\weights\\best.pt")
-        save_dir = os.path.join(cwd, "runs\\detect\\exp\\")
 
-        # Check if a file or folder has been selected
+        # Create a folder to save the results
+        
+        # Ask the user to select a folder to save the results
+        save_dir = QFileDialog.getExistingDirectory(self, "Save Results", "", QFileDialog.ShowDirsOnly)
+        # If the folder already exists, delete it and create a new one
+        if os.path.exists(save_dir):
+            shutil.rmtree(os.path.join(cwd, "runs\\detect\\exp\\"))
+       
+
+
+        ## Check if a file or folder has been selected
+
+
         if self.fileSelected == True and self.folderSelected == False:
+        # If a file has been selected, run detection on the selected image
+
+            # Clear the results dictionary
+            self.resultsImage.clear()
+
             # Run detection on the selected image
-            image = cv2.imread(self.image_path)
+            image = cv2.imread(self.image_path)[:, :, ::-1] # BGR to RGB for detection (OpenCV uses BGR) 
             model = torch.hub.load('ultralytics/yolov5', 'custom', model_weights)
             results = model(image)
+            
+
+            # Save the results to a directory
             results.save(save_dir, exist_ok=True)
+            results.print()
+            results.pandas().xyxy[0].to_json(orient="records", path_or_buf=os.path.join(save_dir, "results_single_image.json"))  # Save results to a JSON file
             
             # Save results
 
@@ -104,8 +137,12 @@ class MainWindow(QMainWindow):
             class_labels = results.pred[0][:, -1].numpy().astype(int)
             class_names = [class_names[i] for i in class_labels]
 
+
             # get filename from input image path
             image_name = os.path.basename(self.image_path).split('.')[0]
+            
+            # Add the name of the image and the corresponding classes to the resultsImage dictionary
+            self.resultsImage[image_name] = class_names
 
             # get extension from input image path
             image_extension = os.path.splitext(os.path.join(save_dir, self.image_path))[1]
@@ -114,12 +151,16 @@ class MainWindow(QMainWindow):
             output_path = os.path.join(save_dir, image_name + '_detected' + image_extension)
 
             # rename output image according to the name of the input image
-            os.rename(os.path.join(save_dir, "image0.jpg"), output_path)
+            os.replace(os.path.join(save_dir, "image0.jpg"), output_path)
 
             self.fileSelected = False
 
+
         elif self.fileSelected == False and self.folderSelected == True:
-            # Run detection on all images in the selected folder
+        # If a folder has been selected, run detection on all the images in the folder
+
+            # Clear the results dictionary
+            self.resultsImage.clear()
 
             # Load the YOLOv5 model
             model = torch.hub.load('ultralytics/yolov5', 'custom', model_weights)
@@ -133,14 +174,16 @@ class MainWindow(QMainWindow):
             # Loop through the list of image file names
             for image_name in list_images:
                 # Load the image using OpenCV and append it to the list
-                image = cv2.imread(os.path.join(self.folder_path, image_name))
+                image = cv2.imread(os.path.join(self.folder_path, image_name))[:, :, ::-1] # BGR to RGB for detection (OpenCV uses BGR)
                 image_list.append(image)
 
             # Pass the list of images to the YOLOv5 model
             results = model(image_list)
 
             # Save the results to a directory
-            results.save(save_dir, exist_ok=True)
+            results.save(save_dir, exist_ok=True) 
+            results.print()
+            results.pandas().xyxy[0].to_json(orient="records", path_or_buf=os.path.join(save_dir, "results.json")) # Save pandas datafrale results to a JSON file
 
             for number, filename in enumerate(os.listdir(self.folder_path)): # Get the filename in the folder and the corresponding index
                     if filename.endswith(".jpg") or filename.endswith(".JPG") or filename.endswith(".jpeg") or filename.endswith(".JPEG"):
@@ -155,6 +198,9 @@ class MainWindow(QMainWindow):
 
                         # get filename from input image path
                         image_name = os.path.basename(image_path).split('.')[0]
+                        
+                        # Add the name of the image and the corresponding classes to the resultsImage dictionary
+                        self.resultsImage[image_name] = class_names
 
                         # get extension from input image path
                         image_extension = os.path.splitext(os.path.join(save_dir, image_path))[1]
@@ -163,7 +209,7 @@ class MainWindow(QMainWindow):
                         output_path = os.path.join(save_dir, image_name + '_detected' + image_extension)
 
                         # rename output image according to the name of the input image
-                        os.rename(os.path.join(save_dir, "image" + str(number) + ".jpg"), output_path)
+                        os.replace(os.path.join(save_dir, "image" + str(number) + ".jpg"), output_path)
 
             self.folderSelected = False
         
@@ -172,6 +218,9 @@ class MainWindow(QMainWindow):
         pixmap = pixmap.scaledToWidth(self.ui.image_label.width())
         self.ui.image_label.setFixedSize(pixmap.size())
         self.ui.image_label.setPixmap(pixmap)
+
+        
+        print(self.resultsImage)
 
 
 if __name__ == "__main__":

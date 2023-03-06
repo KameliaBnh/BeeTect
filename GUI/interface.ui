@@ -259,6 +259,9 @@
                <property name="text">
                 <string>Yolov5</string>
                </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
                <attribute name="buttonGroup">
                 <string notr="true">ModelButtonGroup</string>
                </attribute>
@@ -387,7 +390,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>31</height>
+     <height>21</height>
     </rect>
    </property>
    <property name="locale">
@@ -415,8 +418,16 @@
      <string>Export Report</string>
     </property>
    </widget>
+   <widget class="QMenu" name="Account">
+    <property name="title">
+     <string>Account</string>
+    </property>
+    <addaction name="CreateAccount"/>
+    <addaction name="LogIn"/>
+   </widget>
    <addaction name="Open"/>
    <addaction name="ExportReport"/>
+   <addaction name="Account"/>
   </widget>
   <action name="OpenFile">
    <property name="text">
@@ -429,6 +440,16 @@
   <action name="OpenFolder">
    <property name="text">
     <string>Open Folder</string>
+   </property>
+  </action>
+  <action name="CreateAccount">
+   <property name="text">
+    <string>Create an account</string>
+   </property>
+  </action>
+  <action name="LogIn">
+   <property name="text">
+    <string>Log in</string>
    </property>
   </action>
  </widget>
