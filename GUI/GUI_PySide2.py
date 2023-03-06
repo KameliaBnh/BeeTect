@@ -8,6 +8,8 @@ from PySide2.QtWidgets import QApplication, QMainWindow, QFileDialog, QSizePolic
 import cv2
 import torch
 
+from PIL import Image
+
 # Get the path to the directory containing the PySide2 modules
 pyside2_dir = os.path.dirname(QtWidgets.__file__)
 
@@ -101,12 +103,16 @@ class MainWindow(QMainWindow):
             class_names = model.module.names if hasattr(model, 'module') else model.names
             class_labels = results.pred[0][:, -1].numpy().astype(int)
             class_names = [class_names[i] for i in class_labels]
+
             # get filename from input image path
             image_name = os.path.basename(self.image_path).split('.')[0]
+
             # get extension from input image path
             image_extension = os.path.splitext(os.path.join(save_dir, self.image_path))[1]
+
             # get output path of detected image
             output_path = os.path.join(save_dir, image_name + '_detected' + image_extension)
+
             # rename output image according to the name of the input image
             os.rename(os.path.join(save_dir, "image0.jpg"), output_path)
 
@@ -114,28 +120,50 @@ class MainWindow(QMainWindow):
 
         elif self.fileSelected == False and self.folderSelected == True:
             # Run detection on all images in the selected folder
-            model = torch.hub.load('ultralytics/yolov5', 'custom', model_weights)
-            for filename in os.listdir(self.folder_path):
-                if filename.endswith(".jpg") or filename.endswith(".JPG"):
-                    image_path = os.path.join(self.folder_path, filename)
-                    print(image_path)
-                    image = cv2.imread(image_path)
-                    results = model(image)
-                    results.save(save_dir, exist_ok=True)
 
-                    # Save results
-                    # get class names
-                    class_names = model.module.names if hasattr(model, 'module') else model.names
-                    class_labels = results.pred[0][:, -1].numpy().astype(int)
-                    class_names = [class_names[i] for i in class_labels]
-                    # get filename from input image path
-                    image_name = os.path.basename(image_path).split('.')[0]
-                    # get extension from input image path
-                    image_extension = os.path.splitext(os.path.join(save_dir, image_path))[1]
-                    # get output path of detected image
-                    output_path = os.path.join(save_dir, image_name + '_detected' + image_extension)
-                    # rename output image according to the name of the input image
-                    os.rename(os.path.join(save_dir, "image0.jpg"), output_path)
+            # Load the YOLOv5 model
+            model = torch.hub.load('ultralytics/yolov5', 'custom', model_weights)
+
+            # Get a list of image file names in the selected folder
+            list_images = os.listdir(self.folder_path)
+
+            # Create an empty list to hold the images
+            image_list = []
+
+            # Loop through the list of image file names
+            for image_name in list_images:
+                # Load the image using OpenCV and append it to the list
+                image = cv2.imread(os.path.join(self.folder_path, image_name))
+                image_list.append(image)
+
+            # Pass the list of images to the YOLOv5 model
+            results = model(image_list)
+
+            # Save the results to a directory
+            results.save(save_dir, exist_ok=True)
+
+            for number, filename in enumerate(os.listdir(self.folder_path)): # Get the filename in the folder and the corresponding index
+                    if filename.endswith(".jpg") or filename.endswith(".JPG") or filename.endswith(".jpeg") or filename.endswith(".JPEG"):
+                        image_path = os.path.join(self.folder_path, filename)
+
+                        # Save results
+
+                        # get class names
+                        class_names = model.module.names if hasattr(model, 'module') else model.names
+                        class_labels = results.pred[0][:, -1].numpy().astype(int)
+                        class_names = [class_names[i] for i in class_labels]
+
+                        # get filename from input image path
+                        image_name = os.path.basename(image_path).split('.')[0]
+
+                        # get extension from input image path
+                        image_extension = os.path.splitext(os.path.join(save_dir, image_path))[1]
+
+                        # get output path of detected image
+                        output_path = os.path.join(save_dir, image_name + '_detected' + image_extension)
+
+                        # rename output image according to the name of the input image
+                        os.rename(os.path.join(save_dir, "image" + str(number) + ".jpg"), output_path)
 
             self.folderSelected = False
         
