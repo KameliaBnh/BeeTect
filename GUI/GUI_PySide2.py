@@ -121,7 +121,8 @@ class MainWindow(QMainWindow):
 
             # Run detection on the selected image
             image = cv2.imread(self.image_path)[:, :, ::-1] # BGR to RGB for detection (OpenCV uses BGR) 
-            model = torch.hub.load('ultralytics/yolov5', 'custom', model_weights)
+            model = torch.hub.load('ultralytics/yolov5', 'custom', model_weights) 
+            model.conf = 0.5 #increase confidence threshold 0.5
             results = model(image)
             
 
