@@ -106,7 +106,7 @@ class MainWindow(QMainWindow):
         save_dir = QFileDialog.getExistingDirectory(self, "Save Results", "", QFileDialog.ShowDirsOnly)
         # If the folder already exists, delete it and create a new one
         if os.path.exists(save_dir):
-            shutil.rmtree(os.path.join(cwd, "runs\\detect\\exp\\"))
+            shutil.rmtree(os.path.join(cwd, save_dir))
        
 
 
