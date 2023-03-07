@@ -1,13 +1,14 @@
 import shutil
 import sys
 import os
+import cv2
+import torch
+
 from PySide2 import QtGui, QtWidgets
 from PySide2.QtCore import QFile, Qt, QCoreApplication
 from PySide2.QtUiTools import QUiLoader
-from PySide2.QtWidgets import QApplication, QMainWindow, QFileDialog, QSizePolicy
+from PySide2.QtWidgets import QApplication, QMainWindow, QFileDialog
 
-import cv2
-import torch
 
 # Get the path to the directory containing the PySide2 modules
 pyside2_dir = os.path.dirname(QtWidgets.__file__)
@@ -52,7 +53,6 @@ class MainWindow(QMainWindow):
 
         # Create dictionary to store the results for each image
         self.resultsImage = {}
-
 
 
     def open_image(self):
@@ -128,7 +128,6 @@ class MainWindow(QMainWindow):
             # Save the results to a directory
             results.save(save_dir, exist_ok=True)
             results.print()
-            results.pandas().xyxy[0].to_json(orient="records", path_or_buf=os.path.join(save_dir, "results_single_image.json"))  # Save results to a JSON file
             
             # Save results
 
@@ -140,6 +139,9 @@ class MainWindow(QMainWindow):
 
             # get filename from input image path
             image_name = os.path.basename(self.image_path).split('.')[0]
+            
+            # Save results to a JSON file
+            results.pandas().xyxy[0].to_json(orient="records", path_or_buf=os.path.join(save_dir, image_name + ".json"))
             
             # Add the name of the image and the corresponding classes to the resultsImage dictionary
             self.resultsImage[image_name] = class_names
