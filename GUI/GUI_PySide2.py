@@ -1,4 +1,3 @@
-from contextlib import redirect_stdout
 import shutil
 import sys
 import os
@@ -45,13 +44,12 @@ class MainWindow(QMainWindow):
         self.ui.Start.clicked.connect(self.run_detection)
 
         # Global variable to store the image or folder path
-        self.image_path = None
-        self.folder_path = None
+        self.imagePath = None
+        self.folderPath = None
 
         # Global flag to check if a file or folder has been selected
         self.folderSelected = False
         self.fileSelected = False
-
 
         # Create dictionary to store the results for each image
         self.resultsImage = {}
@@ -60,7 +58,7 @@ class MainWindow(QMainWindow):
     def open_image(self):
         # Open a file dialog to select an image file
         filepath, _ = QFileDialog.getOpenFileName(self, "Open Image", "", "Image Files (*.jpg *.jpeg *.png *.bmp)")
-        self.image_path = filepath
+        self.imagePath = filepath
         # If the image is of the wrong format, open a message box
         if filepath.endswith((".jpg", ".jpeg", ".png", ".bmp", ".JPG", ".JPEG", ".PNG", ".BMP")) == False:
             msg = QtWidgets.QMessageBox()
@@ -86,24 +84,76 @@ class MainWindow(QMainWindow):
     def open_folder(self):
         # Open a file dialog to select a folder
         folder_path = QFileDialog.getExistingDirectory(self, "Open Folder", "", QFileDialog.ShowDirsOnly)
-        self.folder_path = folder_path
+        self.folderPath = folder_path
 
         if folder_path:
             self.folderSelected = True
             # Loop through the files in the folder and display the first image found
             for file_name in os.listdir(folder_path):
                 if file_name.endswith((".jpg", ".JPG", "*.jpeg", "*.JPEG", "*.png", "*.PNG", "*.bmp", "*.BMP")):
-                    self.image_path = os.path.join(folder_path, file_name)
+                    self.imagePath = os.path.join(folder_path, file_name)
+
                     # Load the image and add it to the scene
-                    pixmap = QtGui.QPixmap(self.image_path)
+                    pixmap = QtGui.QPixmap(self.imagePath)
                     pixmap = pixmap.scaledToWidth(self.ui.image_label.width())
                     self.ui.image_label.setFixedSize(pixmap.size())
                     self.ui.image_label.setPixmap(pixmap)
                     break
 
+                
+        # Use of the previous and next buttons to navigate through the images
+        self.ui.next.clicked.connect(self.next_image)
+        self.ui.previous.clicked.connect(self.previous_image)
+
         # Set the infoText label to display explanation 
         self.ui.infoText.setText("Running detection on all the images in the selected folder...")
         self.ui.infoText.repaint()
+
+    def next_image(self):
+        # Get the list of files in the folder
+        files = os.listdir(self.folderPath)
+        # If the file is not an image, remove from the list
+        for file in files:
+            if file.endswith((".jpg", ".JPG", "*.jpeg", "*.JPEG", "*.png", "*.PNG", "*.bmp", "*.BMP")) == False:
+                files.remove(file)
+        # Get the index of the current image in the list
+        index = files.index(os.path.basename(self.imagePath))
+        # If the current image is the last one, set the index to 0
+        if index == len(files) - 1:
+            index = 0
+        else:
+            index += 1
+        # Get the next image in the list
+        self.imagePath = os.path.join(self.folderPath, files[index])
+
+        # Load the image and add it to the scene
+        pixmap = QtGui.QPixmap(self.imagePath)
+        pixmap = pixmap.scaledToWidth(self.ui.image_label.width())
+        self.ui.image_label.setFixedSize(pixmap.size())
+        self.ui.image_label.setPixmap(pixmap)
+
+    def previous_image(self):
+        # Get the list of image files in the folder
+        files = os.listdir(self.folderPath)
+        # If the file is not an image, remove from the list
+        for file in files:
+            if file.endswith((".jpg", ".JPG", "*.jpeg", "*.JPEG", "*.png", "*.PNG", "*.bmp", "*.BMP")) == False:
+                files.remove(file)
+        # Get the index of the current image in the list
+        index = files.index(os.path.basename(self.imagePath))
+        # If the current image is the first one, set the index to the last one
+        if index == 0:
+            index = len(files) - 1
+        else:
+            index -= 1
+        # Get the previous image in the list
+        self.imagePath = os.path.join(self.folderPath, files[index])
+
+        # Load the image and add it to the scene
+        pixmap = QtGui.QPixmap(self.imagePath)
+        pixmap = pixmap.scaledToWidth(self.ui.image_label.width())
+        self.ui.image_label.setFixedSize(pixmap.size())
+        self.ui.image_label.setPixmap(pixmap)
      
 
 
@@ -149,11 +199,10 @@ class MainWindow(QMainWindow):
             self.resultsImage.clear()
 
             # Run detection on the selected image
-            image = cv2.imread(self.image_path)[:, :, ::-1] # BGR to RGB for detection (OpenCV uses BGR) 
+            image = cv2.imread(self.imagePath)[:, :, ::-1] # BGR to RGB for detection (OpenCV uses BGR) 
             model = torch.hub.load('ultralytics/yolov5', 'custom', model_weights) 
             model.conf = 0.5 #increase confidence threshold 0.5
             results = model(image)
-            
 
             # Save the results to a directory
             results.save(save_dir=save_dir, exist_ok=True) 
@@ -172,7 +221,7 @@ class MainWindow(QMainWindow):
 
 
             # get filename from input image path
-            image_name = os.path.basename(self.image_path).split('.')[0]
+            image_name = os.path.basename(self.imagePath).split('.')[0]
             
             # Save results to a JSON file
             results.pandas().xyxy[0].to_json(orient="records", path_or_buf=os.path.join(save_dir, image_name + ".json"))
@@ -181,7 +230,7 @@ class MainWindow(QMainWindow):
             self.resultsImage[image_name] = class_names
 
             # get extension from input image path
-            image_extension = os.path.splitext(self.image_path)[1]
+            image_extension = os.path.splitext(self.imagePath)[1]
 
             # get output path of detected image
             output_path = os.path.join(save_dir, image_name + '_detected' + image_extension)
@@ -203,7 +252,7 @@ class MainWindow(QMainWindow):
             model.conf = 0.5 #increase confidence threshold 0.5
 
             # Get a list of image file names in the selected folder
-            list_images = os.listdir(self.folder_path)
+            list_images = os.listdir(self.folderPath)
 
             # Create an empty list to hold the images
             image_list = []
@@ -211,7 +260,7 @@ class MainWindow(QMainWindow):
             # Loop through the list of image file names
             for image_name in list_images:
                 # Load the image using OpenCV and append it to the list
-                image = cv2.imread(os.path.join(self.folder_path, image_name))[:, :, ::-1] # BGR to RGB for detection (OpenCV uses BGR)
+                image = cv2.imread(os.path.join(self.folderPath, image_name))[:, :, ::-1] # BGR to RGB for detection (OpenCV uses BGR)
                 image_list.append(image)
 
             # Pass the list of images to the YOLOv5 model
@@ -231,9 +280,9 @@ class MainWindow(QMainWindow):
             # Save pandas datafrale results to a JSON file
             results.pandas().xyxy[0].to_json(orient="records", path_or_buf=os.path.join(save_dir, "results.json"))
 
-            for number, filename in enumerate(os.listdir(self.folder_path)): # Get the filename in the input folder and the corresponding index
+            for number, filename in enumerate(os.listdir(self.folderPath)): # Get the filename in the input folder and the corresponding index
                     if filename.endswith(".jpg") or filename.endswith(".JPG") or filename.endswith(".jpeg") or filename.endswith(".JPEG"):
-                        image_path = os.path.join(self.folder_path, filename)
+                        image_path = os.path.join(self.folderPath, filename)
 
                         # Save results
 
@@ -264,6 +313,13 @@ class MainWindow(QMainWindow):
         pixmap = pixmap.scaledToWidth(self.ui.image_label.width())
         self.ui.image_label.setFixedSize(pixmap.size())
         self.ui.image_label.setPixmap(pixmap)
+
+        self.folderPath = save_dir
+        self.imagePath = output_path
+
+        # Use of the previous and next buttons to navigate through the images
+        self.ui.next.clicked.connect(self.next_image)
+        self.ui.previous.clicked.connect(self.previous_image)
 
         
         # Display the results in the results dictionary
