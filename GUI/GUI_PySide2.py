@@ -1,3 +1,4 @@
+from contextlib import redirect_stdout
 import shutil
 import sys
 import os
@@ -34,6 +35,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Automated Pollinator Monitoring")
         self.setWindowIcon(QtGui.QIcon(os.path.join(cwd, "bee.png")))
         
+
         # Connect the button to the function open_image
         self.ui.OpenFile.triggered.connect(self.open_image)
         # Connect the button to the function open_folder
@@ -68,6 +70,10 @@ class MainWindow(QMainWindow):
             msg.setWindowTitle("Error")
             msg.exec_()
             return
+        
+        # Set the infoText label to display explanation 
+        self.ui.infoText.setText("Running detection on the selected image...")
+        self.ui.infoText.repaint()
 
         if filepath:
             self.fileSelected = True
@@ -94,7 +100,11 @@ class MainWindow(QMainWindow):
                     self.ui.image_label.setFixedSize(pixmap.size())
                     self.ui.image_label.setPixmap(pixmap)
                     break
-            
+
+        # Set the infoText label to display explanation 
+        self.ui.infoText.setText("Running detection on all the images in the selected folder...")
+        self.ui.infoText.repaint()
+     
 
 
     def run_detection(self):
@@ -102,16 +112,35 @@ class MainWindow(QMainWindow):
 
         # Create a folder to save the results
         
-        # Ask the user to select a folder to save the results
-        save_dir = QFileDialog.getExistingDirectory(self, "Save Results", "", QFileDialog.ShowDirsOnly)
-        # If the folder already exists, delete it and create a new one
-        if os.path.exists(save_dir):
-            shutil.rmtree(os.path.join(cwd, save_dir))
+        # Display a message box asking the user if they want the folder to be the default one or if they want to select a different one
+        msg = QtWidgets.QMessageBox()
+        msg.setIcon(QtWidgets.QMessageBox.Question)
+        msg.setText("Save Results")
+        msg.setInformativeText("Do you want to save the results in the default folder or do you want to select a different one?")
+        msg.setWindowTitle("Save Results")
+        msg.setStandardButtons(QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel)
+        msg.button(QtWidgets.QMessageBox.Ok).setText('Default Folder')
+        msg.button(QtWidgets.QMessageBox.Cancel).setText('Select Folder')
+
+        if msg.exec_() == QtWidgets.QMessageBox.Cancel:
+            # Ask the user to select a folder to save the results
+            save_dir = QFileDialog.getExistingDirectory(self, "Save Results", "", QFileDialog.ShowDirsOnly)
+            # If the folder already exists, delete it and create a new one
+            if os.path.exists(save_dir):
+                shutil.rmtree(os.path.join(cwd, save_dir))
+            # If the folder does not exist, create it
+            os.makedirs(save_dir)
+        
+        elif msg.exec_() == QtWidgets.QMessageBox.Ok:
+            # Save the results in the default folder
+            save_dir = os.path.join(cwd, "runs\\detect\\exp")
+            # If the folder already exists, delete it and create a new one
+            if os.path.exists(save_dir):
+                shutil.rmtree(save_dir)
        
 
 
         ## Check if a file or folder has been selected
-
 
         if self.fileSelected == True and self.folderSelected == False:
         # If a file has been selected, run detection on the selected image
@@ -127,8 +156,12 @@ class MainWindow(QMainWindow):
             
 
             # Save the results to a directory
-            results.save(save_dir, exist_ok=True)
+            results.save(save_dir=save_dir, exist_ok=True) 
             results.print()
+
+            # Save results to a text file
+            save_results_file = open(os.path.join(save_dir, 'results.txt'), 'w')
+            save_results_file.write(str(results))
             
             # Save results
 
@@ -148,7 +181,7 @@ class MainWindow(QMainWindow):
             self.resultsImage[image_name] = class_names
 
             # get extension from input image path
-            image_extension = os.path.splitext(os.path.join(save_dir, self.image_path))[1]
+            image_extension = os.path.splitext(self.image_path)[1]
 
             # get output path of detected image
             output_path = os.path.join(save_dir, image_name + '_detected' + image_extension)
@@ -167,6 +200,7 @@ class MainWindow(QMainWindow):
 
             # Load the YOLOv5 model
             model = torch.hub.load('ultralytics/yolov5', 'custom', model_weights)
+            model.conf = 0.5 #increase confidence threshold 0.5
 
             # Get a list of image file names in the selected folder
             list_images = os.listdir(self.folder_path)
@@ -184,11 +218,20 @@ class MainWindow(QMainWindow):
             results = model(image_list)
 
             # Save the results to a directory
-            results.save(save_dir, exist_ok=True) 
+            results.save(save_dir=save_dir, exist_ok=True) 
+            # Print results
             results.print()
-            results.pandas().xyxy[0].to_json(orient="records", path_or_buf=os.path.join(save_dir, "results.json")) # Save pandas datafrale results to a JSON file
 
-            for number, filename in enumerate(os.listdir(self.folder_path)): # Get the filename in the folder and the corresponding index
+            # Save results to a text file
+            save_results_file = open(os.path.join(save_dir, 'results.txt'), 'w')
+            save_results_file.write('Saved ' + str(len(os.listdir(save_dir)) - 1) + ' images to ' + save_dir + '\n')
+            save_results_file.write('\n')
+            save_results_file.write(str(results))
+
+            # Save pandas datafrale results to a JSON file
+            results.pandas().xyxy[0].to_json(orient="records", path_or_buf=os.path.join(save_dir, "results.json"))
+
+            for number, filename in enumerate(os.listdir(self.folder_path)): # Get the filename in the input folder and the corresponding index
                     if filename.endswith(".jpg") or filename.endswith(".JPG") or filename.endswith(".jpeg") or filename.endswith(".JPEG"):
                         image_path = os.path.join(self.folder_path, filename)
 
@@ -206,7 +249,7 @@ class MainWindow(QMainWindow):
                         self.resultsImage[image_name] = class_names
 
                         # get extension from input image path
-                        image_extension = os.path.splitext(os.path.join(save_dir, image_path))[1]
+                        image_extension = os.path.splitext(image_path)[1]
 
                         # get output path of detected image
                         output_path = os.path.join(save_dir, image_name + '_detected' + image_extension)
@@ -223,6 +266,7 @@ class MainWindow(QMainWindow):
         self.ui.image_label.setPixmap(pixmap)
 
         
+        # Display the results in the results dictionary
         print(self.resultsImage)
 
 

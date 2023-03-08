@@ -238,6 +238,9 @@
                  <pointsize>8</pointsize>
                 </font>
                </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select the detection model that will be used for the prediction and classification of the images.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
                <property name="locale">
                 <locale language="English" country="UnitedKingdom"/>
                </property>
@@ -286,7 +289,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QFrame" name="frame_2">
+           <widget class="QFrame" name="videoTrack">
             <property name="frameShape">
              <enum>QFrame::NoFrame</enum>
             </property>
@@ -307,12 +310,22 @@
                  <pointsize>8</pointsize>
                 </font>
                </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If unabled, it allows the tracking of objects on the video that has been loaded.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
                <property name="text">
                 <string>Tracking Video</string>
                </property>
               </widget>
              </item>
             </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="infoText">
+            <property name="text">
+             <string/>
+            </property>
            </widget>
           </item>
           <item>
@@ -359,6 +372,9 @@
               <pointsize>9</pointsize>
              </font>
             </property>
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Start the detection on the selected image OR on the images contained in the selected folder.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
             <property name="text">
              <string>Start</string>
             </property>
@@ -383,6 +399,8 @@
      </widget>
     </item>
    </layout>
+   <zorder>frame</zorder>
+   <zorder>ImageGroup</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -390,7 +408,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>21</height>
+     <height>31</height>
     </rect>
    </property>
    <property name="locale">
@@ -401,6 +419,9 @@
      <font>
       <pointsize>10</pointsize>
      </font>
+    </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Open a file OR a folder to be displayed in the Visualisation Pane.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
     <property name="title">
      <string>Open</string>
@@ -433,12 +454,18 @@
    <property name="text">
     <string>Open File</string>
    </property>
+   <property name="toolTip">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
    <property name="font">
     <font/>
    </property>
   </action>
   <action name="OpenFolder">
    <property name="text">
+    <string>Open Folder</string>
+   </property>
+   <property name="toolTip">
     <string>Open Folder</string>
    </property>
   </action>
