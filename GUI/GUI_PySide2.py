@@ -109,51 +109,40 @@ class MainWindow(QMainWindow):
         self.ui.infoText.setText("Running detection on all the images in the selected folder...")
         self.ui.infoText.repaint()
 
-    def next_image(self):
-        # Get the list of files in the folder
-        files = os.listdir(self.folderPath)
-        # If the file is not an image, remove from the list
-        for file in files:
-            if file.endswith((".jpg", ".JPG", "*.jpeg", "*.JPEG", "*.png", "*.PNG", "*.bmp", "*.BMP")) == False:
-                files.remove(file)
-        # Get the index of the current image in the list
-        index = files.index(os.path.basename(self.imagePath))
-        # If the current image is the last one, set the index to 0
-        if index == len(files) - 1:
-            index = 0
-        else:
-            index += 1
-        # Get the next image in the list
-        self.imagePath = os.path.join(self.folderPath, files[index])
+    def get_image_files(self):
+        image_files = [f for f in os.listdir(self.folderPath) 
+                       if os.path.isfile(os.path.join(self.folderPath, f)) and
+                       f.lower().endswith(('.jpg', '.jpeg', '.png', '.bmp'))]
+        return image_files
 
-        # Load the image and add it to the scene
-        pixmap = QtGui.QPixmap(self.imagePath)
-        pixmap = pixmap.scaledToWidth(self.ui.image_label.width())
-        self.ui.image_label.setFixedSize(pixmap.size())
-        self.ui.image_label.setPixmap(pixmap)
+    def next_image(self):
+        image_files = self.get_image_files()
+        if len(image_files) == 0:
+            return
+        
+        current_index = image_files.index(os.path.basename(self.imagePath))
+        next_index = (current_index + 1) % len(image_files)
+        next_image_path = os.path.join(self.folderPath, image_files[next_index])
+
+        self.load_image(next_image_path)
 
     def previous_image(self):
-        # Get the list of image files in the folder
-        files = os.listdir(self.folderPath)
-        # If the file is not an image, remove from the list
-        for file in files:
-            if file.endswith((".jpg", ".JPG", "*.jpeg", "*.JPEG", "*.png", "*.PNG", "*.bmp", "*.BMP")) == False:
-                files.remove(file)
-        # Get the index of the current image in the list
-        index = files.index(os.path.basename(self.imagePath))
-        # If the current image is the first one, set the index to the last one
-        if index == 0:
-            index = len(files) - 1
-        else:
-            index -= 1
-        # Get the previous image in the list
-        self.imagePath = os.path.join(self.folderPath, files[index])
+        image_files = self.get_image_files()
+        if len(image_files) == 0:
+            return
+        
+        current_index = image_files.index(os.path.basename(self.imagePath))
+        previous_index = (current_index - 1) % len(image_files)
+        previous_image_path = os.path.join(self.folderPath, image_files[previous_index])
 
-        # Load the image and add it to the scene
-        pixmap = QtGui.QPixmap(self.imagePath)
+        self.load_image(previous_image_path)
+
+    def load_image(self, image_path):
+        pixmap = QtGui.QPixmap(image_path)
         pixmap = pixmap.scaledToWidth(self.ui.image_label.width())
         self.ui.image_label.setFixedSize(pixmap.size())
         self.ui.image_label.setPixmap(pixmap)
+        self.imagePath = image_path
      
 
 
