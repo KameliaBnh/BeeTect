@@ -15,4 +15,4 @@ image 12/15: 960x1280 1 apis_florea
 image 13/15: 960x1280 1 flower, 2 apis_ceranas
 image 14/15: 960x1280 2 flowers, 1 apis_florea, 1 apis
 image 15/15: 960x1280 2 flowers, 1 apis_florea
-Speed: 5.4ms pre-process, 467.2ms inference, 0.8ms NMS per image at shape (15, 3, 480, 640)
+Speed: 7.6ms pre-process, 507.5ms inference, 0.7ms NMS per image at shape (15, 3, 480, 640)

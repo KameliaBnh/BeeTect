@@ -112,7 +112,7 @@ class MainWindow(QMainWindow):
     def get_image_files(self):
         image_files = [f for f in os.listdir(self.folderPath) 
                        if os.path.isfile(os.path.join(self.folderPath, f)) and
-                       f.lower().endswith(('.jpg', '.jpeg', '.png', '.bmp'))]
+                       f.endswith(('.jpg', '.jpeg', '.png', '.bmp', '.JPG', '.JPEG', '.PNG', '.BMP'))]
         return image_files
 
     def next_image(self):
@@ -305,11 +305,6 @@ class MainWindow(QMainWindow):
 
         self.folderPath = save_dir
         self.imagePath = output_path
-
-        # Use of the previous and next buttons to navigate through the images
-        self.ui.next.clicked.connect(self.next_image)
-        self.ui.previous.clicked.connect(self.previous_image)
-
         
         # Display the results in the results dictionary
         print(self.resultsImage)
