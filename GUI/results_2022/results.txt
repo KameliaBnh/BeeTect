@@ -21,4 +21,4 @@ image 18/21: 3456x4608 (no detections)
 image 19/21: 3456x4608 1 flower, 1 apis_cerana
 image 20/21: 3456x4608 3 flowers
 image 21/21: 3456x4608 (no detections)
-Speed: 51.6ms pre-process, 489.9ms inference, 0.0ms NMS per image at shape (21, 3, 480, 640)
+Speed: 71.2ms pre-process, 498.5ms inference, 0.7ms NMS per image at shape (21, 3, 480, 640)
