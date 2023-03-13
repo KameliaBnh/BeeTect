@@ -1,0 +1,24 @@
+Saved 21 images to C:/Users/benha/Documents/Cranfield/Group_Project/BPT_Cranfield/GUI/Project1/Kamelia_Benhamna_Project1/results_2022
+
+image 1/21: 3456x4608 1 flower, 1 apis_cerana
+image 2/21: 3456x4608 1 flower
+image 3/21: 3456x4608 (no detections)
+image 4/21: 3456x4608 1 flower
+image 5/21: 3456x4608 1 flower, 1 apis_florea
+image 6/21: 3456x4608 1 flower
+image 7/21: 3456x4608 1 flower
+image 8/21: 3456x4608 1 flower
+image 9/21: 3456x4608 1 flower, 1 apis_cerana
+image 10/21: 3456x4608 1 flower
+image 11/21: 3456x4608 1 flower, 1 amegilla
+image 12/21: 3456x4608 1 flower, 1 amegilla, 1 apis_florea
+image 13/21: 3456x4608 1 flower, 1 amegilla
+image 14/21: 3456x4608 1 flower
+image 15/21: 3456x4608 1 flower
+image 16/21: 3456x4608 1 flower, 1 amegilla
+image 17/21: 3456x4608 1 flower, 1 amegilla
+image 18/21: 3456x4608 (no detections)
+image 19/21: 3456x4608 1 flower, 1 apis_cerana
+image 20/21: 3456x4608 3 flowers
+image 21/21: 3456x4608 (no detections)
+Speed: 81.4ms pre-process, 1260.3ms inference, 2.4ms NMS per image at shape (21, 3, 480, 640)

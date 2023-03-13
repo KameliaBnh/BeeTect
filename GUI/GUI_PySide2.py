@@ -5,9 +5,9 @@ import cv2
 import torch
 
 from PySide2 import QtGui, QtWidgets
-from PySide2.QtCore import QFile, Qt, QCoreApplication
+from PySide2.QtCore import QFile, Qt, QCoreApplication, QTimer
 from PySide2.QtUiTools import QUiLoader
-from PySide2.QtWidgets import QApplication, QMainWindow, QFileDialog
+from PySide2.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox, QApplication, QMainWindow, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout
 
 
 # Get the path to the directory containing the PySide2 modules
@@ -18,13 +18,116 @@ os.environ["QT_PLUGIN_PATH"] = os.path.join(pyside2_dir, "plugins") #qt5_applica
 #os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = os.path.join(pyside2_dir, "plugins", "platforms")
 
 
-#Get name of the current working directory
-cwd = os.getcwd()
 
-class MainWindow(QMainWindow):
+class UserInfoForm(QWidget):
+
+    # Define a class variable for current working directory
+    cwd = os.getcwd()
+
     def __init__(self):
         super().__init__()
-        ui_file = QFile(os.path.join(cwd, "interface.ui"), self)
+
+        # Set the title and size of the form
+        self.setWindowTitle('User information')
+        self.resize(300, 200)
+
+        # Create labels and line edits for user information
+        project_label = QLabel('Project name:')
+        self.project_edit = QLineEdit()
+        name_label = QLabel('Name:')
+        self.name_edit = QLineEdit()
+        surname_label = QLabel('Surname:')
+        self.surname_edit = QLineEdit()
+        email_label = QLabel('Email:')
+        self.email_edit = QLineEdit()
+
+        # Make all line edits required except email
+        self.project_edit.setPlaceholderText('Required')
+        self.name_edit.setPlaceholderText('Required')
+        self.surname_edit.setPlaceholderText('Required')
+        self.email_edit.setPlaceholderText('Optional')
+
+        # If the user does not enter a value in the line edit that is required, display a message box
+
+        # Create a submit button
+        submit_button = QPushButton('Submit')
+        submit_button.clicked.connect(self.submit)
+
+        # Create a layout for the form
+        layout = QVBoxLayout()
+        layout.addWidget(project_label)
+        layout.addWidget(self.project_edit)
+        layout.addWidget(name_label)
+        layout.addWidget(self.name_edit)
+        layout.addWidget(surname_label)
+        layout.addWidget(self.surname_edit)
+        layout.addWidget(email_label)
+        layout.addWidget(self.email_edit)
+        layout.addWidget(submit_button)
+
+        self.setLayout(layout)
+
+    def submit(self):
+        # Retrieve user information
+        project = self.project_edit.text()
+        name = self.name_edit.text()
+        surname = self.surname_edit.text()
+        email = self.email_edit.text()
+
+        # Validate required fields
+        if not project:
+            QMessageBox.warning(self, 'Error', 'Please enter a project name.')
+            return
+
+        if not name:
+            QMessageBox.warning(self, 'Error', 'Please enter your name.')
+            return
+
+        if not surname:
+            QMessageBox.warning(self, 'Error', 'Please enter your surname.')
+            return
+
+        # Print the user information
+        print(f'Project name: {project}')
+        print(f'Name: {name}')
+        print(f'Surname: {surname}')
+        print(f'Email: {email}')
+
+        # Close the form
+        self.close()
+
+        # Create a high level folder for the project in the current working directory
+        # if it already exists, set the project path to the existing folder
+        project_path = os.path.join(self.cwd, project)
+        if os.path.exists(project_path):
+            print('Folder already exists')
+        else:
+            os.mkdir(project_path)
+
+        # Create a folder for the user inside the project folder
+        # if it already exists, set the user project path to the existing folder
+        user_project_path = os.path.join(project_path, name + '_' + surname + '_' + project)
+        if os.path.exists(user_project_path):
+            print('Folder already exists')
+        else:
+            os.mkdir(user_project_path)
+
+        # Update the class variable for current working directory
+        UserInfoForm.cwd = user_project_path
+
+        # Set current working directory to the user project folder
+        os.chdir(user_project_path)     
+
+
+
+class MainWindow(QMainWindow):
+
+    # Define a class variable for current working directory
+    cwd = UserInfoForm.cwd
+
+    def __init__(self):
+        super().__init__()
+        ui_file = QFile(os.path.join(self.cwd, "interface.ui"), self)
         ui_file.open(QFile.ReadOnly)
         # Load the .ui file as a widget
         loader = QUiLoader()
@@ -32,9 +135,8 @@ class MainWindow(QMainWindow):
         ui_file.close()
         self.setCentralWidget(self.ui)
         self.setWindowTitle("Automated Pollinator Monitoring")
-        self.setWindowIcon(QtGui.QIcon(os.path.join(cwd, "bee.png")))
+        self.setWindowIcon(QtGui.QIcon(os.path.join(self.cwd, "bee.png")))
         
-
         # Connect the button to the function open_image
         self.ui.OpenFile.triggered.connect(self.open_image)
         # Connect the button to the function open_folder
@@ -42,6 +144,17 @@ class MainWindow(QMainWindow):
 
         # Connect the button to the function on_click
         self.ui.Start.clicked.connect(self.run_detection)
+
+
+        ##GLOBAL VARIABLES##
+
+        # User information
+        self.userName = None
+        self.userSurname = None
+        self.userEmail = None
+        
+        # Project Name 
+        self.projectName = None
 
         # Global variable to store the image or folder path
         self.imagePath = None
@@ -55,14 +168,74 @@ class MainWindow(QMainWindow):
         self.resultsImage = {}
 
 
+
+        # Wait for 5 seconds before opening a message box to ask for user information when the program is launched
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.user_info_form)
+        self.timer.start(1500)
+
+
+    def user_info_form(self):
+        # Stop the timer
+        self.timer.stop()
+
+        # Message box asking the user if they want to open an existing project or create a new one
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Information)
+        msg.setText("Do you want to open an existing project or create a new one?")
+        msg.setWindowTitle("Project selection")
+        msg.setStandardButtons(QMessageBox.Open | QMessageBox.Cancel)
+        msg.button(QMessageBox.Open).setText('Open Project')
+        msg.button(QMessageBox.Cancel).setText('New Project')
+        msg.buttonClicked.connect(self.project_selection)
+        msg.exec_()
+
+    def project_selection(self, i):
+        # If the user wants to open an existing project, open a file dialog to select the project folder
+        if i.text() == 'Open Project':
+            self.folderPath = QFileDialog.getExistingDirectory(self, "Open Project", self.cwd)
+            self.folderSelected = True
+            self.fileSelected = False
+            print(self.folderPath)
+            # If the user doesn't select a folder, open a message box
+            if self.folderPath == '':
+                msg = QMessageBox()
+                msg.setIcon(QMessageBox.Warning)
+                msg.setText("No folder selected")
+                msg.setWindowTitle("Warning")
+                msg.setStandardButtons(QMessageBox.Ok)
+                msg.exec_()
+            # If the user selects a folder, open the user information form and set the project name
+            else:
+                self.user_info_form = UserInfoForm()
+                self.user_info_form.project_edit.setText(self.folderPath.split('/')[-1])
+                # Disable the project name edit
+                self.user_info_form.project_edit.setDisabled(True)
+                self.user_info_form.show()
+
+        # If the user wants to create a new project, open the user information form
+        elif i.text() == 'New Project':
+            # Create and show the user information form
+            self.user_info_form = UserInfoForm()
+            self.user_info_form.show()
+
+        # Save the user information in the global variables
+        self.userName = self.user_info_form.name_edit.text()
+        self.userSurname = self.user_info_form.surname_edit.text()
+        self.userEmail = self.user_info_form.email_edit.text()
+        self.projectName = self.user_info_form.project_edit.text()
+
+
+
     def open_image(self):
+
         # Open a file dialog to select an image file
         filepath, _ = QFileDialog.getOpenFileName(self, "Open Image", "", "Image Files (*.jpg *.jpeg *.png *.bmp)")
         self.imagePath = filepath
         # If the image is of the wrong format, open a message box
         if filepath.endswith((".jpg", ".jpeg", ".png", ".bmp", ".JPG", ".JPEG", ".PNG", ".BMP")) == False:
-            msg = QtWidgets.QMessageBox()
-            msg.setIcon(QtWidgets.QMessageBox.Critical)
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Critical)
             msg.setText("Error")
             msg.setInformativeText("Please select an image file of accepted format.")
             msg.setWindowTitle("Error")
@@ -147,32 +320,32 @@ class MainWindow(QMainWindow):
 
 
     def run_detection(self):
-        model_weights = os.path.join(cwd, "yolov5\\weights\\best.pt")
+        model_weights = os.path.join(self.cwd, "yolov5\\weights_2021\\best.pt")
 
         # Create a folder to save the results
         
         # Display a message box asking the user if they want the folder to be the default one or if they want to select a different one
-        msg = QtWidgets.QMessageBox()
-        msg.setIcon(QtWidgets.QMessageBox.Question)
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Question)
         msg.setText("Save Results")
-        msg.setInformativeText("Do you want to save the results in the default folder or do you want to select a different one?")
+        msg.setInformativeText("Do you want to save the results in the default folder or do you want to select a different one? Default folder: runs\\detect\\exp")
         msg.setWindowTitle("Save Results")
-        msg.setStandardButtons(QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel)
-        msg.button(QtWidgets.QMessageBox.Ok).setText('Default Folder')
-        msg.button(QtWidgets.QMessageBox.Cancel).setText('Select Folder')
+        msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+        msg.button(QMessageBox.Ok).setText('Default Folder')
+        msg.button(QMessageBox.Cancel).setText('Select Folder')
 
-        if msg.exec_() == QtWidgets.QMessageBox.Cancel:
+        if msg.exec_() == QMessageBox.Cancel:
             # Ask the user to select a folder to save the results
             save_dir = QFileDialog.getExistingDirectory(self, "Save Results", "", QFileDialog.ShowDirsOnly)
             # If the folder already exists, delete it and create a new one
             if os.path.exists(save_dir):
-                shutil.rmtree(os.path.join(cwd, save_dir))
+                shutil.rmtree(os.path.join(self.cwd, save_dir))
             # If the folder does not exist, create it
             os.makedirs(save_dir)
         
-        elif msg.exec_() == QtWidgets.QMessageBox.Ok:
+        elif msg.exec_() == QMessageBox.Ok:
             # Save the results in the default folder
-            save_dir = os.path.join(cwd, "runs\\detect\\exp")
+            save_dir = os.path.join(self.cwd, "runs\\detect\\exp")
             # If the folder already exists, delete it and create a new one
             if os.path.exists(save_dir):
                 shutil.rmtree(save_dir)
