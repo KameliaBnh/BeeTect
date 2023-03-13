@@ -216,14 +216,14 @@
              <item row="3" column="0">
               <widget class="QLabel" name="label">
                <property name="text">
-                <string>Most Abundant Specie:</string>
+                <string>Most Abundant Species:</string>
                </property>
               </widget>
              </item>
              <item row="4" column="0">
               <widget class="QLabel" name="label_2">
                <property name="text">
-                <string>Most Abundant Rare Specie:</string>
+                <string>Most Abundant Rare Species:</string>
                </property>
               </widget>
              </item>
@@ -315,6 +315,29 @@
               </widget>
              </item>
             </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QFrame" name="newModel">
+            <property name="frameShape">
+             <enum>QFrame::StyledPanel</enum>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Raised</enum>
+            </property>
+            <widget class="QPushButton" name="addModel">
+             <property name="geometry">
+              <rect>
+               <x>131</x>
+               <y>0</y>
+               <width>161</width>
+               <height>34</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Add a new model..</string>
+             </property>
+            </widget>
            </widget>
           </item>
           <item>

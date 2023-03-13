@@ -34,6 +34,7 @@ class UserInfoForm(QWidget):
         # Create labels and line edits for user information
         project_label = QLabel('Project name:')
         self.project_edit = QLineEdit()
+        user_label = QLabel('User Information:')
         name_label = QLabel('Name:')
         self.name_edit = QLineEdit()
         surname_label = QLabel('Surname:')
@@ -57,6 +58,9 @@ class UserInfoForm(QWidget):
         layout = QVBoxLayout()
         layout.addWidget(project_label)
         layout.addWidget(self.project_edit)
+        # User information label bold and as a separator
+        user_label.setStyleSheet("font-weight: bold")
+        layout.addWidget(user_label)
         layout.addWidget(name_label)
         layout.addWidget(self.name_edit)
         layout.addWidget(surname_label)
@@ -119,6 +123,112 @@ class UserInfoForm(QWidget):
         os.chdir(user_project_path)     
 
 
+class NewModel(QWidget):
+    # Define a class variable for current working directory
+    cwd = UserInfoForm.cwd
+
+    def __init__(self):
+        super().__init__()
+
+        # Set the title and size of the form
+        self.setWindowTitle('New Detection Model')
+        self.resize(300, 200)
+
+        # Create labels and line edits for new model
+        model_label = QLabel('Model name:')
+        self.model_edit = QLineEdit()
+        self.model_edit.setPlaceholderText('Required')
+
+        # Create a model weight label that open a file dialog to select the model weight file
+        model_weight_label = QLabel('Model weight:')
+        self.model_weight_edit = QLineEdit()
+        self.model_weight_edit.setReadOnly(True)
+        self.model_weight_button = QPushButton('Browse')
+        self.model_weight_button.clicked.connect(self.open_model_weight)
+
+        self.submit_button = QPushButton('Submit')
+        self.submit_button.clicked.connect(self.submit)
+
+        # Create a layout for the form
+        layout = QVBoxLayout()
+        layout.addWidget(model_label)
+        layout.addWidget(self.model_edit)
+        layout.addWidget(model_weight_label)
+        layout.addWidget(self.model_weight_edit)
+        layout.addWidget(self.model_weight_button)
+        layout.addWidget(self.submit_button)
+
+        # Retrieve the model name
+        model_name = self.model_edit.text()
+
+        # Create a folder for the model inside the user project folder
+        model_path = os.path.join(self.cwd, 'model')
+        # if it already exists, set the model path to the existing folder
+        if os.path.exists(model_path):
+            print('Folder already exists')
+        else:
+            os.mkdir(model_path)
+
+        # Save the model weight file in the user project folder with the name of the model
+        self.model_weight_path = os.path.join(model_path, model_name + '.pt')
+
+
+        self.setLayout(layout)
+
+    
+    def open_model_weight(self):
+        # Open a file dialog to select the model weight file
+        model_weight_file, _ = QFileDialog.getOpenFileName(self, 'Select model weight file', self.cwd, 'Model weight (*.pt)')
+        self.model_weight_edit.setText(model_weight_file)
+
+    def submit(self):
+        # Retrieve the model information
+        model_name = self.model_edit.text()
+        model_weight = self.model_weight_edit.text()
+
+        # Validate required fields
+        if not model_name:
+            QMessageBox.warning(self, 'Error', 'Please enter a model name.')
+            return
+
+        if not model_weight:
+            QMessageBox.warning(self, 'Error', 'Please select a model weight file.')
+            return
+
+        # Validate that the model weight file exists
+        if not os.path.isfile(model_weight):
+            QMessageBox.warning(self, 'Error', 'The selected model weight file does not exist.')
+            return
+
+        # Create a folder for the model inside the user project folder
+        model_path = os.path.join(self.cwd, 'model', model_name)
+        if os.path.exists(model_path):
+            print('Folder already exists')
+        else:
+            os.mkdir(model_path)
+
+        # Save the model weight file in the user project folder with the name of the model
+        model_weight_path = os.path.join(model_path, model_name + '.pt')
+
+        # Validate that the destination directory exists
+        if not os.path.isdir(os.path.dirname(model_weight_path)):
+            QMessageBox.warning(self, 'Error', 'The destination directory for the model weight file does not exist.')
+            print(model_weight_path)
+            return
+
+        # Copy the model weight file to the user project folder 
+        try:
+            shutil.copy(model_weight, model_weight_path)
+        except Exception as e:
+            QMessageBox.warning(self, 'Error', f'Error copying model weight file: {str(e)}')
+            return
+
+        # Close the form
+        self.close()
+
+
+
+
 
 class MainWindow(QMainWindow):
 
@@ -144,6 +254,9 @@ class MainWindow(QMainWindow):
 
         # Connect the button to the function on_click
         self.ui.Start.clicked.connect(self.run_detection)
+
+        # Connect the addModel button to the function add_model
+        self.ui.addModel.clicked.connect(self.add_model)
 
 
         ##GLOBAL VARIABLES##
@@ -224,6 +337,11 @@ class MainWindow(QMainWindow):
         self.userSurname = self.user_info_form.surname_edit.text()
         self.userEmail = self.user_info_form.email_edit.text()
         self.projectName = self.user_info_form.project_edit.text()
+
+    def add_model(self):
+        # Create and show the model form
+        self.model_form = NewModel()
+        self.model_form.show()
 
 
 
