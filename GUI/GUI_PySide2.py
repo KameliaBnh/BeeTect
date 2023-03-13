@@ -21,9 +21,6 @@ os.environ["QT_PLUGIN_PATH"] = os.path.join(pyside2_dir, "plugins") #qt5_applica
 
 class UserInfoForm(QWidget):
 
-    # Define a class variable for current working directory
-    cwd = os.getcwd()
-
     def __init__(self):
         super().__init__()
 
@@ -102,30 +99,26 @@ class UserInfoForm(QWidget):
 
         # Create a high level folder for the project in the current working directory
         # if it already exists, set the project path to the existing folder
-        project_path = os.path.join(self.cwd, project)
+        project_path = os.path.join(os.getcwd(), project)
         if os.path.exists(project_path):
-            print('Folder already exists')
+            print('Folder already exists')  
         else:
-            os.mkdir(project_path)
+            os.mkdir(project_path)  
 
         # Create a folder for the user inside the project folder
         # if it already exists, set the user project path to the existing folder
         user_project_path = os.path.join(project_path, name + '_' + surname + '_' + project)
         if os.path.exists(user_project_path):
             print('Folder already exists')
+            # Set current working directory to the user project folder
+            os.chdir(user_project_path)     
         else:
             os.mkdir(user_project_path)
-
-        # Update the class variable for current working directory
-        UserInfoForm.cwd = user_project_path
-
-        # Set current working directory to the user project folder
-        os.chdir(user_project_path)     
+            # Set current working directory to the user project folder
+            os.chdir(user_project_path)
 
 
 class NewModel(QWidget):
-    # Define a class variable for current working directory
-    cwd = UserInfoForm.cwd
 
     def __init__(self):
         super().__init__()
@@ -162,7 +155,7 @@ class NewModel(QWidget):
         model_name = self.model_edit.text()
 
         # Create a folder for the model inside the user project folder
-        model_path = os.path.join(self.cwd, 'model')
+        model_path = os.path.join(os.getcwd(), 'model')
         # if it already exists, set the model path to the existing folder
         if os.path.exists(model_path):
             print('Folder already exists')
@@ -178,7 +171,7 @@ class NewModel(QWidget):
     
     def open_model_weight(self):
         # Open a file dialog to select the model weight file
-        model_weight_file, _ = QFileDialog.getOpenFileName(self, 'Select model weight file', self.cwd, 'Model weight (*.pt)')
+        model_weight_file, _ = QFileDialog.getOpenFileName(self, 'Select model weight file', os.getcwd(), 'Model weight (*.pt)')
         self.model_weight_edit.setText(model_weight_file)
 
     def submit(self):
@@ -201,7 +194,7 @@ class NewModel(QWidget):
             return
 
         # Create a folder for the model inside the user project folder
-        model_path = os.path.join(self.cwd, 'model', model_name)
+        model_path = os.path.join(os.getcwd(), 'model')
         if os.path.exists(model_path):
             print('Folder already exists')
         else:
@@ -213,11 +206,11 @@ class NewModel(QWidget):
         # Validate that the destination directory exists
         if not os.path.isdir(os.path.dirname(model_weight_path)):
             QMessageBox.warning(self, 'Error', 'The destination directory for the model weight file does not exist.')
-            print(model_weight_path)
             return
 
         # Copy the model weight file to the user project folder 
         try:
+            print(f'Copying model weight file to {model_weight_path}')
             shutil.copy(model_weight, model_weight_path)
         except Exception as e:
             QMessageBox.warning(self, 'Error', f'Error copying model weight file: {str(e)}')
@@ -232,12 +225,9 @@ class NewModel(QWidget):
 
 class MainWindow(QMainWindow):
 
-    # Define a class variable for current working directory
-    cwd = UserInfoForm.cwd
-
     def __init__(self):
         super().__init__()
-        ui_file = QFile(os.path.join(self.cwd, "interface.ui"), self)
+        ui_file = QFile(os.path.join(os.getcwd(), "interface.ui"), self)
         ui_file.open(QFile.ReadOnly)
         # Load the .ui file as a widget
         loader = QUiLoader()
@@ -245,7 +235,7 @@ class MainWindow(QMainWindow):
         ui_file.close()
         self.setCentralWidget(self.ui)
         self.setWindowTitle("Automated Pollinator Monitoring")
-        self.setWindowIcon(QtGui.QIcon(os.path.join(self.cwd, "bee.png")))
+        self.setWindowIcon(QtGui.QIcon(os.path.join(os.getcwd(), "bee.png")))
         
         # Connect the button to the function open_image
         self.ui.OpenFile.triggered.connect(self.open_image)
@@ -306,7 +296,7 @@ class MainWindow(QMainWindow):
     def project_selection(self, i):
         # If the user wants to open an existing project, open a file dialog to select the project folder
         if i.text() == 'Open Project':
-            self.folderPath = QFileDialog.getExistingDirectory(self, "Open Project", self.cwd)
+            self.folderPath = QFileDialog.getExistingDirectory(self, "Open Project", os.getcwd())
             self.folderSelected = True
             self.fileSelected = False
             print(self.folderPath)
@@ -438,7 +428,7 @@ class MainWindow(QMainWindow):
 
 
     def run_detection(self):
-        model_weights = os.path.join(self.cwd, "yolov5\\weights_2021\\best.pt")
+        model_weights = os.path.join(os.getcwd(), "yolov5\\weights_2021\\best.pt")
 
         # Create a folder to save the results
         
@@ -457,13 +447,13 @@ class MainWindow(QMainWindow):
             save_dir = QFileDialog.getExistingDirectory(self, "Save Results", "", QFileDialog.ShowDirsOnly)
             # If the folder already exists, delete it and create a new one
             if os.path.exists(save_dir):
-                shutil.rmtree(os.path.join(self.cwd, save_dir))
+                shutil.rmtree(os.path.join(os.getcwd(), save_dir))
             # If the folder does not exist, create it
             os.makedirs(save_dir)
         
         elif msg.exec_() == QMessageBox.Ok:
             # Save the results in the default folder
-            save_dir = os.path.join(self.cwd, "runs\\detect\\exp")
+            save_dir = os.path.join(os.getcwd(), "runs\\detect\\exp")
             # If the folder already exists, delete it and create a new one
             if os.path.exists(save_dir):
                 shutil.rmtree(save_dir)
