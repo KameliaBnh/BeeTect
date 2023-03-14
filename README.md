@@ -5,3 +5,23 @@
 Note: ctrl + shift + v to have preview of the readme file
 
 Note: shift + alt + f to convert the .json file to have a data frame format
+
+## Conda environement
+
+#### Install conda and dependencies
+
+1. Install Miniconda/Anaconda
+
+2. Open the terminal and write the following commands:
+
+conda create -n GUI-env python=3.9.13
+conda activate GUI-env
+pip install -r requirements.txt
+
+
+## Requirements
+
+* python 3.9.13
+* opencv-python 4.7.0.72
+* PySide2 5.15.2.1
+* torch 1.13.1
