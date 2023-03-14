@@ -14,10 +14,11 @@ Note: shift + alt + f to convert the .json file to have a data frame format
 
 2. Open the terminal and write the following commands:
 
+'''
 conda create -n GUI-env python=3.9.13
 conda activate GUI-env
 pip install -r requirements.txt
-
+'''
 
 ## Requirements
 
