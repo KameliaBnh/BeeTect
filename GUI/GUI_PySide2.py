@@ -17,7 +17,7 @@ pyside2_dir = os.path.dirname(QtWidgets.__file__)
 os.environ["QT_PLUGIN_PATH"] = os.path.join(pyside2_dir, "plugins") #qt5_applications\Qt\plugins
 #os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = os.path.join(pyside2_dir, "plugins", "platforms")
 
-
+cwd = os.getcwd()
 
 class UserInfoForm(QWidget):
 
@@ -155,7 +155,7 @@ class NewModel(QWidget):
         model_name = self.model_edit.text()
 
         # Create a folder for the model inside the user project folder
-        model_path = os.path.join(os.getcwd(), 'model')
+        model_path = os.path.join(os.getcwd(), 'models')
         # if it already exists, set the model path to the existing folder
         if os.path.exists(model_path):
             print('Folder already exists')
@@ -194,11 +194,7 @@ class NewModel(QWidget):
             return
 
         # Create a folder for the model inside the user project folder
-        model_path = os.path.join(os.getcwd(), 'model')
-        if os.path.exists(model_path):
-            print('Folder already exists')
-        else:
-            os.mkdir(model_path)
+        model_path = os.path.join(os.getcwd(), 'models')
 
         # Save the model weight file in the user project folder with the name of the model
         model_weight_path = os.path.join(model_path, model_name + '.pt')
@@ -227,7 +223,7 @@ class MainWindow(QMainWindow):
 
     def __init__(self):
         super().__init__()
-        ui_file = QFile(os.path.join(os.getcwd(), "interface.ui"), self)
+        ui_file = QFile(os.path.join(cwd, "interface.ui"), self)
         ui_file.open(QFile.ReadOnly)
         # Load the .ui file as a widget
         loader = QUiLoader()
@@ -235,7 +231,7 @@ class MainWindow(QMainWindow):
         ui_file.close()
         self.setCentralWidget(self.ui)
         self.setWindowTitle("Automated Pollinator Monitoring")
-        self.setWindowIcon(QtGui.QIcon(os.path.join(os.getcwd(), "bee.png")))
+        self.setWindowIcon(QtGui.QIcon(os.path.join(cwd, "bee.png")))
         
         # Connect the button to the function open_image
         self.ui.OpenFile.triggered.connect(self.open_image)
@@ -333,6 +329,10 @@ class MainWindow(QMainWindow):
         self.model_form = NewModel()
         self.model_form.show()
 
+        # Add the model name to the combobox
+        if self.model_form.model_edit.text() != '':
+            self.ui.comboBox.addItem(self.model_form.model_edit.text())
+
 
 
     def open_image(self):
@@ -428,7 +428,7 @@ class MainWindow(QMainWindow):
 
 
     def run_detection(self):
-        model_weights = os.path.join(os.getcwd(), "yolov5\\weights_2021\\best.pt")
+        model_weights = os.path.join(cwd, "yolov5\\weights_2021\\best.pt")
 
         # Create a folder to save the results
         
@@ -482,6 +482,7 @@ class MainWindow(QMainWindow):
             save_results_file = open(os.path.join(save_dir, 'results.txt'), 'w')
             save_results_file.write(str(results))
             
+
             # Save results
 
             # get class names

@@ -22,3 +22,7 @@ with open(os.path.join(save_dir, 'results.txt'), 'r') as data:
             # Associate the image index with the image name from the dictionary
             image_name = resultsImage[image_index]
             
+
+
+
+# For the number of images with polinators, get in the text file the number of lines where the polinator is present
