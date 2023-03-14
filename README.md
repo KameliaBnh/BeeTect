@@ -20,6 +20,8 @@ conda activate GUI-env                      # activate environment in terminal
 pip install -r requirements.txt             # install requirements
 ```
 
+3. Run the script
+
 ## Requirements
 
 * python 3.9.13
