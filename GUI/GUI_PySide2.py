@@ -17,7 +17,10 @@ pyside2_dir = os.path.dirname(QtWidgets.__file__)
 os.environ["QT_PLUGIN_PATH"] = os.path.join(pyside2_dir, "plugins") #qt5_applications\Qt\plugins
 #os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = os.path.join(pyside2_dir, "plugins", "platforms")
 
+# Get current working directory
 cwd = os.getcwd()
+
+
 
 class UserInfoForm(QWidget):
 
@@ -214,8 +217,6 @@ class NewModel(QWidget):
 
         # Close the form
         self.close()
-
-
 
 
 
