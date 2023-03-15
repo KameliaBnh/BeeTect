@@ -1,3 +1,4 @@
+import datetime
 import shutil
 import sys
 import os
@@ -20,6 +21,9 @@ os.environ["QT_PLUGIN_PATH"] = os.path.join(pyside2_dir, "plugins") #qt5_applica
 # Get current working directory
 cwd = os.getcwd()
 
+# Path of the text file storing the preferences of the user
+preferences_path = os.path.join(cwd, 'preferences.txt')
+
 
 
 class UserInfoForm(QWidget):
@@ -32,8 +36,6 @@ class UserInfoForm(QWidget):
         self.resize(300, 200)
 
         # Create labels and line edits for user information
-        project_label = QLabel('Project name:')
-        self.project_edit = QLineEdit()
         user_label = QLabel('User Information:')
         name_label = QLabel('Name:')
         self.name_edit = QLineEdit()
@@ -43,7 +45,6 @@ class UserInfoForm(QWidget):
         self.email_edit = QLineEdit()
 
         # Make all line edits required except email
-        self.project_edit.setPlaceholderText('Required')
         self.name_edit.setPlaceholderText('Required')
         self.surname_edit.setPlaceholderText('Required')
         self.email_edit.setPlaceholderText('Optional')
@@ -51,13 +52,12 @@ class UserInfoForm(QWidget):
         # If the user does not enter a value in the line edit that is required, display a message box
 
         # Create a submit button
-        submit_button = QPushButton('Submit')
-        submit_button.clicked.connect(self.submit)
+        self.submit_button = QPushButton('Submit')
+        self.submit_button.clicked.connect(self.submit)
 
         # Create a layout for the form
         layout = QVBoxLayout()
-        layout.addWidget(project_label)
-        layout.addWidget(self.project_edit)
+
         # User information label bold and as a separator
         user_label.setStyleSheet("font-weight: bold")
         layout.addWidget(user_label)
@@ -67,21 +67,15 @@ class UserInfoForm(QWidget):
         layout.addWidget(self.surname_edit)
         layout.addWidget(email_label)
         layout.addWidget(self.email_edit)
-        layout.addWidget(submit_button)
+        layout.addWidget(self.submit_button)
 
         self.setLayout(layout)
 
     def submit(self):
         # Retrieve user information
-        project = self.project_edit.text()
         name = self.name_edit.text()
         surname = self.surname_edit.text()
         email = self.email_edit.text()
-
-        # Validate required fields
-        if not project:
-            QMessageBox.warning(self, 'Error', 'Please enter a project name.')
-            return
 
         if not name:
             QMessageBox.warning(self, 'Error', 'Please enter your name.')
@@ -92,23 +86,12 @@ class UserInfoForm(QWidget):
             return
 
         # Print the user information
-        print(f'Project name: {project}')
         print(f'Name: {name}')
         print(f'Surname: {surname}')
         print(f'Email: {email}')
 
         # Close the form
         self.close()
-
-        # Create a high level folder for the project in the current working directory
-        # if it already exists, set the project path to the existing folder
-        project_path = os.path.join(os.getcwd(), project)
-        if os.path.exists(project_path):
-            print('Folder already exists')  
-            os.chdir(project_path)
-        else:
-            os.mkdir(project_path)
-            os.chdir(project_path)
 
 
 class NewModel(QWidget):
@@ -148,7 +131,7 @@ class NewModel(QWidget):
         model_name = self.model_edit.text()
 
         # Create a folder for the model inside the user project folder
-        model_path = os.path.join(os.getcwd(), 'models')
+        model_path = os.path.join(cwd, 'models')
         # if it already exists, set the model path to the existing folder
         if os.path.exists(model_path):
             print('Folder already exists')
@@ -164,7 +147,7 @@ class NewModel(QWidget):
     
     def open_model_weight(self):
         # Open a file dialog to select the model weight file
-        model_weight_file, _ = QFileDialog.getOpenFileName(self, 'Select model weight file', os.getcwd(), 'Model weight (*.pt)')
+        model_weight_file, _ = QFileDialog.getOpenFileName(self, 'Select model weight file', cwd, 'Model weight (*.pt)')
         self.model_weight_edit.setText(model_weight_file)
 
     def submit(self):
@@ -224,6 +207,9 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Automated Pollinator Monitoring")
         self.setWindowIcon(QtGui.QIcon(os.path.join(cwd, "bee.png")))
         
+        # Close the application when the user clicks the close button
+        self.ui.Exit.triggered.connect(self.close)
+
         # Connect the button to the function open_image
         self.ui.OpenFile.triggered.connect(self.open_image)
         # Connect the button to the function open_image_folder
@@ -267,7 +253,7 @@ class MainWindow(QMainWindow):
         # If the preferences.txt file does not exist, open the user information form to ask for user information
         # and save the information in the preferences.txt file
 
-        if not os.path.isfile('preferences.txt'):     
+        if not os.path.isfile(os.path.join(cwd, 'preferences.txt')):     
             # If the preferences.txt file does not exist
             # Wait for 5 seconds before opening a message box to ask for user information when the program is launched
             self.timer = QTimer()
@@ -276,7 +262,7 @@ class MainWindow(QMainWindow):
 
         else: 
             # If the preferences.txt file exists, read the user information from the file
-            with open('preferences.txt', 'r') as f:
+            with open(os.path.join(cwd, 'preferences.txt'), 'r') as f:
                 # Skip the first line
                 f.readline()
                 # Read the user information
@@ -291,26 +277,30 @@ class MainWindow(QMainWindow):
         self.timer.stop()
 
         # Open the user information form
-        self.user_info_form = UserInfoForm()
-        self.user_info_form.show()
+        self.user_info_dialog = UserInfoForm()
+        self.user_info_dialog.show()
 
         # Connect the submit button to the function submit_user_info
-        self.user_info_form.submit_button.clicked.connect(self.submit_user_info)
+        self.user_info_dialog.submit_button.clicked.connect(self.submit_user_info)
 
     
     def submit_user_info(self):
         # Retrieve the user information
-        self.userName = self.user_info_form.name_edit.text()
-        self.userSurname = self.user_info_form.surname_edit.text()
-        self.userEmail = self.user_info_form.email_edit.text()
+        self.userName = self.user_info_dialog.name_edit.text()
+        self.userSurname = self.user_info_dialog.surname_edit.text()
+        self.userEmail = self.user_info_dialog.email_edit.text()
         
         # Save the user information in the preferences.txt file
-        with open('preferences.txt', 'w') as f:
+        with open(os.path.join(cwd, 'preferences.txt'), 'w') as f:
             f.write('User information:\n')
             f.write(f'Name: {self.userName}\n')
             f.write(f'Surname: {self.userSurname}\n')
             f.write(f'Email: {self.userEmail}\n')
-            f.write(f'Project Name: {self.projectName}\n')
+            # Write the date and time when the user information was saved
+            now = datetime.datetime.now()
+            date_str = now.strftime("%d/%m/%Y")
+            time_str = now.strftime("%H:%M:%S")
+            f.write(f'Date: {date_str} Time: {time_str}\n')
 
 
 
@@ -331,8 +321,14 @@ class MainWindow(QMainWindow):
         # Set the project name to the selected folder name
         self.projectName = os.path.basename(self.folderPath)
 
+        new_line = f'Project Name: {self.projectName}'
+
+        self.save_to_text_file(new_line)
+
+
         # Set the project folder path as the current working directory
         os.chdir(self.folderPath)
+
 
     def new_project(self):
         # Create a dialog box for selecting project name and folder path
@@ -390,6 +386,10 @@ class MainWindow(QMainWindow):
             # Set the project name to the selected folder name
             self.projectName = os.path.basename(project_path)
 
+            new_line = f'Project Name: {self.projectName}'
+
+            self.save_to_text_file(new_line)
+
             # Set the project folder path as the current working directory
             os.chdir(project_path)
 
@@ -401,6 +401,27 @@ class MainWindow(QMainWindow):
 
         # Show dialog box
         dialog.exec_()
+        
+        
+    def save_to_text_file(self, new_line):
+        # Save the project name in the preferences.txt file
+        with open(preferences_path, 'r') as f:
+            lines = f.readlines()
+
+        with open(preferences_path, 'w') as f:
+            found = False
+            for i, line in enumerate(lines):
+                if line.startswith('Project Name'):
+                    lines[i] = new_line
+                    found = True
+                    break
+            if not found:
+                lines.append(new_line)
+
+            f.writelines(lines)
+
+        with open(preferences_path, 'r') as f:
+            lines = f.readlines()
 
 
 
@@ -508,7 +529,7 @@ class MainWindow(QMainWindow):
 
 
     def run_detection(self):
-        model_weights = os.path.join(cwd, "yolov5\\weights_2021\\best.pt")
+        model_weights = os.path.join(cwd, "models\\yolov5\\weights_2021\\best.pt")
 
         # Create a folder to save the results
         
