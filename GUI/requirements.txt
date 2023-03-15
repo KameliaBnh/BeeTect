@@ -1,0 +1,3 @@
+opencv-python>=4.7.0.72
+PySide2>=5.15.2.1
+torch>=1.13.1
