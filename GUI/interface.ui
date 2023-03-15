@@ -27,9 +27,9 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
-      <widget class="QWidget" name="tab">
+      <widget class="QWidget" name="VisualisationTab">
        <attribute name="title">
         <string>Visualisation</string>
        </attribute>
@@ -358,7 +358,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab_2">
+      <widget class="QWidget" name="StatisticsTab">
        <attribute name="title">
         <string>Statistics</string>
        </attribute>
@@ -504,7 +504,7 @@
     <addaction name="OpenFile"/>
     <addaction name="OpenFolder"/>
     <addaction name="separator"/>
-    <addaction name="actionExit"/>
+    <addaction name="Exit"/>
    </widget>
    <widget class="QMenu" name="ExportReport">
     <property name="font">
@@ -576,7 +576,7 @@
     <string>Recent Projects</string>
    </property>
   </action>
-  <action name="actionExit">
+  <action name="Exit">
    <property name="text">
     <string>Exit</string>
    </property>
