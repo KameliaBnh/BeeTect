@@ -7,7 +7,7 @@ import torch
 from PySide2 import QtGui, QtWidgets
 from PySide2.QtCore import QFile, Qt, QCoreApplication, QTimer
 from PySide2.QtUiTools import QUiLoader
-from PySide2.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox, QApplication, QMainWindow, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout
+from PySide2.QtWidgets import QApplication, QMainWindow, QFileDialog, QDialog, QMessageBox, QApplication, QMainWindow, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout
 
 
 # Get the path to the directory containing the PySide2 modules
@@ -105,20 +105,10 @@ class UserInfoForm(QWidget):
         project_path = os.path.join(os.getcwd(), project)
         if os.path.exists(project_path):
             print('Folder already exists')  
+            os.chdir(project_path)
         else:
-            os.mkdir(project_path)  
-
-        # Create a folder for the user inside the project folder
-        # if it already exists, set the user project path to the existing folder
-        user_project_path = os.path.join(project_path, name + '_' + surname + '_' + project)
-        if os.path.exists(user_project_path):
-            print('Folder already exists')
-            # Set current working directory to the user project folder
-            os.chdir(user_project_path)     
-        else:
-            os.mkdir(user_project_path)
-            # Set current working directory to the user project folder
-            os.chdir(user_project_path)
+            os.mkdir(project_path)
+            os.chdir(project_path)
 
 
 class NewModel(QWidget):
@@ -236,8 +226,13 @@ class MainWindow(QMainWindow):
         
         # Connect the button to the function open_image
         self.ui.OpenFile.triggered.connect(self.open_image)
-        # Connect the button to the function open_folder
-        self.ui.OpenFolder.triggered.connect(self.open_folder)
+        # Connect the button to the function open_image_folder
+        self.ui.OpenFolder.triggered.connect(self.open_image_folder)
+
+        # Connect the button to the function open_project
+        self.ui.OpenProject.triggered.connect(self.open_project)
+        # Connect the button to the function new_project
+        self.ui.NewProject.triggered.connect(self.new_project)
 
         # Connect the button to the function on_click
         self.ui.Start.clicked.connect(self.run_detection)
@@ -252,8 +247,8 @@ class MainWindow(QMainWindow):
         self.userName = None
         self.userSurname = None
         self.userEmail = None
-        
-        # Project Name 
+
+        # Project information
         self.projectName = None
 
         # Global variable to store the image or folder path
@@ -269,61 +264,145 @@ class MainWindow(QMainWindow):
 
 
 
-        # Wait for 5 seconds before opening a message box to ask for user information when the program is launched
-        self.timer = QTimer()
-        self.timer.timeout.connect(self.user_info_form)
-        self.timer.start(1500)
+        # If the preferences.txt file does not exist, open the user information form to ask for user information
+        # and save the information in the preferences.txt file
+
+        if not os.path.isfile('preferences.txt'):     
+            # If the preferences.txt file does not exist
+            # Wait for 5 seconds before opening a message box to ask for user information when the program is launched
+            self.timer = QTimer()
+            self.timer.timeout.connect(self.user_info_form)
+            self.timer.start(1500)
+
+        else: 
+            # If the preferences.txt file exists, read the user information from the file
+            with open('preferences.txt', 'r') as f:
+                # Skip the first line
+                f.readline()
+                # Read the user information
+                self.userName = f.readline().strip()
+                self.userSurname = f.readline().strip()
+                self.userEmail = f.readline().strip()
+
 
 
     def user_info_form(self):
         # Stop the timer
         self.timer.stop()
 
-        # Message box asking the user if they want to open an existing project or create a new one
-        msg = QMessageBox()
-        msg.setIcon(QMessageBox.Information)
-        msg.setText("Do you want to open an existing project or create a new one?")
-        msg.setWindowTitle("Project selection")
-        msg.setStandardButtons(QMessageBox.Open | QMessageBox.Cancel)
-        msg.button(QMessageBox.Open).setText('Open Project')
-        msg.button(QMessageBox.Cancel).setText('New Project')
-        msg.buttonClicked.connect(self.project_selection)
-        msg.exec_()
+        # Open the user information form
+        self.user_info_form = UserInfoForm()
+        self.user_info_form.show()
 
-    def project_selection(self, i):
-        # If the user wants to open an existing project, open a file dialog to select the project folder
-        if i.text() == 'Open Project':
-            self.folderPath = QFileDialog.getExistingDirectory(self, "Open Project", os.getcwd())
-            self.folderSelected = True
-            self.fileSelected = False
-            print(self.folderPath)
-            # If the user doesn't select a folder, open a message box
-            if self.folderPath == '':
-                msg = QMessageBox()
-                msg.setIcon(QMessageBox.Warning)
-                msg.setText("No folder selected")
-                msg.setWindowTitle("Warning")
-                msg.setStandardButtons(QMessageBox.Ok)
-                msg.exec_()
-            # If the user selects a folder, open the user information form and set the project name
-            else:
-                self.user_info_form = UserInfoForm()
-                self.user_info_form.project_edit.setText(self.folderPath.split('/')[-1])
-                # Disable the project name edit
-                self.user_info_form.project_edit.setDisabled(True)
-                self.user_info_form.show()
+        # Connect the submit button to the function submit_user_info
+        self.user_info_form.submit_button.clicked.connect(self.submit_user_info)
 
-        # If the user wants to create a new project, open the user information form
-        elif i.text() == 'New Project':
-            # Create and show the user information form
-            self.user_info_form = UserInfoForm()
-            self.user_info_form.show()
-
-        # Save the user information in the global variables
+    
+    def submit_user_info(self):
+        # Retrieve the user information
         self.userName = self.user_info_form.name_edit.text()
         self.userSurname = self.user_info_form.surname_edit.text()
         self.userEmail = self.user_info_form.email_edit.text()
-        self.projectName = self.user_info_form.project_edit.text()
+        
+        # Save the user information in the preferences.txt file
+        with open('preferences.txt', 'w') as f:
+            f.write('User information:\n')
+            f.write(f'Name: {self.userName}\n')
+            f.write(f'Surname: {self.userSurname}\n')
+            f.write(f'Email: {self.userEmail}\n')
+            f.write(f'Project Name: {self.projectName}\n')
+
+
+
+    def open_project(self):
+        # If the user wants to open an existing project, open a file dialog to select the project folder
+        self.folderPath = QFileDialog.getExistingDirectory(self, "Open Project", os.getcwd())
+        self.folderSelected = True
+        self.fileSelected = False
+        # If the user doesn't select a folder, open a message box
+        if self.folderPath == '':
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Warning)
+            msg.setText("No folder selected")
+            msg.setWindowTitle("Warning")
+            msg.setStandardButtons(QMessageBox.Ok)
+            msg.exec_()
+
+        # Set the project name to the selected folder name
+        self.projectName = os.path.basename(self.folderPath)
+
+        # Set the project folder path as the current working directory
+        os.chdir(self.folderPath)
+
+    def new_project(self):
+        # Create a dialog box for selecting project name and folder path
+        dialog = QDialog()
+        dialog.setWindowTitle("New Project")
+        dialog.setModal(True)
+        layout = QVBoxLayout(dialog)
+
+        # Add label and line edit for project name
+        name_label = QLabel("Project Name:")
+        name_edit = QLineEdit()
+        layout.addWidget(name_label)
+        layout.addWidget(name_edit)
+
+        # Add button for selecting folder path
+        path_button = QPushButton("Select Folder")
+        path_label = QLabel()
+        layout.addWidget(path_button)
+        layout.addWidget(path_label)
+
+        # Define function for handling folder path selection
+        def select_folder():
+            folder_path = QFileDialog.getExistingDirectory(
+                dialog,
+                "Select Folder",
+                "."
+            )
+            path_label.setText(folder_path)
+
+        # Connect folder path selection button to function
+        path_button.clicked.connect(select_folder)
+
+        # Add button for saving project
+        save_button = QPushButton("Save")
+        layout.addWidget(save_button)
+
+        # Define function for handling project saving
+        def save_project():
+            project_name = name_edit.text()
+            folder_path = path_label.text()
+            project_path = f"{folder_path}/{project_name}"
+            # Create project folder if it does not exist
+            if not os.path.exists(project_path):
+                os.makedirs(project_path)
+            # If the project folder already exists, open a message box
+            else:
+                msg = QMessageBox()
+                msg.setIcon(QMessageBox.Warning)
+                msg.setText("Project already exists")
+                msg.setWindowTitle("Warning")
+                msg.setStandardButtons(QMessageBox.Ok)
+                msg.exec_()
+                return
+            
+            # Set the project name to the selected folder name
+            self.projectName = os.path.basename(project_path)
+
+            # Set the project folder path as the current working directory
+            os.chdir(project_path)
+
+            # Close the dialog box
+            dialog.close()
+
+        # Connect save button to function
+        save_button.clicked.connect(save_project)
+
+        # Show dialog box
+        dialog.exec_()
+
+
 
     def add_model(self):
         # Create and show the model form
@@ -363,7 +442,7 @@ class MainWindow(QMainWindow):
             self.ui.image_label.setFixedSize(pixmap.size())
             self.ui.image_label.setPixmap(pixmap)
     
-    def open_folder(self):
+    def open_image_folder(self):
         # Open a file dialog to select a folder
         folder_path = QFileDialog.getExistingDirectory(self, "Open Folder", "", QFileDialog.ShowDirsOnly)
         self.folderPath = folder_path

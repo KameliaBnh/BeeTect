@@ -27,9 +27,9 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
-      <widget class="QWidget" name="tab">
+      <widget class="QWidget" name="VisualisationTab">
        <attribute name="title">
         <string>Visualisation</string>
        </attribute>
@@ -358,7 +358,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab_2">
+      <widget class="QWidget" name="StatisticsTab">
        <attribute name="title">
         <string>Statistics</string>
        </attribute>
