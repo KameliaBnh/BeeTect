@@ -3,6 +3,7 @@ import shutil
 import sys
 import os
 import cv2
+import pandas
 import torch
 
 from PySide2 import QtGui, QtWidgets
@@ -33,7 +34,7 @@ class UserInfoForm(QWidget):
 
         # Set the title and size of the form
         self.setWindowTitle('User information')
-        self.resize(300, 200)
+        self.resize(500, 350)
 
         # Create labels and line edits for user information
         user_label = QLabel('User Information:')
@@ -236,6 +237,7 @@ class MainWindow(QMainWindow):
 
         # Project information
         self.projectName = None
+        self.projectPath = None
 
         # Global variable to store the image or folder path
         self.imagePath = None
@@ -253,7 +255,7 @@ class MainWindow(QMainWindow):
         # If the preferences.txt file does not exist, open the user information form to ask for user information
         # and save the information in the preferences.txt file
 
-        if not os.path.isfile(os.path.join(cwd, 'preferences.txt')):     
+        if not os.path.isfile(preferences_path):     
             # If the preferences.txt file does not exist
             # Wait for 5 seconds before opening a message box to ask for user information when the program is launched
             self.timer = QTimer()
@@ -262,13 +264,46 @@ class MainWindow(QMainWindow):
 
         else: 
             # If the preferences.txt file exists, read the user information from the file
-            with open(os.path.join(cwd, 'preferences.txt'), 'r') as f:
-                # Skip the first line
-                f.readline()
-                # Read the user information
-                self.userName = f.readline().strip()
-                self.userSurname = f.readline().strip()
-                self.userEmail = f.readline().strip()
+            with open(preferences_path, 'r') as f:
+                # Initialize variables
+                projectName = None
+                projectPath = None
+                userName = None
+                userSurname = None
+                userEmail = None
+
+                # Loop through the lines in the file
+                for line in f:
+                    # Strip whitespace and split the line at the colon
+                    if ':' in line:
+                        key_value_pair = [x.strip() for x in line.split(':')]
+                        if len(key_value_pair) == 2:
+                            key, value = key_value_pair
+                            # Check if the line contains project information
+                            if key == 'Project Name':
+                                projectName = value
+                            elif key == 'Project Folder':
+                                projectPath = value
+                            # Check if the line contains user information
+                            elif key == 'Name':
+                                userName = value
+                            elif key == 'Surname':
+                                userSurname = value
+                            elif key == 'Email':
+                                userEmail = value
+
+                # Assign variables to self
+                self.projectName = projectName
+                self.projectPath = projectPath
+                self.userName = userName
+                self.userSurname = userSurname
+                self.userEmail = userEmail
+
+        print(f'User information: {self.userName} {self.userSurname} {self.userEmail}')
+        print(f'Project information: {self.projectName} {self.projectPath}')
+
+        # Display the project path in the label
+        self.ui.ProjectPath.setText(self.projectPath)
 
 
 
@@ -321,9 +356,7 @@ class MainWindow(QMainWindow):
         # Set the project name to the selected folder name
         self.projectName = os.path.basename(self.folderPath)
 
-        new_line = f'Project Name: {self.projectName}'
-
-        self.save_to_text_file(new_line)
+        self.save_to_text_file(self.projectName, self.folderPath)
 
 
         # Set the project folder path as the current working directory
@@ -386,9 +419,7 @@ class MainWindow(QMainWindow):
             # Set the project name to the selected folder name
             self.projectName = os.path.basename(project_path)
 
-            new_line = f'Project Name: {self.projectName}'
-
-            self.save_to_text_file(new_line)
+            self.save_to_text_file(self.projectName, project_path)
 
             # Set the project folder path as the current working directory
             os.chdir(project_path)
@@ -403,25 +434,34 @@ class MainWindow(QMainWindow):
         dialog.exec_()
         
         
-    def save_to_text_file(self, new_line):
-        # Save the project name in the preferences.txt file
+    def save_to_text_file(self, project_name, project_folder):
+        
+        # Save the project name and folder in the preferences.txt file
         with open(preferences_path, 'r') as f:
             lines = f.readlines()
 
         with open(preferences_path, 'w') as f:
-            found = False
+            found_project_info = False
             for i, line in enumerate(lines):
                 if line.startswith('Project Name'):
-                    lines[i] = new_line
-                    found = True
-                    break
-            if not found:
-                lines.append(new_line)
-
+                    # We've found an existing project, so update its name and folder
+                    project_info = line.strip().split(':')
+                    if project_info[1].strip() == project_name:
+                        lines[i] = f'Project Name: {project_name}\n'
+                        lines[i+1] = f'Project Folder: {project_folder}\n'
+                        found_project_info = True
+                        break  # Exit the loop once we've updated the project
             f.writelines(lines)
 
+            # If there was no existing project with this name, add a new project to the end of the file
+            if not found_project_info:
+                f.write('\n')
+                f.write(f'Project Name: {project_name}\n')
+                f.write(f'Project Folder: {project_folder}\n')
+        
         with open(preferences_path, 'r') as f:
             lines = f.readlines()
+
 
 
 
@@ -576,7 +616,19 @@ class MainWindow(QMainWindow):
             results = model(image)
 
             # Save the results to a directory
-            results.save(save_dir=save_dir, exist_ok=True) 
+
+            self.folderNumber = 1
+
+            # If the default folder is selected and "runs\\detect\\exp" already exists, increment the number of the folder
+            if save_dir == os.path.join(os.getcwd(), "runs\\detect\\exp"):
+                while os.path.exists(os.path.join(os.getcwd(), f"runs\\detect\\exp{self.folderNumber}")):
+                    self.folderNumber += 1
+                save_dir = os.path.join(os.getcwd(), f"runs\\detect\\exp{self.folderNumber}")
+                results.save(save_dir=save_dir, exist_ok=True) 
+            # If a different folder is selected, save the results in the selected folder
+            else:
+                results.save(save_dir=save_dir, exist_ok=True)
+
             results.print()
 
             # Save results to a text file
@@ -639,7 +691,20 @@ class MainWindow(QMainWindow):
             results = model(image_list)
 
             # Save the results to a directory
-            results.save(save_dir=save_dir, exist_ok=True) 
+            
+            self.folderNumber = 1
+
+            # If the default folder is selected and "runs\\detect\\exp" already exists, increment the number of the folder
+            if save_dir == os.path.join(os.getcwd(), "runs\\detect\\exp"):
+                while os.path.exists(os.path.join(os.getcwd(), f"runs\\detect\\exp{self.folderNumber}")):
+                    self.folderNumber += 1
+                save_dir = os.path.join(os.getcwd(), f"runs\\detect\\exp{self.folderNumber}")
+                results.save(save_dir=save_dir, exist_ok=True) 
+            # If a different folder is selected, save the results in the selected folder
+            else:
+                results.save(save_dir=save_dir, exist_ok=True)
+
+
             # Print results
             results.print()
 
@@ -649,9 +714,7 @@ class MainWindow(QMainWindow):
             save_results_file.write('\n')
             save_results_file.write(str(results))
 
-            # Save pandas datafrale results to a JSON file
-            results.pandas().xyxy[0].to_json(orient="records", path_or_buf=os.path.join(save_dir, "results.json"))
-
+            
             for number, filename in enumerate(os.listdir(self.folderPath)): # Get the filename in the input folder and the corresponding index
                     if filename.endswith(".jpg") or filename.endswith(".JPG") or filename.endswith(".jpeg") or filename.endswith(".JPEG"):
                         image_path = os.path.join(self.folderPath, filename)
@@ -660,12 +723,20 @@ class MainWindow(QMainWindow):
 
                         # get class names
                         class_names = model.module.names if hasattr(model, 'module') else model.names
-                        class_labels = results.pred[0][:, -1].numpy().astype(int)
+                        class_labels = results.pred[number][:, -1].numpy().astype(int)
                         class_names = [class_names[i] for i in class_labels]
 
                         # get filename from input image path
                         image_name = os.path.basename(image_path).split('.')[0]
                         
+                        # create a pandas dataframe from the tensor
+                        results_df = pandas.DataFrame(results.pred[number].cpu().numpy(), columns=['x1', 'y1', 'x2', 'y2', 'confidence', 'class'])
+                        results_df['class'] = results_df['class'].astype(int)
+
+                        # save the dataframe to a JSON file
+                        results_df.to_json(os.path.join(save_dir, image_name + ".json"), orient="records")
+
+
                         # Add the name of the image and the corresponding classes to the resultsImage dictionary
                         self.resultsImage[image_name] = class_names
 
