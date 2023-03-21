@@ -2,6 +2,7 @@ import datetime
 import shutil
 import sys
 import os
+import time
 import cv2
 import pandas
 import torch
@@ -9,7 +10,7 @@ import torch
 from PySide2 import QtGui, QtWidgets
 from PySide2.QtCore import QFile, Qt, QCoreApplication, QTimer
 from PySide2.QtUiTools import QUiLoader
-from PySide2.QtWidgets import QApplication, QMainWindow, QFileDialog, QDialog, QMessageBox, QApplication, QMainWindow, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout
+from PySide2.QtWidgets import QApplication, QMainWindow, QFileDialog, QDialog, QMessageBox, QApplication, QMainWindow, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QMenu
 
 
 # Get the path to the directory containing the PySide2 modules
@@ -100,6 +101,9 @@ class NewModel(QWidget):
     def __init__(self):
         super().__init__()
 
+        # Create a folder for the model inside the project folder
+        self.model_path = os.path.join(cwd, 'models')
+
         # Set the title and size of the form
         self.setWindowTitle('New Detection Model')
         self.resize(300, 200)
@@ -128,19 +132,12 @@ class NewModel(QWidget):
         layout.addWidget(self.model_weight_button)
         layout.addWidget(self.submit_button)
 
-        # Retrieve the model name
-        model_name = self.model_edit.text()
 
-        # Create a folder for the model inside the user project folder
-        model_path = os.path.join(cwd, 'models')
         # if it already exists, set the model path to the existing folder
-        if os.path.exists(model_path):
+        if os.path.exists(self.model_path):
             print('Folder already exists')
         else:
-            os.mkdir(model_path)
-
-        # Save the model weight file in the user project folder with the name of the model
-        self.model_weight_path = os.path.join(model_path, model_name + '.pt')
+            os.mkdir(self.model_path)
 
 
         self.setLayout(layout)
@@ -170,11 +167,8 @@ class NewModel(QWidget):
             QMessageBox.warning(self, 'Error', 'The selected model weight file does not exist.')
             return
 
-        # Create a folder for the model inside the user project folder
-        model_path = os.path.join(os.getcwd(), 'models')
-
         # Save the model weight file in the user project folder with the name of the model
-        model_weight_path = os.path.join(model_path, model_name + '.pt')
+        model_weight_path = os.path.join(self.model_path, model_name + '.pt')
 
         # Validate that the destination directory exists
         if not os.path.isdir(os.path.dirname(model_weight_path)):
@@ -223,9 +217,11 @@ class MainWindow(QMainWindow):
 
         # Connect the button to the function on_click
         self.ui.Start.clicked.connect(self.run_detection)
+        # Deactivate the start button until the user selects an image or folder
+        self.ui.Start.setEnabled(False)
 
-        # Connect the addModel button to the function add_model
-        self.ui.addModel.clicked.connect(self.add_model)
+        # Connect the addModel button to the function new_model
+        self.ui.addModel.clicked.connect(self.new_model)
 
 
         ##GLOBAL VARIABLES##
@@ -250,6 +246,9 @@ class MainWindow(QMainWindow):
         # Create dictionary to store the results for each image
         self.resultsImage = {}
 
+        # Total number of images
+        self.totalImages = 0
+
 
 
         # If the preferences.txt file does not exist, open the user information form to ask for user information
@@ -265,46 +264,34 @@ class MainWindow(QMainWindow):
         else: 
             # If the preferences.txt file exists, read the user information from the file
             with open(preferences_path, 'r') as f:
-                # Initialize variables
-                projectName = None
-                projectPath = None
-                userName = None
-                userSurname = None
-                userEmail = None
+
+                # Create an empty dictionary to store the user and project information
+                info_dict = {}
 
                 # Loop through the lines in the file
-                for line in f:
-                    # Strip whitespace and split the line at the colon
-                    if ':' in line:
-                        key_value_pair = [x.strip() for x in line.split(':')]
-                        if len(key_value_pair) == 2:
-                            key, value = key_value_pair
-                            # Check if the line contains project information
-                            if key == 'Project Name':
-                                projectName = value
-                            elif key == 'Project Folder':
-                                projectPath = value
-                            # Check if the line contains user information
-                            elif key == 'Name':
-                                userName = value
-                            elif key == 'Surname':
-                                userSurname = value
-                            elif key == 'Email':
-                                userEmail = value
-
-                # Assign variables to self
-                self.projectName = projectName
-                self.projectPath = projectPath
-                self.userName = userName
-                self.userSurname = userSurname
-                self.userEmail = userEmail
+                for line in f.readlines()[:9]:
+                    if ': ' in line:
+                        x = line.split(': ')
+                        info_dict[x[0].strip()] = x[1].strip()
+                                                                   
+                # Assign values to keys
+                self.projectName = info_dict['Project Name']
+                self.projectPath = info_dict['Project Folder']   
+                self.userName = info_dict['Name']
+                self.userSurname = info_dict['Surname']
+                self.userEmail = info_dict['Email']
 
         print(f'User information: {self.userName} {self.userSurname} {self.userEmail}')
         print(f'Project information: {self.projectName} {self.projectPath}')
 
-        # Display the project path in the label
-        self.ui.ProjectPath.setText(self.projectPath)
+        # Display the project name and path in the label as soon as the program is launched
+        self.ui.ProjectNameDisplay.setText(self.projectName)
+        self.ui.ProjectPathDisplay.setText(self.projectPath)
 
+        # Set the project folder path as the current working directory
+        # If the app has never been opened, the project path is set to none
+        if self.projectPath != None:
+            os.chdir(self.projectPath)
 
 
     def user_info_form(self):
@@ -342,8 +329,7 @@ class MainWindow(QMainWindow):
     def open_project(self):
         # If the user wants to open an existing project, open a file dialog to select the project folder
         self.folderPath = QFileDialog.getExistingDirectory(self, "Open Project", os.getcwd())
-        self.folderSelected = True
-        self.fileSelected = False
+
         # If the user doesn't select a folder, open a message box
         if self.folderPath == '':
             msg = QMessageBox()
@@ -353,14 +339,8 @@ class MainWindow(QMainWindow):
             msg.setStandardButtons(QMessageBox.Ok)
             msg.exec_()
 
-        # Set the project name to the selected folder name
-        self.projectName = os.path.basename(self.folderPath)
-
-        self.save_to_text_file(self.projectName, self.folderPath)
-
-
-        # Set the project folder path as the current working directory
-        os.chdir(self.folderPath)
+        # Use open_selected_project function to open the newly created project
+        self.open_selected_project()
 
 
     def new_project(self):
@@ -401,6 +381,15 @@ class MainWindow(QMainWindow):
         # Define function for handling project saving
         def save_project():
             project_name = name_edit.text()
+            # If the project name is empty, open a message box
+            if project_name == '':
+                msg = QMessageBox()
+                msg.setIcon(QMessageBox.Warning)
+                msg.setText("Project name cannot be empty")
+                msg.setWindowTitle("Warning")
+                msg.setStandardButtons(QMessageBox.Ok)
+                msg.exec_()
+                return
             folder_path = path_label.text()
             project_path = f"{folder_path}/{project_name}"
             # Create project folder if it does not exist
@@ -416,13 +405,9 @@ class MainWindow(QMainWindow):
                 msg.exec_()
                 return
             
-            # Set the project name to the selected folder name
-            self.projectName = os.path.basename(project_path)
-
-            self.save_to_text_file(self.projectName, project_path)
-
-            # Set the project folder path as the current working directory
-            os.chdir(project_path)
+            # Use open_selected_project function to open the newly created project
+            self.folderPath = project_path
+            self.open_selected_project()
 
             # Close the dialog box
             dialog.close()
@@ -433,47 +418,125 @@ class MainWindow(QMainWindow):
         # Show dialog box
         dialog.exec_()
         
+    def open_selected_project(self):
+        # Set the project name to the selected folder name
+        self.projectName = os.path.basename(self.folderPath)
+
+        self.save_to_text_file(self.projectName, self.folderPath)
+
+
+        # Set the project folder path as the current working directory
+        os.chdir(self.folderPath)
+
+        # Display the project name and path in the label
+        self.ui.ProjectNameDisplay.setText(self.projectName)
+        self.ui.ProjectPathDisplay.setText(self.folderPath)
+
+
         
     def save_to_text_file(self, project_name, project_folder):
         
         # Save the project name and folder in the preferences.txt file
         with open(preferences_path, 'r') as f:
+            # Read the lines of the file
             lines = f.readlines()
+
+        # Copy the 5 first lines of the file
+        new_lines = lines[:5]
+
+        # Write the lines back to the file, updating the project name and folder if it already exists
+        
+        # Save project to a tuple
+        current_project = (project_name, project_folder)
+        
+        # Create an empty list to store tuples of recent projects
+        recent_projects = [current_project]
+
+        for i, line in enumerate(lines):
+            if line.startswith('Project Name:'):
+                # We've found an existing project, so update its name and folder
+                recent_project = (lines[i].strip().split(': ')[1],
+                                  lines[i+1].strip().split(': ')[1])
+                if recent_project not in recent_projects:
+                    recent_projects.append(recent_project)
+
+        # Add the recent projects in the menuBar
+        self.ui.RecentProjects.setMenu(QMenu(self.ui.File))
+        for project in recent_projects:
+            self.ui.RecentProjects.menu().addAction(project[0])
+        # Link the recent projects to the open_selected_project function
+        self.ui.RecentProjects.menu().triggered.connect(self.open_selected_project)
 
         with open(preferences_path, 'w') as f:
-            found_project_info = False
-            for i, line in enumerate(lines):
-                if line.startswith('Project Name'):
-                    # We've found an existing project, so update its name and folder
-                    project_info = line.strip().split(':')
-                    if project_info[1].strip() == project_name:
-                        lines[i] = f'Project Name: {project_name}\n'
-                        lines[i+1] = f'Project Folder: {project_folder}\n'
-                        found_project_info = True
-                        break  # Exit the loop once we've updated the project
-            f.writelines(lines)
+            new_lines.append('\nCurrent Project:\n')
+            new_lines.append(f'Project Name: {project_name}\n')
+            new_lines.append(f'Project Folder: {project_folder}\n')
+            new_lines.append('\nRecently Opened Projects:\n')
+            for cpt, project in enumerate(recent_projects[1:]):
+                if cpt == 5:
+                    break
+                new_lines.append(f'\nProject Name: {project[0]}\n')
+                new_lines.append(f'Project Folder: {project[1]}\n')
 
-            # If there was no existing project with this name, add a new project to the end of the file
-            if not found_project_info:
-                f.write('\n')
-                f.write(f'Project Name: {project_name}\n')
-                f.write(f'Project Folder: {project_folder}\n')
-        
-        with open(preferences_path, 'r') as f:
-            lines = f.readlines()
+            f.writelines(new_lines)
 
 
 
-
-    def add_model(self):
+    def new_model(self):
         # Create and show the model form
         self.model_form = NewModel()
         self.model_form.show()
 
-        # Add the model name to the combobox
-        if self.model_form.model_edit.text() != '':
-            self.ui.comboBox.addItem(self.model_form.model_edit.text())
+        # If the submit button is clicked, add the model name to the combobox
+        self.model_form.submit_button.clicked.connect(self.add_model_to_combobox)
 
+    def add_model_to_combobox(self):
+        # Get the model name from the model form
+        model_name = self.model_form.model_edit.text()
+        # Add the model name to the combobox
+        self.ui.comboBox.addItem(model_name)
+        # Save the model names to the file
+        self.save_model_names()
+        # Close the model form
+        self.model_form.close()
+
+    def save_model_names(self):
+        # Get the model names from the combobox
+        model_names = [self.ui.comboBox.itemText(i) for i in range(self.ui.comboBox.count())]
+
+        models_file = os.path.join(cwd, 'models', 'model_names.txt')
+
+        # Read the existing model names from the file, if any
+        try:
+            with open(models_file, 'r') as f:
+                existing_model_names = [line.strip() for line in f]
+        except FileNotFoundError:
+            existing_model_names = []
+
+        # Append the new model names to the existing list of names
+        model_names += [name for name in existing_model_names if name not in model_names]
+
+        # Write the model names to a file
+        with open(models_file, 'w') as f:
+            for model_name in model_names:
+                f.write(model_name + '\n')
+
+    def load_model_names(self):
+        # Load models to the combobox from the file
+
+        models_file = os.path.join(cwd, 'models', 'model_names.txt')
+
+        # Read the model names from the file
+        try:
+            with open(models_file, 'r') as f:
+                model_names = [line.strip() for line in f]
+        except FileNotFoundError:
+            model_names = []
+
+        # Add the model names to the combobox if it doen't already exist
+        for model_name in model_names:
+            if self.ui.comboBox.findText(model_name) == -1:
+                self.ui.comboBox.addItem(model_name)
 
 
     def open_image(self):
@@ -490,10 +553,6 @@ class MainWindow(QMainWindow):
             msg.setWindowTitle("Error")
             msg.exec_()
             return
-        
-        # Set the infoText label to display explanation 
-        self.ui.infoText.setText("Running detection on the selected image...")
-        self.ui.infoText.repaint()
 
         if filepath:
             self.fileSelected = True
@@ -502,6 +561,9 @@ class MainWindow(QMainWindow):
             pixmap = pixmap.scaledToWidth(self.ui.image_label.width())
             self.ui.image_label.setFixedSize(pixmap.size())
             self.ui.image_label.setPixmap(pixmap)
+
+        # Activate the start button
+        self.ui.Start.setEnabled(True)
     
     def open_image_folder(self):
         # Open a file dialog to select a folder
@@ -522,14 +584,17 @@ class MainWindow(QMainWindow):
                     self.ui.image_label.setPixmap(pixmap)
                     break
 
+        # Get total number of images in the folder
+        self.total_images = len([file for file in os.listdir(folder_path)
+                                 if file.endswith((".jpg", ".JPG", "*.jpeg", "*.JPEG", "*.png", "*.PNG", "*.bmp", "*.BMP"))])
                 
         # Use of the previous and next buttons to navigate through the images
         self.ui.next.clicked.connect(self.next_image)
         self.ui.previous.clicked.connect(self.previous_image)
 
-        # Set the infoText label to display explanation 
-        self.ui.infoText.setText("Running detection on all the images in the selected folder...")
-        self.ui.infoText.repaint()
+        # Activate the start button
+        self.ui.Start.setEnabled(True)
+
 
     def get_image_files(self):
         image_files = [f for f in os.listdir(self.folderPath) 
@@ -632,8 +697,10 @@ class MainWindow(QMainWindow):
             results.print()
 
             # Save results to a text file
-            save_results_file = open(os.path.join(save_dir, 'results.txt'), 'w')
-            save_results_file.write(str(results))
+            with open(os.path.join(save_dir, 'results.txt'), 'w') as save_results_file:
+                save_results_file.write('Saved image to ' + save_dir + '\n')
+                save_results_file.write('\n')
+                save_results_file.write(str(results))
             
 
             # Save results
@@ -649,7 +716,7 @@ class MainWindow(QMainWindow):
             
             # Save results to a JSON file
             results.pandas().xyxy[0].to_json(orient="records", path_or_buf=os.path.join(save_dir, image_name + ".json"))
-            
+
             # Add the name of the image and the corresponding classes to the resultsImage dictionary
             self.resultsImage[image_name] = class_names
 
@@ -705,14 +772,25 @@ class MainWindow(QMainWindow):
                 results.save(save_dir=save_dir, exist_ok=True)
 
 
+            # Update progress bar
+
+            # Number of images that have been processed
+            #while self.current_num < self.total_images:
+            #    self.current_num += 1
+            #    self.ui.progressBar.setValue(self.current_num)
+            #    self.ui.progressBar.repaint()
+            #    self.ui.progressBar.update()
+            #    time.sleep(0.01)
+
+
             # Print results
             results.print()
 
             # Save results to a text file
-            save_results_file = open(os.path.join(save_dir, 'results.txt'), 'w')
-            save_results_file.write('Saved ' + str(len(os.listdir(save_dir)) - 1) + ' images to ' + save_dir + '\n')
-            save_results_file.write('\n')
-            save_results_file.write(str(results))
+            with open(os.path.join(save_dir, 'results.txt'), 'w') as save_results_file:
+                save_results_file.write('Saved ' + str(len(os.listdir(save_dir)) - 1) + ' images to ' + save_dir + '\n')
+                save_results_file.write('\n')
+                save_results_file.write(str(results))
 
             
             for number, filename in enumerate(os.listdir(self.folderPath)): # Get the filename in the input folder and the corresponding index
@@ -749,8 +827,22 @@ class MainWindow(QMainWindow):
                         # rename output image according to the name of the input image
                         os.replace(os.path.join(save_dir, "image" + str(number) + ".jpg"), output_path)
 
+            
+            # Create directories and subdirectories for the results
+            self.create_subdirectories(save_dir)
+
+            # Move the images to the appropriate subdirectories
+            pollinator_dir, non_pollinator_dir = self.move_images(save_dir)
+            
             self.folderSelected = False
         
+        # Select the first image in the 'Multiple Pollinators' folder
+        multiple_pollinators_dir = os.path.join(pollinator_dir, "Multiple Pollinators")
+        for image in os.listdir(multiple_pollinators_dir):
+            if image.endswith(".jpg") or image.endswith(".JPG") or image.endswith(".jpeg") or image.endswith(".JPEG"):
+                output_path = os.path.join(multiple_pollinators_dir, image)
+                break
+
         # Display output image
         pixmap = QtGui.QPixmap(output_path)
         pixmap = pixmap.scaledToWidth(self.ui.image_label.width())
@@ -762,6 +854,63 @@ class MainWindow(QMainWindow):
         
         # Display the results in the results dictionary
         print(self.resultsImage)
+
+        # Deactivate Start button
+        self.ui.Start.setEnabled(False)
+
+
+    def create_subdirectories(self, save_dir):
+        # Create two subdirectories in the selected folder: one for Pollinator images and one for Non-Pollinator images
+        self.pollinator_dir = os.path.join(save_dir, "Pollinator")
+        self.nonpollinator_dir = os.path.join(save_dir, "Non-Pollinator")
+        os.makedirs(self.pollinator_dir, exist_ok=True)
+        os.makedirs(self.nonpollinator_dir, exist_ok=True)
+
+        # Inside the Pollinator directory, create subdirectories for each class
+        pollinator_classes = set()
+        for class_list in self.resultsImage.values():
+            pollinator_classes.update(class_list)
+        for class_name in pollinator_classes:
+            if class_name != 'flower':
+                os.makedirs(os.path.join(self.pollinator_dir, class_name), exist_ok=True)
+        os.makedirs(os.path.join(self.pollinator_dir, "Multiple Pollinators"), exist_ok=True)
+
+    def move_images(self, save_dir):
+    # Move the images to the corresponding subdirectories
+
+        for image_name, class_list in self.resultsImage.items():
+            # If the image contains only a flower or nothing detected
+            if class_list == ['flower'] or not class_list:
+                shutil.move(os.path.join(save_dir, image_name + "_detected.JPG"), os.path.join(self.nonpollinator_dir, image_name + "_detected.JPG"))
+                # Also move the corresponding JSON file
+                shutil.move(os.path.join(save_dir, image_name + ".json"), os.path.join(self.nonpollinator_dir, image_name + ".json"))
+
+            # If the image contains a single pollinator or a pollinator and one or multiple flowers detected
+            elif len(class_list) >= 1 and ('flower' in class_list or len(set(class_list)) == 1):
+                # Get the pollinator class
+                pollinator_class = None
+                for class_name in class_list:
+                    if class_name != 'flower':
+                        pollinator_class = class_name
+                        break
+                if pollinator_class is not None:
+                    shutil.move(os.path.join(save_dir, image_name + "_detected.JPG"), os.path.join(self.pollinator_dir, pollinator_class, image_name + "_detected.JPG"))
+                    # Also move the corresponding JSON file
+                    shutil.move(os.path.join(save_dir, image_name + ".json"), os.path.join(self.pollinator_dir, pollinator_class, image_name + ".json"))
+                else:
+                    # There is a flower but no pollinator class, move to nonpollinator directory
+                    shutil.move(os.path.join(save_dir, image_name + "_detected.JPG"), os.path.join(self.nonpollinator_dir, image_name + "_detected.JPG"))
+                    # Also move the corresponding JSON file
+                    shutil.move(os.path.join(save_dir, image_name + ".json"), os.path.join(self.nonpollinator_dir, image_name + ".json"))
+
+            # If the image contains multiple pollinators
+            elif len(class_list) > 1:
+                os.makedirs(os.path.join(self.pollinator_dir, "Multiple Pollinators"), exist_ok=True)
+                shutil.move(os.path.join(save_dir, image_name + "_detected.JPG"), os.path.join(self.pollinator_dir, "Multiple Pollinators", image_name + "_detected.JPG"))
+                # Also move the corresponding JSON file
+                shutil.move(os.path.join(save_dir, image_name + ".json"), os.path.join(self.pollinator_dir, "Multiple Pollinators", image_name + ".json"))
+
+        return self.pollinator_dir, self.nonpollinator_dir
 
 
 if __name__ == "__main__":
