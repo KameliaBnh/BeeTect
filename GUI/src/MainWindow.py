@@ -33,7 +33,7 @@ import shutil
 import pandas
 import torch
 
-from PySide2 import QtGui
+from PySide2.QtGui import QIcon
 from PySide2.QtCore import QFile
 from PySide2.QtUiTools import QUiLoader
 from PySide2.QtWidgets import QMainWindow, QMainWindow, QMenu, QFileDialog, QMessageBox, QInputDialog
@@ -74,7 +74,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Automated Pollinator Monitoring")
 
         # Set the icon of the application
-        self.setWindowIcon(QtGui.QIcon(os.path.join(os.path.dirname(os.getcwd()), "resources\\bee.png")))
+        self.setWindowIcon(QIcon(os.path.join(os.getcwd()), "resources\\bee.png"))
         
         # Check if the preferences.txt file exists when the application starts
         self.check_preferences()
@@ -150,8 +150,6 @@ class MainWindow(QMainWindow):
                         x1 = line.split(': ')
                         x2 = lines_recent_projects[number + 1].split(': ')
                         recent_projects_dict[x1[1].strip()] = x2[1].strip()
-
-                print(recent_projects_dict)
 
                 # Add recent projects to the menu
                 for project_name, project_path in recent_projects_dict.items():
@@ -322,7 +320,6 @@ class MainWindow(QMainWindow):
             self.Images[i].new_path_result(folder_path)
             file = os.path.join(folder_path, "image" + str(i) + ".jpg")
             if file.lower().endswith('.jpg') or file.lower().endswith('.jpeg') or file.lower().endswith('.png') or file.lower().endswith('.bmp'):
-                print(os.path.join(folder_path, file), " : ", self.Images[i].path_result)
                 os.replace(os.path.join(folder_path, file), self.Images[i].path_result)
 
         # Save results to text file
@@ -362,7 +359,8 @@ class MainWindow(QMainWindow):
                 # Also move the corresponding JSON file
                 shutil.move(image.json_result_path, os.path.join(folder_path, image.class_folder_name, os.path.basename(image.json_result_path)))
             except Exception as e:
-                print(e)
+                # Message box to inform the user of the error
+                QMessageBox.warning(self, 'Error', f'Error moving the images to their subfolders: {str(e)}', QMessageBox.Ok)
 
         # Display results images
         self.load_image_result(self.Images[0])
