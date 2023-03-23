@@ -21,7 +21,7 @@ class Models(QWidget):
 
         # Class attributes
         self.path = os.path.join(os.getcwd(), 'models')
-        self.list = [os.path.basename(file).split('.')[0] for file in os.listdir(self.path)]
+        self.list = [os.path.basename(file).split('.')[0] for file in os.listdir(self.path) if file.endswith('.pt')]
 
         # Call the parent class constructor
         super().__init__()
@@ -105,6 +105,7 @@ class Models(QWidget):
             try:
                 print(f'Copying model weight file to {model_weight_path}')
                 shutil.copy(model_weight, model_weight_path)
+                os.makedirs(os.path.join(self.path, model_name), exist_ok=True)
             except Exception as e:
                 QMessageBox.warning(self, 'Error', f'Error copying model weight file: {str(e)}')
                 return

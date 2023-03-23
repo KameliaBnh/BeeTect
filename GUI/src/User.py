@@ -30,6 +30,8 @@ class User(QWidget):
         # Call the parent class constructor
         super().__init__()
 
+        #self.setWindowModality
+
         # Set the font
         font = QFont()
         font.setPointSize(8)

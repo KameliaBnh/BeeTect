@@ -1,11 +1,5 @@
-import datetime
-import shutil
 import sys
 import os
-import time
-import cv2
-import pandas
-import torch
 
 from PySide2 import QtWidgets
 from PySide2.QtCore import Qt, QCoreApplication

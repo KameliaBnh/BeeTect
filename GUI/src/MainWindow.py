@@ -30,6 +30,8 @@
 
 import os
 import shutil
+import subprocess
+import webbrowser
 import pandas
 import torch
 
@@ -57,6 +59,8 @@ class MainWindow(QMainWindow):
         self.cpt_image = 0
         self.cpt_image_result = 0
 
+        self.project_results_path = None
+
         # Call the parent class constructor
         super().__init__()
 
@@ -74,7 +78,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Automated Pollinator Monitoring")
 
         # Set the icon of the application
-        self.setWindowIcon(QIcon(os.path.join(os.getcwd()), "resources\\bee.png"))
+        self.setWindowIcon(QIcon(os.path.join(os.getcwd(), "resources\\bee.png")))
         
         # Check if the preferences.txt file exists when the application starts
         self.check_preferences()
@@ -105,6 +109,9 @@ class MainWindow(QMainWindow):
         self.ui.Start.clicked.connect(self.run_detection)
         # Deactivate the 'Start detection' button until the user selects an image or folder
         self.ui.Start.setEnabled(False)
+
+        # Press the button to export the html report 
+        self.ui.ExportReport.aboutToShow.connect(self.export_report)
 
         # Disable the next and previous buttons until the user selects a folder
         self.ui.next.setEnabled(False)
@@ -272,7 +279,7 @@ class MainWindow(QMainWindow):
         os.makedirs(os.path.join(folder_path, "Pollinator", "Multiple-Pollinators"), exist_ok=True)
 
     def run_detection(self):
-        model_path = os.path.join(self.Models.path, self.ui.comboBox.currentText())
+        model_path = os.path.join(self.Models.path, self.ui.comboBox.currentText() + '.pt')
         
         # Let the user choose whether to save the results in the default subfolder of the current project or in a renamed subfolder
         msg = QMessageBox()
@@ -287,19 +294,19 @@ class MainWindow(QMainWindow):
         # If the user selects the custom folder option, let him write the name of the folder
         if msg.exec_() == QMessageBox.Cancel:
             folder_name = QInputDialog.getText(self, 'Folder Name', 'Enter the name of the folder')[0]
-            folder_path = os.path.join(self.Project.path, folder_name)
-            if os.path.exists(folder_path):
-                shutil.rmtree(folder_path)
-            os.makedirs(folder_path)
+            self.project_results_path = os.path.join(self.Project.path, folder_name)
+            if os.path.exists(self.project_results_path):
+                shutil.rmtree(self.project_results_path)
+            os.makedirs(self.project_results_path)
 
         # If the user selects the default folder option, create the folder if it doesn't exist
         else:
             folder_number = 1
-            folder_path = os.path.join(self.Project.path, os.path.join('runs', 'detect', 'exp'))
-            while os.path.exists(folder_path + str(folder_number)):
+            self.project_results_path = os.path.join(self.Project.path, os.path.join('runs', 'detect', 'exp'))
+            while os.path.exists(self.project_results_path + str(folder_number)):
                 folder_number += 1
-            folder_path = folder_path + str(folder_number)
-            os.makedirs(folder_path)
+            self.project_results_path = self.project_results_path + str(folder_number)
+            os.makedirs(self.project_results_path)
 
         # Run the detection
         model = torch.hub.load('ultralytics/yolov5', 'custom', model_path) # load model
@@ -308,7 +315,7 @@ class MainWindow(QMainWindow):
         results = model([im.image_cv for im in self.Images]) # inference
 
         # Save the results
-        results.save(save_dir=folder_path, exist_ok=True)
+        results.save(save_dir=self.project_results_path, exist_ok=True)
         
         # Display the results
         results.print()
@@ -317,14 +324,14 @@ class MainWindow(QMainWindow):
         #for image, file in zip(self.Images, os.listdir(folder_path)):
         for i in range(len(self.Images)):
             # Set the new path of the image
-            self.Images[i].new_path_result(folder_path)
-            file = os.path.join(folder_path, "image" + str(i) + ".jpg")
+            self.Images[i].new_path_result(self.project_results_path)
+            file = os.path.join(self.project_results_path, "image" + str(i) + ".jpg")
             if file.lower().endswith('.jpg') or file.lower().endswith('.jpeg') or file.lower().endswith('.png') or file.lower().endswith('.bmp'):
-                os.replace(os.path.join(folder_path, file), self.Images[i].path_result)
+                os.replace(os.path.join(self.project_results_path, file), self.Images[i].path_result)
 
         # Save results to text file
-        with open(os.path.join(folder_path, 'results.txt'), 'w') as save_results_file:
-            save_results_file.write('Saved ' + str(len(self.Images)) + ' images to ' + folder_path + '\n')
+        with open(os.path.join(self.project_results_path, 'results.txt'), 'w') as save_results_file:
+            save_results_file.write('Saved ' + str(len(self.Images)) + ' images to ' + self.project_results_path + '\n')
             save_results_file.write('\n')
             save_results_file.write(str(results))
 
@@ -351,13 +358,13 @@ class MainWindow(QMainWindow):
             image.new_pixmap_result(image.path_result)
 
             # Create subdirectories
-            self.create_subdirectories(folder_path, image)
+            self.create_subdirectories(self.project_results_path, image)
 
             # Move images to subfolders according to their classes
             try:
-                shutil.move(image.path_result, os.path.join(folder_path, image.class_folder_name, image.name_result))
+                shutil.move(image.path_result, os.path.join(self.project_results_path, image.class_folder_name, image.name_result))
                 # Also move the corresponding JSON file
-                shutil.move(image.json_result_path, os.path.join(folder_path, image.class_folder_name, os.path.basename(image.json_result_path)))
+                shutil.move(image.json_result_path, os.path.join(self.project_results_path, image.class_folder_name, os.path.basename(image.json_result_path)))
             except Exception as e:
                 # Message box to inform the user of the error
                 QMessageBox.warning(self, 'Error', f'Error moving the images to their subfolders: {str(e)}', QMessageBox.Ok)
@@ -372,3 +379,19 @@ class MainWindow(QMainWindow):
         # Set next and previous buttons to navigate through the results
         self.ui.next.clicked.connect(self.show_next_result)
         self.ui.previous.clicked.connect(self.show_previous_result)
+
+
+    def export_report(self):
+
+        # get the path to the directory containing this script
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        print(script_dir)
+
+        # construct the path to the notebook
+        notebook_path = os.path.join(script_dir, 'stats.ipynb')
+        print(notebook_path)
+        
+        # Call nbconvert to convert the notebook to HTML
+        subprocess.run(['jupyter', 'nbconvert', '--execute',  "--no-input",'--to', 'html', notebook_path])
+        shutil.move(os.path.join(script_dir, 'stats.html'), self.project_results_path)
+        webbrowser.open(f'file://{self.project_results_path}/stats.html')
