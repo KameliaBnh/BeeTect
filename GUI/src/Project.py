@@ -78,7 +78,7 @@ class Project(QWidget):
             self.name = project_name_edit.text()
     
             # Get the project directory
-            self.path = project_directory_edit.text()
+            self.path = os.path.join(project_directory_edit.text(), project_name_edit.text())
 
         except Exception as e:
             # Open message box
@@ -87,7 +87,7 @@ class Project(QWidget):
         
         else:
             # Create the project directory
-            os.mkdir(os.path.join(self.path, self.name))
+            os.mkdir(self.path)
 
             # Get the project creation date
             self.creation_date = os.path.getctime(self.path)

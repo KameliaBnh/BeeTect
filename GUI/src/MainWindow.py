@@ -26,6 +26,7 @@
 #   - show_next_result(self)
 #   - show_previous_result(self)
 #   - run_detection(self)
+#   - export_report(self)
 
 
 import os
@@ -36,9 +37,9 @@ import pandas
 import torch
 
 from PySide2.QtGui import QIcon
-from PySide2.QtCore import QFile
+from PySide2.QtCore import QFile, Qt
 from PySide2.QtUiTools import QUiLoader
-from PySide2.QtWidgets import QMainWindow, QMainWindow, QMenu, QFileDialog, QMessageBox, QInputDialog
+from PySide2.QtWidgets import QMainWindow, QMainWindow, QMenu, QFileDialog, QMessageBox, QInputDialog, QPushButton
 
 import Project
 import User
@@ -116,6 +117,11 @@ class MainWindow(QMainWindow):
         # Disable the next and previous buttons until the user selects a folder
         self.ui.next.setEnabled(False)
         self.ui.previous.setEnabled(False)
+
+        # Add two buttons to the center of the 'image_frame' QFrame: openImage and openFolder
+        self.ui.openImage.clicked.connect(self.show_image)
+        self.ui.openFolder.clicked.connect(self.show_image_from_folder)
+
 
 
     def check_preferences(self):
@@ -209,12 +215,19 @@ class MainWindow(QMainWindow):
         self.ui.next.setEnabled(False)
         self.ui.previous.setEnabled(False)
         
+        # Set the window as modal
+        self.setWindowModality(Qt.ApplicationModal)
+
         self.Images.clear()
         image_path = QFileDialog.getOpenFileName(self, 'Open Image', os.getcwd(), 'Image Files (*.jpg *.jpeg *.png *.bmp)')[0]
         self.Images.append(Image.Image(image_path))
     
     def get_images_from_folder(self):
         self.Images.clear()
+
+        # Set the window as modal
+        self.setWindowModality(Qt.ApplicationModal)
+
         folder_path = QFileDialog.getExistingDirectory(self, 'Open Folder', os.getcwd(), QFileDialog.ShowDirsOnly)
         for root, dirs, file in os.walk(folder_path):
             for image in file:
@@ -238,6 +251,10 @@ class MainWindow(QMainWindow):
     def show_image(self):
         self.get_image()
         self.load_image(self.Images[0])
+        
+        # Delete the two buttons when the user selects an image or folder
+        self.ui.openImage.hide()
+        self.ui.openFolder.hide()
 
     def show_image_from_folder(self):
         # Enable the previous and next buttons
@@ -250,6 +267,10 @@ class MainWindow(QMainWindow):
         # Set next and previous buttons to navigate through the images
         self.ui.next.clicked.connect(self.show_next_image)
         self.ui.previous.clicked.connect(self.show_previous_image)
+
+        # Delete the two buttons when the user selects an image or folder
+        self.ui.openImage.hide()
+        self.ui.openFolder.hide()
 
     def load_image_result(self, image):
         image.pixmap_result.scaledToHeight(self.ui.image_label.height())
@@ -281,6 +302,9 @@ class MainWindow(QMainWindow):
     def run_detection(self):
         model_path = os.path.join(self.Models.path, self.ui.comboBox.currentText() + '.pt')
         
+        # Set the window as modal
+        self.setWindowModality(Qt.ApplicationModal)
+
         # Let the user choose whether to save the results in the default subfolder of the current project or in a renamed subfolder
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Question)
