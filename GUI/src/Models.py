@@ -14,6 +14,7 @@ import shutil
 
 from PySide2.QtWidgets import QMessageBox, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QFileDialog
 from PySide2.QtGui import QFont
+from PySide2 import QtCore
 
 class Models(QWidget):
 
@@ -25,6 +26,9 @@ class Models(QWidget):
 
         # Call the parent class constructor
         super().__init__()
+
+        # Set the window as modal
+        self.setWindowModality(QtCore.Qt.ApplicationModal)
 
         # Set the font
         font = QFont()
