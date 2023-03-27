@@ -20,10 +20,9 @@
 import os
 import cv2
 
-from PySide2.QtWidgets import QWidget
 from PySide2.QtGui import QPixmap
 
-class Image(QWidget):
+class Image():
 
     def __init__(self, path):
 
