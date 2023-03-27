@@ -36,10 +36,10 @@ import webbrowser
 import pandas
 import torch
 
-from PySide2.QtGui import QIcon
+from PySide2.QtGui import QIcon, QFont
 from PySide2.QtCore import QFile, Qt
 from PySide2.QtUiTools import QUiLoader
-from PySide2.QtWidgets import QMainWindow, QMainWindow, QMenu, QFileDialog, QMessageBox, QInputDialog, QPushButton
+from PySide2.QtWidgets import QMainWindow, QMainWindow, QMenu, QFileDialog, QMessageBox, QInputDialog, QPushButton, QDialog, QLineEdit, QVBoxLayout, QLabel, QTableWidget, QHeaderView, QTableWidgetItem
 
 import Project
 import User
@@ -53,12 +53,15 @@ class MainWindow(QMainWindow):
         # Class attributes
     
         self.User = User.User()
-        self.Project = Project.Project()
         self.Models = Models.Models()
+
         self.Images = []
 
         self.cpt_image = 0
         self.cpt_image_result = 0
+
+        results_path = os.path.join(os.getcwd(), "results")
+        self.Projects = [Project.Project(os.path.join(results_path, dir)) for dir in os.listdir(results_path) if os.path.isdir(os.path.join(results_path, dir))]
 
         self.project_results_path = None
 
@@ -98,6 +101,9 @@ class MainWindow(QMainWindow):
         # Connect the addModel button to the function new_model
         self.ui.addModel.clicked.connect(self.add_new_model)
 
+        # Connect the editModels button to the function edit_models
+        self.ui.editModels.clicked.connect(self.edit_models)
+
         # Connect the button to the function close_model_form
         self.Models.submit_button.clicked.connect(self.close_model_form)
 
@@ -122,8 +128,6 @@ class MainWindow(QMainWindow):
         self.ui.openImage.clicked.connect(self.show_image)
         self.ui.openFolder.clicked.connect(self.show_image_from_folder)
 
-
-
     def check_preferences(self):
         # Check if the user_info.txt file exists
         if not os.path.isfile(os.path.join(os.getcwd(), 'user_info.txt')):
@@ -146,55 +150,221 @@ class MainWindow(QMainWindow):
                 self.User.surname = info_dict['Surname']
                 self.User.email = info_dict['Email']
                 self.User.date = info_dict['Date']
-                self.Project.name = info_dict['Project Name']
-                self.Project.path = info_dict['Project Folder']
 
-            with open(os.path.join(os.getcwd(), 'user_info.txt'), 'r') as file:
-                # Create an empty dictionary to store the recent projects information
-                recent_projects_dict = {}
+            # Retrieve the 5 most recent projects from the self.Projects list
+            recent_projects_dict = {}
 
-                # Create a menu for the recent projects
-                self.ui.RecentProjects.setMenu(QMenu(self.ui.File))
-                
-                # Retrieve recent projects
-                lines_recent_projects = file.readlines()[11:]
-                for number, line in enumerate(lines_recent_projects):
-                    if 'Project Name: ' in line:
-                        x1 = line.split(': ')
-                        x2 = lines_recent_projects[number + 1].split(': ')
-                        recent_projects_dict[x1[1].strip()] = x2[1].strip()
+            # Create a menu for the recent projects
+            self.ui.RecentProjects.setMenu(QMenu(self.ui.File))
+            
+            #### TODO
 
-                # Add recent projects to the menu
-                for project_name, project_path in recent_projects_dict.items():
-                    self.ui.RecentProjects.menu().addAction(project_name)
+            # If there are less than 5 projects, add all the projects to the menu
+            if len(self.Projects) < 5:
+                for project in self.Projects:
+                    recent_projects_dict[project.name] = project.path
+            
+            else:
+                # Add the 5 most recent projects to the dictionary
+                for i in range(5):
+                    recent_projects_dict[self.Projects[i].name] = self.Projects[i].path
+            
+            # Add recent projects to the menu
+            for project_name, project_path in recent_projects_dict.items():
+                self.ui.RecentProjects.menu().addAction(project_name)
 
-                    # Link the recent projects to the open_selected_project function
-                    #self.ui.RecentProjects.menu().triggered.connect(self.open_selected_project(project_name, project_path))
+                # Link the recent projects to the open_selected_project function
+                self.ui.RecentProjects.menu().triggered.connect(lambda name=project_name, path=project_path: self.open_selected_project(name, path))
 
-        print(f'User: {self.User.name} {self.User.surname} {self.User.email} {self.User.date}')
-        print(f'Project: {self.Project.name} {self.Project.path}')
+            #### TODO
 
-        # Display project information
-        self.ui.ProjectNameDisplay.setText(self.Project.name)
-        self.ui.ProjectPathDisplay.setText(self.Project.path)
+        if len(self.Projects) != 0:
+            # Display project information
+            self.ui.ProjectNameDisplay.setText(self.Projects[0].name)
+            self.ui.ProjectPathDisplay.setText(self.Projects[0].path)
+
+    # Save the project to text file
+    def write_project_to_text_file(self, name, path):
+        # Open 'user_info.txt' file
+        with open(os.path.join(os.getcwd(), 'user_info.txt'), 'r') as file:
+            # Read the file
+            lines = file.readlines()
+
+        # Copy the 5 first lines of the file
+        new_lines = lines[:5]
+
+        ## Write lines back to the file, updating the project name and path if necessary
+
+        # Save current project to a tuple
+        current_project = (name, path)
+
+        # Create an empty list to store tuples of recent projects
+        recent_projects = [current_project]
+
+        for i, line in enumerate(lines):
+            if line.startswith('Project Name:'):
+                recent_project = (lines[i].strip().split(': ')[1],
+                                  lines[i+1].strip().split(': ')[1])
+                if recent_project not in recent_projects:
+                    recent_projects.append(recent_project)
+        
+        # Write the project name and path to the file
+        with open(os.path.join(os.getcwd(), 'user_info.txt'), 'w') as file:
+            new_lines.append('\nCurrent Project:\n')
+            new_lines.append(f'Project Name: {name}\n')
+            new_lines.append(f'Project Folder: {path}\n')
+            new_lines.append('\nRecently Opened Projects:\n')
+            for cpt, project in enumerate(recent_projects[1:]):
+                if cpt == 5:
+                    break
+                new_lines.append(f'\nProject Name: {project[0]}\n')
+                new_lines.append(f'Project Folder: {project[1]}\n')
+            
+            file.writelines(new_lines)
 
     def open_selected_project(self, project_name, project_path):
+        # Move the project to the top of the list
+        self.Projects.insert(0, self.Projects[[project.path for project in self.Projects].index(project_path)])
+
         # Save project to text file
-        self.Project.save_project(project_name, project_path)
+        self.write_project_to_text_file(self.Projects[0].name, self.Projects[0].path)
+
+        # Display project information
+        self.ui.ProjectNameDisplay.setText(self.Projects[0].name)
+        self.ui.ProjectPathDisplay.setText(self.Projects[0].path)
 
     def open_project(self):
-        self.Project.open_project()
+
+        # Set the window as modal
+        self.setWindowModality(Qt.ApplicationModal)
+
+        try:
+            # Open the project
+            self.Projects.clear()
+            project_path = QFileDialog.getExistingDirectory(self, "Open Project", os.getcwd())
+            if project_path not in [project.path for project in self.Projects]:
+                # Add the project to the top of the list
+                self.Projects.insert(0, Project.Project(project_path))
+            else:
+                # Move the project to the top of the list
+                self.Projects.insert(0, self.Projects[[project.path for project in self.Projects].index(project_path)])
+    
+
+        except Exception as e:
+            # Open message box
+            QMessageBox.warning(self, 'Error', f'Error opening project: {str(e)}', QMessageBox.Ok)
+            return
+        
+        else:
+            # Update the project last modification date
+            self.Projects[0].update_last_modification_date()
+
+            # Save project to text file
+            self.write_project_to_text_file(self.Projects[0].name, project_path)
 
         # Display project information
-        self.ui.ProjectNameDisplay.setText(self.Project.name)
-        self.ui.ProjectPathDisplay.setText(self.Project.path)
+        self.ui.ProjectNameDisplay.setText(self.Projects[0].name)
+        self.ui.ProjectPathDisplay.setText(self.Projects[0].path)
+
+    # Open a file dialog to select the project directory
+    def open_project_directory(self, project_directory_edit):
+
+        # Set the window as modal
+        self.setWindowModality(Qt.ApplicationModal)
+
+        try:
+            # Open the project directory
+            project_directory = QFileDialog.getExistingDirectory(self, "Select Project Directory", os.getcwd())
+
+        except Exception as e:
+            # Open message box
+            QMessageBox.warning(self, 'Error', f'Error opening project directory: {str(e)}', QMessageBox.Ok)
+            return
+        
+        else:
+            # Set the project directory
+            project_directory_edit.setText(project_directory)
+
+    # Save the new project
+    def save_new_project(self, project_name_edit, project_directory_edit):
+            
+        try:
+            # Add the project to the list of projects
+            new_project_path = os.path.join(project_directory_edit.text(), project_name_edit.text())
+            if new_project_path not in [project.path for project in self.Projects]:
+                # Create the project directory
+                os.mkdir(new_project_path)
+                # Add the project to the top of the list
+                self.Projects.insert(0, Project.Project(new_project_path))
+            else:
+                # Move the project to the top of the list
+                self.Projects.insert(0, self.Projects[[project.path for project in self.Projects].index(new_project_path)])
+
+        except Exception as e:
+            # Open message box
+            QMessageBox.warning(self, 'Error', f'Error saving project: {str(e)}', QMessageBox.Ok)
+            return
+        
+        else:
+            # Open message box
+            QMessageBox.information(self, 'Success', 'Project successfully created', QMessageBox.Ok)
 
     def new_project(self):
-        self.Project.create_project()
+        
+        # Open a file dialog to select the project name and directory
+        dialog = QDialog()
+        dialog.setWindowTitle('Create New Project')
+        dialog.setModal(True)
+        dialog.setFixedSize(500, 300)
+        layout = QVBoxLayout(dialog)
+
+        # Set the font
+        font = QFont()
+        font.setPointSize(8)
+
+        # Create a label and line edit for the project name
+        project_name_label = QLabel('Project name:')
+        project_name_label.setFont(font)
+        project_name_edit = QLineEdit()
+        project_name_edit.setFont(font)
+        project_name_edit.setPlaceholderText('Required')
+        project_name_edit.setFont(font)
+
+        # Create a label and line edit for the project directory
+        project_directory_label = QLabel('Project directory:')
+        project_directory_label.setFont(font)
+        project_directory_edit = QLineEdit()
+        project_directory_edit.setFont(font)
+        project_directory_edit.setReadOnly(True)
+        project_directory_button = QPushButton('Browse')
+        project_directory_button.setFont(font)
+        project_directory_button.clicked.connect(lambda: self.open_project_directory(project_directory_edit))
+
+        # Create a submit button
+        submit_button = QPushButton('Submit')
+        submit_button.setFont(font)
+        submit_button.clicked.connect(lambda: self.save_new_project(project_name_edit, project_directory_edit))
+
+        # Add the widgets to the layout
+        layout.addWidget(project_name_label)
+        layout.addWidget(project_name_edit)
+        layout.addWidget(project_directory_label)
+        layout.addWidget(project_directory_edit)
+        layout.addWidget(project_directory_button)
+        layout.addWidget(submit_button)
+
+        # Show the dialog
+        dialog.exec_()
+
+        # Save project to text file
+        self.write_project_to_text_file(self.Projects[0].name, self.Projects[0].path)
+
+        # Close the dialog when the submit button is clicked
+        dialog.close()
 
         # Display project information
-        self.ui.ProjectNameDisplay.setText(self.Project.name)
-        self.ui.ProjectPathDisplay.setText(self.Project.path)
+        self.ui.ProjectNameDisplay.setText(self.Projects[0].name)
+        self.ui.ProjectPathDisplay.setText(self.Projects[0].path)
 
     def add_new_model(self):
         self.Models.open_models_form()
@@ -209,6 +379,94 @@ class MainWindow(QMainWindow):
         self.Models.close_models_form()
         # Refresh the combobox
         self.load_models()
+
+    def edit_models(self):
+        # Open a window displaying the models in a table
+        window = QDialog()
+        window.setWindowTitle('Edit Models')
+        window.setModal(True)
+        window.setFixedSize(500, 300)
+        layout = QVBoxLayout(window)
+
+        # Set the font
+        font = QFont()
+        font.setPointSize(8)
+
+        # Create a table widget
+        table = QTableWidget()
+        table.setRowCount(len(self.Models.list))
+        table.setColumnCount(2)
+        table.setHorizontalHeaderLabels(['Model', 'Path'])
+        # Set the resize mode of the header to allow for resizing of columns
+        header = table.horizontalHeader()
+        header.setSectionResizeMode(0, QHeaderView.Stretch)
+        header.setSectionResizeMode(1, QHeaderView.ResizeToContents)
+        table.verticalHeader().setVisible(False)
+        table.setFont(font)
+
+        # Add the models to the table
+        for i, model in enumerate(self.Models.list):
+            table.setItem(i, 0, QTableWidgetItem(model))
+            table.setItem(i, 1, QTableWidgetItem(os.path.join(self.Models.path, self.Models.list[i] + '.pt')))
+
+        # Create a button to add a new model
+        add_model_button = QPushButton('Add Model')
+        add_model_button.setFont(font)
+        add_model_button.clicked.connect(self.add_new_model)
+
+        # Create a button to remove a model
+        remove_model_button = QPushButton('Remove Model')
+        remove_model_button.setFont(font)
+        remove_model_button.clicked.connect(lambda: self.remove_model(table))
+
+        # Create a button to close the window
+        close_button = QPushButton('Close')
+        close_button.setFont(font)
+        close_button.clicked.connect(window.close)
+
+        # Add the widgets to the layout
+        layout.addWidget(table)
+        layout.addWidget(add_model_button)
+        layout.addWidget(remove_model_button)
+        layout.addWidget(close_button)
+
+        # Show the window
+        window.exec_()
+        # Refresh the combobox
+        self.load_models()
+
+    def remove_model(self, table):
+        # Get the selected row
+        selected_row = table.currentRow()
+
+        # Check that the selected row is a valid index
+        if selected_row < 0 or selected_row >= len(self.Models.list):
+            return
+        
+        # Ask the user to confirm the deletion
+        confirmation = QMessageBox.question(
+            self, 'Confirm Deletion', 'Are you sure you want to delete the selected model?', 
+            QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        
+        if confirmation == QMessageBox.Yes:
+
+            # Remove the model from the list
+            model_name = self.Models.list[selected_row]
+            self.Models.list.pop(selected_row)
+
+            # Remove the model from the table
+            table.removeRow(selected_row)
+            
+            # Delete the model and the model folder from the models folder
+            model_path = os.path.join(self.Models.path, model_name)
+            if os.path.exists(model_path):
+                shutil.rmtree(model_path)
+            model_file = os.path.join(self.Models.path, model_name + '.pt')
+            if os.path.exists(model_file):
+                os.remove(model_file)
+
+            # Refresh the combobox
+            self.load_models()
 
     def get_image(self):
         # Disable the next and previous buttons until the user selects a folder
@@ -318,7 +576,7 @@ class MainWindow(QMainWindow):
         # If the user selects the custom folder option, let him write the name of the folder
         if msg.exec_() == QMessageBox.Cancel:
             folder_name = QInputDialog.getText(self, 'Folder Name', 'Enter the name of the folder')[0]
-            self.project_results_path = os.path.join(self.Project.path, folder_name)
+            self.project_results_path = os.path.join(self.Projects[0].path, folder_name)
             if os.path.exists(self.project_results_path):
                 shutil.rmtree(self.project_results_path)
             os.makedirs(self.project_results_path)
@@ -326,7 +584,7 @@ class MainWindow(QMainWindow):
         # If the user selects the default folder option, create the folder if it doesn't exist
         else:
             folder_number = 1
-            self.project_results_path = os.path.join(self.Project.path, os.path.join('runs', 'detect', 'exp'))
+            self.project_results_path = os.path.join(self.Projects[0].path, os.path.join('runs', 'detect', 'exp'))
             while os.path.exists(self.project_results_path + str(folder_number)):
                 folder_number += 1
             self.project_results_path = self.project_results_path + str(folder_number)
@@ -403,7 +661,6 @@ class MainWindow(QMainWindow):
         # Set next and previous buttons to navigate through the results
         self.ui.next.clicked.connect(self.show_next_result)
         self.ui.previous.clicked.connect(self.show_previous_result)
-
 
     def export_report(self):
 

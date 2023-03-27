@@ -35,7 +35,7 @@ class Models(QWidget):
         font.setPointSize(8)
 
         # Set the title and size of the form
-        self.setWindowTitle('New Detection Model')
+        self.setWindowTitle('New YOLO Model')
         self.resize(500, 350)
 
         # Create labels and line edits for new model
