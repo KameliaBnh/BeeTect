@@ -157,8 +157,8 @@ class Project(QWidget):
 
     # Save the project to text file
     def save_project(self, name, path):
-        # Open 'preferences.txt' file
-        with open(os.path.join(os.getcwd(), 'preferences.txt'), 'r') as file:
+        # Open 'user_info.txt' file
+        with open(os.path.join(os.getcwd(), 'user_info.txt'), 'r') as file:
             # Read the file
             lines = file.readlines()
 
@@ -181,7 +181,7 @@ class Project(QWidget):
                     recent_projects.append(recent_project)
         
         # Write the project name and path to the file
-        with open(os.path.join(os.getcwd(), 'preferences.txt'), 'w') as file:
+        with open(os.path.join(os.getcwd(), 'user_info.txt'), 'w') as file:
             new_lines.append('\nCurrent Project:\n')
             new_lines.append(f'Project Name: {name}\n')
             new_lines.append(f'Project Folder: {path}\n')

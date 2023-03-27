@@ -108,9 +108,9 @@ class User(QWidget):
             QMessageBox.warning(self, 'Error', 'Please enter your surname.')
             return
         
-        # Save the user information in the preferences.txt file
+        # Save the user information in the user_info.txt file
         # os.path.dirname(os.getcwd()) returns the path of the parent folder of the current working directory
-        with open(os.path.join(os.getcwd(), 'preferences.txt'), 'w') as f:
+        with open(os.path.join(os.getcwd(), 'user_info.txt'), 'w') as f:
             f.write('User information:\n')
             f.write(f'Name: {self.name}\n')
             f.write(f'Surname: {self.surname}\n')
