@@ -81,7 +81,7 @@ class MainWindow(QMainWindow):
         # Set the icon of the application
         self.setWindowIcon(QIcon(os.path.join(os.getcwd(), "resources\\bee.png")))
         
-        # Check if the preferences.txt file exists when the application starts
+        # Check if the user_info.txt file exists when the application starts
         self.check_preferences()
 
         # Load models from the models folder in the combobox
@@ -125,13 +125,13 @@ class MainWindow(QMainWindow):
 
 
     def check_preferences(self):
-        # Check if the preferences.txt file exists
-        if not os.path.isfile(os.path.join(os.getcwd(), 'preferences.txt')):
+        # Check if the user_info.txt file exists
+        if not os.path.isfile(os.path.join(os.getcwd(), 'user_info.txt')):
             self.User.open_user_form()
 
         else:
 
-            with open(os.path.join(os.getcwd(), 'preferences.txt'), 'r') as file:
+            with open(os.path.join(os.getcwd(), 'user_info.txt'), 'r') as file:
 
                 # Create an empty dictionary to store the user information
                 info_dict = {}
@@ -149,7 +149,7 @@ class MainWindow(QMainWindow):
                 self.Project.name = info_dict['Project Name']
                 self.Project.path = info_dict['Project Folder']
 
-            with open(os.path.join(os.getcwd(), 'preferences.txt'), 'r') as file:
+            with open(os.path.join(os.getcwd(), 'user_info.txt'), 'r') as file:
                 # Create an empty dictionary to store the recent projects information
                 recent_projects_dict = {}
 
@@ -169,7 +169,7 @@ class MainWindow(QMainWindow):
                     self.ui.RecentProjects.menu().addAction(project_name)
 
                     # Link the recent projects to the open_selected_project function
-                    self.ui.RecentProjects.menu().triggered.connect(self.open_selected_project(project_name, project_path))
+                    #self.ui.RecentProjects.menu().triggered.connect(self.open_selected_project(project_name, project_path))
 
         print(f'User: {self.User.name} {self.User.surname} {self.User.email} {self.User.date}')
         print(f'Project: {self.Project.name} {self.Project.path}')
