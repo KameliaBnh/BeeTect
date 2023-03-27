@@ -39,7 +39,7 @@ import torch
 from PySide2.QtGui import QIcon, QFont
 from PySide2.QtCore import QFile, Qt
 from PySide2.QtUiTools import QUiLoader
-from PySide2.QtWidgets import QMainWindow, QMainWindow, QMenu, QFileDialog, QMessageBox, QInputDialog, QPushButton, QDialog, QLineEdit, QVBoxLayout, QLabel
+from PySide2.QtWidgets import QMainWindow, QMainWindow, QMenu, QFileDialog, QMessageBox, QInputDialog, QPushButton, QDialog, QLineEdit, QVBoxLayout, QLabel, QTableWidget, QHeaderView, QTableWidgetItem
 
 import Project
 import User
@@ -101,6 +101,9 @@ class MainWindow(QMainWindow):
         # Connect the addModel button to the function new_model
         self.ui.addModel.clicked.connect(self.add_new_model)
 
+        # Connect the editModels button to the function edit_models
+        self.ui.editModels.clicked.connect(self.edit_models)
+
         # Connect the button to the function close_model_form
         self.Models.submit_button.clicked.connect(self.close_model_form)
 
@@ -124,8 +127,6 @@ class MainWindow(QMainWindow):
         # Add two buttons to the center of the 'image_frame' QFrame: openImage and openFolder
         self.ui.openImage.clicked.connect(self.show_image)
         self.ui.openFolder.clicked.connect(self.show_image_from_folder)
-
-
 
     def check_preferences(self):
         # Check if the user_info.txt file exists
@@ -156,6 +157,8 @@ class MainWindow(QMainWindow):
             # Create a menu for the recent projects
             self.ui.RecentProjects.setMenu(QMenu(self.ui.File))
             
+            #### TODO
+
             # If there are less than 5 projects, add all the projects to the menu
             if len(self.Projects) < 5:
                 for project in self.Projects:
@@ -171,7 +174,9 @@ class MainWindow(QMainWindow):
                 self.ui.RecentProjects.menu().addAction(project_name)
 
                 # Link the recent projects to the open_selected_project function
-                #self.ui.RecentProjects.menu().triggered.connect(lambda checked, project_name=project_name, project_path=project_path: self.open_selected_project(project_name, project_path))
+                self.ui.RecentProjects.menu().triggered.connect(lambda name=project_name, path=project_path: self.open_selected_project(name, path))
+
+            #### TODO
 
         if len(self.Projects) != 0:
             # Display project information
@@ -222,11 +227,11 @@ class MainWindow(QMainWindow):
         self.Projects.insert(0, self.Projects[[project.path for project in self.Projects].index(project_path)])
 
         # Save project to text file
-        self.write_project_to_text_file(project_name, project_path)
+        self.write_project_to_text_file(self.Projects[0].name, self.Projects[0].path)
 
         # Display project information
-        self.ui.ProjectNameDisplay.setText(project_name)
-        self.ui.ProjectPathDisplay.setText(project_path)
+        self.ui.ProjectNameDisplay.setText(self.Projects[0].name)
+        self.ui.ProjectPathDisplay.setText(self.Projects[0].path)
 
     def open_project(self):
 
@@ -374,6 +379,94 @@ class MainWindow(QMainWindow):
         self.Models.close_models_form()
         # Refresh the combobox
         self.load_models()
+
+    def edit_models(self):
+        # Open a window displaying the models in a table
+        window = QDialog()
+        window.setWindowTitle('Edit Models')
+        window.setModal(True)
+        window.setFixedSize(500, 300)
+        layout = QVBoxLayout(window)
+
+        # Set the font
+        font = QFont()
+        font.setPointSize(8)
+
+        # Create a table widget
+        table = QTableWidget()
+        table.setRowCount(len(self.Models.list))
+        table.setColumnCount(2)
+        table.setHorizontalHeaderLabels(['Model', 'Path'])
+        # Set the resize mode of the header to allow for resizing of columns
+        header = table.horizontalHeader()
+        header.setSectionResizeMode(0, QHeaderView.Stretch)
+        header.setSectionResizeMode(1, QHeaderView.ResizeToContents)
+        table.verticalHeader().setVisible(False)
+        table.setFont(font)
+
+        # Add the models to the table
+        for i, model in enumerate(self.Models.list):
+            table.setItem(i, 0, QTableWidgetItem(model))
+            table.setItem(i, 1, QTableWidgetItem(os.path.join(self.Models.path, self.Models.list[i] + '.pt')))
+
+        # Create a button to add a new model
+        add_model_button = QPushButton('Add Model')
+        add_model_button.setFont(font)
+        add_model_button.clicked.connect(self.add_new_model)
+
+        # Create a button to remove a model
+        remove_model_button = QPushButton('Remove Model')
+        remove_model_button.setFont(font)
+        remove_model_button.clicked.connect(lambda: self.remove_model(table))
+
+        # Create a button to close the window
+        close_button = QPushButton('Close')
+        close_button.setFont(font)
+        close_button.clicked.connect(window.close)
+
+        # Add the widgets to the layout
+        layout.addWidget(table)
+        layout.addWidget(add_model_button)
+        layout.addWidget(remove_model_button)
+        layout.addWidget(close_button)
+
+        # Show the window
+        window.exec_()
+        # Refresh the combobox
+        self.load_models()
+
+    def remove_model(self, table):
+        # Get the selected row
+        selected_row = table.currentRow()
+
+        # Check that the selected row is a valid index
+        if selected_row < 0 or selected_row >= len(self.Models.list):
+            return
+        
+        # Ask the user to confirm the deletion
+        confirmation = QMessageBox.question(
+            self, 'Confirm Deletion', 'Are you sure you want to delete the selected model?', 
+            QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        
+        if confirmation == QMessageBox.Yes:
+
+            # Remove the model from the list
+            model_name = self.Models.list[selected_row]
+            self.Models.list.pop(selected_row)
+
+            # Remove the model from the table
+            table.removeRow(selected_row)
+            
+            # Delete the model and the model folder from the models folder
+            model_path = os.path.join(self.Models.path, model_name)
+            if os.path.exists(model_path):
+                shutil.rmtree(model_path)
+            model_file = os.path.join(self.Models.path, model_name + '.pt')
+            if os.path.exists(model_file):
+                os.remove(model_file)
+
+            # Refresh the combobox
+            self.load_models()
 
     def get_image(self):
         # Disable the next and previous buttons until the user selects a folder
