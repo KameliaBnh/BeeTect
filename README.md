@@ -20,6 +20,8 @@ conda activate GUI-env                      # activate environment in terminal
 pip install -r requirements.txt             # install requirements
 ```
 
+#### Run the script
+
 3. Run the main.py script from the BPT_Cranfield/GUI folder by using this command:
 
 ```
