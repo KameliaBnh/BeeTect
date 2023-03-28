@@ -1,32 +1,12 @@
 # Attributes:
 #   - User: User.User()
-#   - Project: Project.Project()
 #   - Models: Models.Models()
 #   - Images: list
 #   - cpt_image: int
 #   - cpt_image_result: int
-
-# Functions:
-#   - __init__(self)
-#   - check_preferences(self)
-#   - open_selected_project(self, project_name, project_path)
-#   - open_project(self)
-#   - new_project(self)
-#   - add_new_model(self)
-#   - load_models(self)
-#   - close_model_form(self)
-#   - get_image(self)
-#   - get_images_from_folder(self, path)
-#   - load_image(self)
-#   - show_next_image(self)
-#   - show_previous_image(self)
-#   - show_image(self, image)
-#   - show_image_from_folder(self)
-#   - load_image_result(self)
-#   - show_next_result(self)
-#   - show_previous_result(self)
-#   - run_detection(self)
-#   - export_report(self)
+#   - results_path: str
+#   - Projects: list
+#   - project_results_path: str
 
 
 import os
@@ -69,7 +49,7 @@ class MainWindow(QMainWindow):
         super().__init__()
 
         # Load the .ui file
-        ui_file = QFile(os.path.join(os.getcwd(), "src\\interface.ui"), self)
+        ui_file = QFile(os.path.join(os.getcwd(), "interface.ui"), self)
         ui_file.open(QFile.ReadOnly)
 
         # Load the .ui file as a widget
@@ -83,6 +63,10 @@ class MainWindow(QMainWindow):
 
         # Set the icon of the application
         self.setWindowIcon(QIcon(os.path.join(os.getcwd(), "resources\\bee.png")))
+
+        # If the results folder doesn't exist, create it
+        if not os.path.exists(results_path):
+            os.makedirs(results_path)
         
         # Check if the user_info.txt file exists when the application starts
         self.check_preferences()

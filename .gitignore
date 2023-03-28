@@ -1,2 +1,10 @@
 # .pt weight files too heavy to upload: ignore them when pushing to github
 *.pt
+
+# Image file formats
+*.png
+*.jpg
+*.jpeg
+*.PNG
+*.JPG
+*.JPEG
