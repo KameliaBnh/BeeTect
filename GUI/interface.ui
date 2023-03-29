@@ -587,18 +587,20 @@
     <addaction name="separator"/>
     <addaction name="Exit"/>
    </widget>
-   <widget class="QMenu" name="ExportReport">
+   <widget class="QMenu" name="Export">
     <property name="font">
      <font>
       <pointsize>10</pointsize>
      </font>
     </property>
     <property name="toolTip">
-     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Export HTML report containing model information and selected batch statistics.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Export HTML report containing model information and batch comparison statistics.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
     <property name="title">
-     <string>Export Report</string>
+     <string>Export</string>
     </property>
+    <addaction name="ExportReport"/>
+    <addaction name="ExportBatchReport"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -613,7 +615,7 @@
    </widget>
    <addaction name="File"/>
    <addaction name="menuEdit"/>
-   <addaction name="ExportReport"/>
+   <addaction name="Export"/>
    <addaction name="menuHelp"/>
   </widget>
   <action name="OpenFile">
@@ -668,6 +670,22 @@
   <action name="OpenAppHelp">
    <property name="text">
     <string>Open App Help</string>
+   </property>
+  </action>
+  <action name="ExportReport">
+   <property name="text">
+    <string>Export Report</string>
+   </property>
+   <property name="toolTip">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Export HTML report containing model information and selected batch statistics.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
+  </action>
+  <action name="ExportBatchReport">
+   <property name="text">
+    <string>Export Batch Report</string>
+   </property>
+   <property name="toolTip">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Export HTML report containing model information and batch comparison statistics.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
   </action>
  </widget>
