@@ -2,7 +2,8 @@
 #   - name: Name of the user
 #   - surname: Surname of the user
 #   - email: Email of the user
-#   - date: Date and time when the user information was saved
+#   - date: Date of the user information form submission
+#   - time: Time of the user information form submission
 
 # Functions:
 #   - __init__(self): Class constructor
@@ -26,6 +27,7 @@ class User(QWidget):
         self.surname = None
         self.email = None
         self.date = None
+        self.time = None
 
         # Call the parent class constructor
         super().__init__()
@@ -119,7 +121,7 @@ class User(QWidget):
             now = datetime.datetime.now()
             date_str = now.strftime("%d/%m/%Y")
             time_str = now.strftime("%H:%M:%S")
-            f.write(f'Date: {date_str} Time: {time_str}\n')
+            f.write(f'Date: {date_str} \nTime: {time_str}\n')
 
         # Close the form
         self.close()
