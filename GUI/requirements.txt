@@ -1,7 +1,7 @@
 altgraph==0.17.3
 asttokens==2.2.1
 backcall==0.2.0
-# certifi @ file:///C:/b/abs_85o_6fm0se/croot/certifi_1671487778835/work/certifi
+#certifi @ file:///C:/b/abs_85o_6fm0se/croot/certifi_1671487778835/work/certifi
 charset-normalizer==3.1.0
 colorama==0.4.6
 comm==0.1.3
@@ -10,6 +10,7 @@ cycler==0.11.0
 debugpy==1.6.6
 decorator==5.1.1
 executing==1.2.0
+filelock==3.10.7
 fonttools==4.39.0
 gitdb==4.0.10
 GitPython==3.1.31
@@ -21,13 +22,20 @@ ipython==8.11.0
 ipython-genutils==0.2.0
 ipywidgets==8.0.5
 jedi==0.18.2
+Jinja2==3.1.2
 jupyter_client==8.1.0
 jupyter_core==5.3.0
 jupyterlab-widgets==3.0.6
 kiwisolver==1.4.4
+MarkupSafe==2.1.2
 matplotlib==3.7.1
 matplotlib-inline==0.1.6
+mkl-fft==1.3.1
+#mkl-random @ file:///C:/ci/mkl_random_1626186184308/work
+mkl-service==2.4.0
+mpmath==1.3.0
 nest-asyncio==1.5.6
+networkx==3.0
 numpy==1.24.2
 opencv-python==4.7.0.72
 packaging==23.0
@@ -55,11 +63,12 @@ requests==2.28.2
 scipy==1.10.1
 seaborn==0.12.2
 shiboken2==5.15.2.1
-six==1.16.0
+#six @ file:///tmp/build/80754af9/six_1644875935023/work
 smmap==5.0.0
 stack-data==0.6.2
-torch==1.13.1
-torchvision==0.14.1
+sympy==1.11.1
+torch==2.0.0
+torchvision==0.15.1
 tornado==6.2
 tqdm==4.65.0
 traitlets==5.9.0

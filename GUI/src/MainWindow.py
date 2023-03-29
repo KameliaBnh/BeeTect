@@ -35,12 +35,19 @@ class MainWindow(QMainWindow):
         self.User = User.User()
         self.Models = Models.Models()
 
+        # Create an empty list to store the images
         self.Images = []
 
         self.cpt_image = 0
         self.cpt_image_result = 0
 
         results_path = os.path.join(os.getcwd(), "results")
+        
+        # If the results folder doesn't exist, create it
+        if not os.path.exists(results_path):
+            os.makedirs(results_path)
+        
+        # Create a list of Project objects
         self.Projects = [Project.Project(os.path.join(results_path, dir)) for dir in os.listdir(results_path) if os.path.isdir(os.path.join(results_path, dir))]
 
         self.project_results_path = None
@@ -63,10 +70,6 @@ class MainWindow(QMainWindow):
 
         # Set the icon of the application
         self.setWindowIcon(QIcon(os.path.join(os.getcwd(), "resources\\bee.png")))
-
-        # If the results folder doesn't exist, create it
-        if not os.path.exists(results_path):
-            os.makedirs(results_path)
         
         # Check if the user_info.txt file exists when the application starts
         self.check_preferences()
@@ -116,15 +119,17 @@ class MainWindow(QMainWindow):
         # Check if the user_info.txt file exists
         if not os.path.isfile(os.path.join(os.getcwd(), 'user_info.txt')):
             self.User.open_user_form()
+            print("Getting user information...")
 
         else:
 
+            print("Retrieving user information...")
             with open(os.path.join(os.getcwd(), 'user_info.txt'), 'r') as file:
 
                 # Create an empty dictionary to store the user information
                 info_dict = {}
 
-                for line in file.readlines()[:9]:
+                for line in file.readlines()[:10]:
                     if ': ' in line:
                         x = line.split(': ')
                         info_dict[x[0].strip()] = x[1].strip()
@@ -134,6 +139,7 @@ class MainWindow(QMainWindow):
                 self.User.surname = info_dict['Surname']
                 self.User.email = info_dict['Email']
                 self.User.date = info_dict['Date']
+                self.User.time = info_dict['Time']
 
             # Retrieve the 5 most recent projects from the self.Projects list
             recent_projects_dict = {}
@@ -162,20 +168,33 @@ class MainWindow(QMainWindow):
 
             #### TODO
 
+        # Display user information if the variables are not empty
+        if self.User.name != None and self.User.surname != None and self.User.email != None and self.User.date != None and self.User.time != None:
+            print("User information retrieved successfully!")
+            print("User: " + self.User.name + " " + self.User.surname)
+            print("Email: " + self.User.email)
+            print("Date: " + self.User.date)
+            print("Time: " + self.User.time)
+
         if len(self.Projects) != 0:
             # Display project information
             self.ui.ProjectNameDisplay.setText(self.Projects[0].name)
             self.ui.ProjectPathDisplay.setText(self.Projects[0].path)
 
+            print("Current Project: " + self.Projects[0].name)
+
     # Save the project to text file
     def write_project_to_text_file(self, name, path):
+
+        print("Saving project information to user_info.txt file...")
+
         # Open 'user_info.txt' file
         with open(os.path.join(os.getcwd(), 'user_info.txt'), 'r') as file:
             # Read the file
             lines = file.readlines()
 
-        # Copy the 5 first lines of the file
-        new_lines = lines[:5]
+        # Copy the 6 first lines of the file
+        new_lines = lines[:6]
 
         ## Write lines back to the file, updating the project name and path if necessary
 
@@ -207,8 +226,11 @@ class MainWindow(QMainWindow):
             file.writelines(new_lines)
 
     def open_selected_project(self, project_name, project_path):
+
         # Move the project to the top of the list
         self.Projects.insert(0, self.Projects[[project.path for project in self.Projects].index(project_path)])
+
+        print("Opening project: " + project_name)
 
         # Save project to text file
         self.write_project_to_text_file(self.Projects[0].name, self.Projects[0].path)
@@ -232,7 +254,8 @@ class MainWindow(QMainWindow):
             else:
                 # Move the project to the top of the list
                 self.Projects.insert(0, self.Projects[[project.path for project in self.Projects].index(project_path)])
-    
+
+            print("Opening project: " + self.Projects[0].name)
 
         except Exception as e:
             # Open message box
@@ -240,6 +263,8 @@ class MainWindow(QMainWindow):
             return
         
         else:
+            print("Project opened successfully!")
+
             # Update the project last modification date
             self.Projects[0].update_last_modification_date()
 
@@ -260,6 +285,8 @@ class MainWindow(QMainWindow):
             # Open the project directory
             project_directory = QFileDialog.getExistingDirectory(self, "Select Project Directory", os.getcwd())
 
+            print("Selecting project directory...")
+
         except Exception as e:
             # Open message box
             QMessageBox.warning(self, 'Error', f'Error opening project directory: {str(e)}', QMessageBox.Ok)
@@ -269,10 +296,15 @@ class MainWindow(QMainWindow):
             # Set the project directory
             project_directory_edit.setText(project_directory)
 
+            print(project_directory + " selected successfully!")
+
     # Save the new project
     def save_new_project(self, project_name_edit, project_directory_edit):
             
         try:
+
+            print("Creating project: " + project_name_edit.text())
+
             # Add the project to the list of projects
             new_project_path = os.path.join(project_directory_edit.text(), project_name_edit.text())
             if new_project_path not in [project.path for project in self.Projects]:
@@ -292,6 +324,8 @@ class MainWindow(QMainWindow):
         else:
             # Open message box
             QMessageBox.information(self, 'Success', 'Project successfully created', QMessageBox.Ok)
+
+            print("Project successfully created!")
 
     def new_project(self):
         
@@ -340,6 +374,8 @@ class MainWindow(QMainWindow):
         # Show the dialog
         dialog.exec_()
 
+        print("Creating new project...")
+
         # Save project to text file
         self.write_project_to_text_file(self.Projects[0].name, self.Projects[0].path)
 
@@ -353,11 +389,18 @@ class MainWindow(QMainWindow):
     def add_new_model(self):
         self.Models.open_models_form()
 
+        print("Adding new model...")
+
     def load_models(self):
+
+        print("Loading models...")
+
         # Clear the combobox
         self.ui.comboBox.clear()
         for model in self.Models.list:
             self.ui.comboBox.addItem(model)
+
+        print("Models loaded successfully!")
 
     def close_model_form(self):
         self.Models.close_models_form()
@@ -365,6 +408,9 @@ class MainWindow(QMainWindow):
         self.load_models()
 
     def edit_models(self):
+
+        print("Editing models...")
+
         # Open a window displaying the models in a table
         window = QDialog()
         window.setWindowTitle('Edit Models')
@@ -416,6 +462,7 @@ class MainWindow(QMainWindow):
 
         # Show the window
         window.exec_()
+
         # Refresh the combobox
         self.load_models()
 
@@ -433,6 +480,8 @@ class MainWindow(QMainWindow):
             QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         
         if confirmation == QMessageBox.Yes:
+
+            print("Deleting " + self.Models.list[selected_row] + " model...")
 
             # Remove the model from the list
             model_name = self.Models.list[selected_row]
@@ -453,6 +502,9 @@ class MainWindow(QMainWindow):
             self.load_models()
 
     def get_image(self):
+
+        print("Loading image...")
+
         # Disable the next and previous buttons until the user selects a folder
         self.ui.next.setEnabled(False)
         self.ui.previous.setEnabled(False)
@@ -465,6 +517,9 @@ class MainWindow(QMainWindow):
         self.Images.append(Image.Image(image_path))
     
     def get_images_from_folder(self):
+
+        print("Loading images from folder...")
+
         self.Images.clear()
 
         # Set the window as modal
@@ -544,6 +599,8 @@ class MainWindow(QMainWindow):
     def run_detection(self):
         model_path = os.path.join(self.Models.path, self.ui.comboBox.currentText() + '.pt')
         
+        print("Yolo Model selected: " + os.path.basename(model_path))
+
         # Set the window as modal
         self.setWindowModality(Qt.ApplicationModal)
 
@@ -559,6 +616,12 @@ class MainWindow(QMainWindow):
 
         # If the user selects the custom folder option, let him write the name of the folder
         if msg.exec_() == QMessageBox.Cancel:
+
+            print("Saving results in a custom folder...")
+
+            # Set the window as modal
+            self.setWindowModality(Qt.ApplicationModal)
+
             folder_name = QInputDialog.getText(self, 'Folder Name', 'Enter the name of the folder')[0]
             self.project_results_path = os.path.join(self.Projects[0].path, folder_name)
             if os.path.exists(self.project_results_path):
@@ -567,6 +630,9 @@ class MainWindow(QMainWindow):
 
         # If the user selects the default folder option, create the folder if it doesn't exist
         else:
+
+            print("Saving results in the default folder...")
+
             folder_number = 1
             self.project_results_path = os.path.join(self.Projects[0].path, os.path.join('runs', 'detect', 'exp'))
             while os.path.exists(self.project_results_path + str(folder_number)):
@@ -587,7 +653,7 @@ class MainWindow(QMainWindow):
         results.print()
 
         # Rename the images in the folder
-        #for image, file in zip(self.Images, os.listdir(folder_path)):
+        print("Renaming images...")
         for i in range(len(self.Images)):
             # Set the new path of the image
             self.Images[i].new_path_result(self.project_results_path)
@@ -596,6 +662,7 @@ class MainWindow(QMainWindow):
                 os.replace(os.path.join(self.project_results_path, file), self.Images[i].path_result)
 
         # Save results to text file
+        print("Saving results to text file...")
         with open(os.path.join(self.project_results_path, 'results.txt'), 'w') as save_results_file:
             save_results_file.write('Saved ' + str(len(self.Images)) + ' images to ' + self.project_results_path + '\n')
             save_results_file.write('\n')
@@ -635,6 +702,11 @@ class MainWindow(QMainWindow):
                 # Message box to inform the user of the error
                 QMessageBox.warning(self, 'Error', f'Error moving the images to their subfolders: {str(e)}', QMessageBox.Ok)
 
+        
+        print("Subdirectories created!")
+
+        print("Images moved to subfolders!")
+
         # Display results images
         self.load_image_result(self.Images[0])
 
@@ -648,15 +720,12 @@ class MainWindow(QMainWindow):
 
     def export_report(self):
 
-        # get the path to the directory containing this script
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        print(script_dir)
-
-        # construct the path to the notebook
-        notebook_path = os.path.join(script_dir, 'stats.ipynb')
-        print(notebook_path)
+        print("Exporting report...")
         
         # Call nbconvert to convert the notebook to HTML
-        subprocess.run(['jupyter', 'nbconvert', '--execute',  "--no-input",'--to', 'html', notebook_path])
-        shutil.move(os.path.join(script_dir, 'stats.html'), self.project_results_path)
+        subprocess.call(["python", "src/stat_results.py"])
+
+        print(self.project_results_path)
+
+        shutil.move(os.path.join(os.getcwd(), 'stats.html'), self.project_results_path)
         webbrowser.open(f'file://{self.project_results_path}/stats.html')
