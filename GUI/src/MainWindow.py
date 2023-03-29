@@ -94,6 +94,10 @@ class MainWindow(QMainWindow):
         # Connect the button to the function close_model_form
         self.Models.submit_button.clicked.connect(self.close_model_form)
 
+        # Deactivate the OpenFile and OpenFolder buttons until the user selects a project
+        self.ui.OpenFile.setEnabled(False)
+        self.ui.OpenFolder.setEnabled(False)
+
         # Connect the button to the function open_image
         self.ui.OpenFile.triggered.connect(self.show_image)
         # Connect the button to the function open_image_folder
@@ -105,7 +109,7 @@ class MainWindow(QMainWindow):
         self.ui.Start.setEnabled(False)
 
         # Press the button to export the html report 
-        self.ui.ExportReport.aboutToShow.connect(self.export_report)
+        self.ui.ExportReport.triggered.connect(self.export_report)
 
         # Disable the next and previous buttons until the user selects a folder
         self.ui.next.setEnabled(False)
@@ -239,6 +243,10 @@ class MainWindow(QMainWindow):
         self.ui.ProjectNameDisplay.setText(self.Projects[0].name)
         self.ui.ProjectPathDisplay.setText(self.Projects[0].path)
 
+        # Enable the OpenFile and OpenFolder buttons
+        self.ui.OpenFile.setEnabled(True)
+        self.ui.OpenFolder.setEnabled(True)
+
     def open_project(self):
 
         # Set the window as modal
@@ -274,6 +282,10 @@ class MainWindow(QMainWindow):
         # Display project information
         self.ui.ProjectNameDisplay.setText(self.Projects[0].name)
         self.ui.ProjectPathDisplay.setText(self.Projects[0].path)
+
+        # Enable the OpenFile and OpenFolder buttons
+        self.ui.OpenFile.setEnabled(True)
+        self.ui.OpenFolder.setEnabled(True)
 
     # Open a file dialog to select the project directory
     def open_project_directory(self, project_directory_edit):
@@ -385,6 +397,10 @@ class MainWindow(QMainWindow):
         # Display project information
         self.ui.ProjectNameDisplay.setText(self.Projects[0].name)
         self.ui.ProjectPathDisplay.setText(self.Projects[0].path)
+
+        # Enable the OpenFile and OpenFolder buttons
+        self.ui.OpenFile.setEnabled(True)
+        self.ui.OpenFolder.setEnabled(True)
 
     def add_new_model(self):
         self.Models.open_models_form()
