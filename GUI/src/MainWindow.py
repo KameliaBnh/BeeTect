@@ -105,7 +105,7 @@ class MainWindow(QMainWindow):
         self.ui.Start.setEnabled(False)
 
         # Press the button to export the html report 
-        self.ui.ExportReport.aboutToShow.connect(self.export_report)
+        self.ui.ExportReport.triggered.connect(self.export_report)
 
         # Disable the next and previous buttons until the user selects a folder
         self.ui.next.setEnabled(False)
