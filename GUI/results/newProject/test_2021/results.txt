@@ -1,4 +1,4 @@
-Saved 41 images to C:/Users/benha/Documents/Cranfield/Group_Project/BPT_Cranfield/GUI/results\test\test
+Saved 41 images to C:\Users\benha\Documents\Cranfield\Group_Project\BPT_Cranfield\GUI\results\newProject\test_2021
 
 image 1/41: 960x1280 1 amegilla, 1 apis_cerana, 1 apis_florea
 image 2/41: 960x1280 1 apis_cerana
@@ -41,4 +41,4 @@ image 38/41: 960x1280 2 flowers, 1 apis_florea
 image 39/41: 960x1280 2 flowers, 2 apis_floreas
 image 40/41: 960x1280 2 flowers, 1 apis_florea, 1 apis
 image 41/41: 960x1280 2 flowers, 1 apis_florea
-Speed: 7.6ms pre-process, 904.0ms inference, 1.8ms NMS per image at shape (41, 3, 480, 640)
+Speed: 7.2ms pre-process, 564.2ms inference, 0.7ms NMS per image at shape (41, 3, 480, 640)

@@ -9,25 +9,27 @@ import random
 import scipy.stats as stats
 from scipy.stats import shapiro
 import warnings
+
+from PySide2.QtWidgets import QApplication
+import sys
+
+# Import the main window object (mw) to access variables
+import MainWindow as mw
+
+# Create the Qt application
+app = QApplication(sys.argv)
+
+# Create an object for the main window
+main_window = mw.MainWindow()
+
 warnings.filterwarnings("ignore", message="this method is deprecated")
 
-
-##getting the user Information 
-# Get current working directory
-cwd = os.getcwd()
-
 # Path of the text file storing the preferences of the user
-preferences_path = os.path.join(cwd, 'user_info.txt')
+user_info_path = os.path.join(os.getcwd(), 'user_info.txt')
 
-#path to the models 
-model_path = os.path.join(cwd, 'models')
-
-
-
-# Load the YAML data from the file
-with open('models/YOLO_v5_2021/opt.yaml', 'r') as f:
+# Load the YAML data from the folder corresponding to the currently selected model
+with open(os.path.join(main_window.Models.path, main_window.ui.comboBox.currentText()), 'r') as f:
     data = yaml.safe_load(f)
-
 
 # Extract the relevant information for the model summary
 epochs = data['epochs']
@@ -49,7 +51,7 @@ summary_df = pd.DataFrame({
 summary_df = summary_df.rename(index={0: ''})
 
 # To read the User Information
-with open(preferences_path) as f:
+with open(user_info_path) as f:
     lines = f.readlines()
     first_name = lines[1].split(':')[1].strip()
     last_name = lines[2].split(':')[1].strip()
@@ -59,24 +61,21 @@ with open(preferences_path) as f:
 
 full_user_name = first_name + ' ' + last_name
 
-
 # Path of the text file storing the YOLO detection results
-results_path = os.path.join('C:/Users/benha/Documents/Cranfield/Group_Project/BPT_Cranfield/GUI/results/test/test/results.txt')
-
+results_path = f'{main_window.project_results_path}/results.txt'
 
 #creating a directory to save all the output graphs 
-output_directory = f'{project_name}/Output_Graphs'
+output_directory = f'{main_window.project_results_path}/Output_Graphs'
 if not os.path.exists(output_directory):
     os.makedirs(output_directory)
 
-#getting the results summary 
+# Getting the results summary 
 
 with open(results_path) as f:
         bee_counts = {"amegilla":0, "ceratina":0, "meliponini":0, "xylocopa_aestuans":0, "pollinator":0, "apis":0, "unknown":0, "apis_cerana":0, "apis_florea":0} # creating empty dictionary to store the counts 
         per_image_counts={}
         no_detection_images=0
         image_no=[]
-        
       
         for line in f:
             line = line.strip() # stripping the line of any white space 
@@ -96,7 +95,6 @@ with open(results_path) as f:
                 if species_counts == "(no detections)":
                     no_detection_images+=1
                     
-
                 else:
                     species_counts = species_counts.split(', ') # all the species counts are splitted based on the comma 
                     
@@ -107,7 +105,6 @@ with open(results_path) as f:
                         count = int(parts[0])
                         species_name = ' '.join(parts[1:]) 
                         
-
                         if species_name.endswith("amegillas"):
                             species_name = "amegilla"
 
@@ -142,7 +139,7 @@ with open(results_path) as f:
 filtered_counts = {k:v for k,v in bee_counts.items() if v > 0}
 
 
-#getting the number of input Images 
+# Getting the number of input Images 
 # converting the strings of numbers into integers to calculate max value 
 numbers = [int(n) for n in image_no] 
 no_input_img= max(numbers)
@@ -236,7 +233,7 @@ if p > alpha:
 
 
 #path to the output folders
-output_path = os.path.join(cwd, 'results', project_name, 'test/test/Pollinator')
+output_path = f'{main_window.project_results_path}/Pollinator'
 subfolders = [f.path for f in os.scandir(output_path) if f.is_dir()]
 random_image_paths = []
 
