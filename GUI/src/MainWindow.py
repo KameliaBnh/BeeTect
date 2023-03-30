@@ -741,7 +741,5 @@ class MainWindow(QMainWindow):
         # Call nbconvert to convert the notebook to HTML
         subprocess.call(["python", "src/stat_results.py"])
 
-        print(self.project_results_path)
-
-        shutil.move(os.path.join(os.getcwd(), 'stats.html'), self.project_results_path)
-        webbrowser.open(f'file://{self.project_results_path}/stats.html')
+        #shutil.move(os.path.join(os.getcwd(), 'stats.html'), self.project_results_path)
+        #webbrowser.open(f'file://{self.project_results_path}/stats.html')
