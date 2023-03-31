@@ -17,7 +17,7 @@ import sys
 import MainWindow as mw
 
 # Create the Qt application
-app = QApplication(sys.argv).instance()
+app = QApplication(sys.argv)
 
 # Create an object for the main window
 main_window = mw.MainWindow()
@@ -61,13 +61,11 @@ with open(user_info_path) as f:
 
 full_user_name = first_name + ' ' + last_name
 
-print(main_window.ui.BatchFolder.text())
-
 # Path of the text file storing the YOLO detection results
-results_path = os.path.join(main_window.Projects[0].path, main_window.ui.BatchFolder.text(), 'results.txt')
+results_path = os.path.join(main_window.Batches[0].path, 'results.txt')
 
 #creating a directory to save all the output graphs 
-output_directory = f'{os.path.join(main_window.Projects[0].path, main_window.ui.BatchFolder.text())}/Output_Graphs'
+output_directory = os.path.join(main_window.Batches[0].path, 'Output_Graphs')
 if not os.path.exists(output_directory):
     os.makedirs(output_directory)
 
@@ -235,14 +233,14 @@ if p > alpha:
 
 
 #path to the output folders
-output_path = f'{main_window.project_results_path}/Pollinator'
+output_path = os.path.join(main_window.Batches[0].path, 'Pollinator')
 subfolders = [f.path for f in os.scandir(output_path) if f.is_dir()]
 random_image_paths = []
 
 # Loop through each subfolder
 for subfolder in subfolders:
     # Get a list of all image files within the subfolder
-    image_files = [f for f in os.listdir(subfolder) if f.endswith(".JPG")]
+    image_files = [f for f in os.listdir(subfolder) if f.lower().endswith(".jpg")]
     # Choose a random image from the list
     if image_files:
         random_image = random.choice(image_files)
