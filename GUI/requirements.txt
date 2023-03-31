@@ -17,15 +17,11 @@ GitPython==3.1.31
 idna==3.4
 importlib-metadata==6.1.0
 importlib-resources==5.12.0
-ipykernel==6.22.0
 ipython==8.11.0
 ipython-genutils==0.2.0
 ipywidgets==8.0.5
 jedi==0.18.2
 Jinja2==3.1.2
-jupyter_client==8.1.0
-jupyter_core==5.3.0
-jupyterlab-widgets==3.0.6
 kiwisolver==1.4.4
 MarkupSafe==2.1.2
 matplotlib==3.7.1
@@ -77,4 +73,3 @@ urllib3==1.26.15
 wcwidth==0.2.6
 widgetsnbextension==4.0.6
 wincertstore==0.2
-zipp==3.15.0

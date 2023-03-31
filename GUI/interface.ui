@@ -180,6 +180,25 @@
             </widget>
            </item>
            <item>
+            <widget class="QPushButton" name="SelectFolder">
+             <property name="font">
+              <font>
+               <pointsize>9</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Select Batch Folder</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="BatchFolder">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item>
             <widget class="QPushButton" name="Start">
              <property name="palette">
               <palette>

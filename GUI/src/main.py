@@ -3,7 +3,7 @@ import os
 
 from PySide2 import QtWidgets
 from PySide2.QtCore import Qt, QCoreApplication
-from PySide2.QtWidgets import QApplication, QApplication
+from PySide2.QtWidgets import QApplication
 
 import MainWindow
 
@@ -14,6 +14,7 @@ pyside2_dir = os.path.dirname(QtWidgets.__file__)
 os.environ["QT_PLUGIN_PATH"] = os.path.join(pyside2_dir, "plugins") #qt5_applications\Qt\plugins
 
 if __name__ == "__main__":
+    
     # Set the Qt::AA_ShareOpenGLContexts attribute
     QCoreApplication.setAttribute(Qt.AA_ShareOpenGLContexts)
 
@@ -28,3 +29,4 @@ if __name__ == "__main__":
 
     # Run the Qt event loop
     sys.exit(app.exec_())
+
