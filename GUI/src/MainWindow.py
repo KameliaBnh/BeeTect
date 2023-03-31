@@ -25,6 +25,7 @@ import Project
 import User
 import Models
 import Image
+import Batch
 
 class MainWindow(QMainWindow):
 
@@ -42,8 +43,6 @@ class MainWindow(QMainWindow):
         self.cpt_image_result = 0
 
         results_path = os.path.join(os.getcwd(), "results")
-
-        self.project_results_folder = ""
         
         # If the results folder doesn't exist, create it
         if not os.path.exists(results_path):
@@ -51,6 +50,8 @@ class MainWindow(QMainWindow):
         
         # Create a list of Project objects
         self.Projects = [Project.Project(os.path.join(results_path, dir)) for dir in os.listdir(results_path) if os.path.isdir(os.path.join(results_path, dir))]
+
+        self.Batches = [Batch.Batch(os.path.join(self.Projects[0].path, dir)) for dir in os.listdir(self.Projects[0].path) if os.path.isdir(os.path.join(self.Projects[0].path, dir))]
 
         # Call the parent class constructor
         super().__init__()
@@ -106,14 +107,11 @@ class MainWindow(QMainWindow):
         self.ui.OpenFolder.triggered.connect(self.show_image_from_folder)
 
         # Connect the button to the function select_project_results_folder
-        self.ui.SelectFolder.clicked.connect(lambda: self.set_project_results_folder())
+        self.ui.SelectFolder.clicked.connect(self.select_project_results_folder)
         # Connect the button to the function on_click
-        self.ui.Start.clicked.connect(self.run_detection_with_results_folder)
+        self.ui.Start.clicked.connect(self.run_detection)
         # Deactivate the 'Start detection' button until the user selects an image or folder
         self.ui.Start.setEnabled(False)
-
-        # Press the button to export the html report 
-        #self.ui.ExportReport.triggered.connect(self.export_report)
 
         # Disable the next and previous buttons until the user selects a folder
         self.ui.next.setEnabled(False)
@@ -620,7 +618,7 @@ class MainWindow(QMainWindow):
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Question)
         msg.setText("Save Results")
-        msg.setInformativeText("Do you want to save the results in the default folder or do you want to select a different one? Default folder: runs\\detect\\exp")
+        msg.setInformativeText("Do you want to save the results in the default folder or do you want to select a different one?")
         msg.setWindowTitle("Save Results")
         msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
         msg.button(QMessageBox.Ok).setText('Default Folder')
@@ -635,10 +633,16 @@ class MainWindow(QMainWindow):
             self.setWindowModality(Qt.ApplicationModal)
 
             folder_name = QInputDialog.getText(self, 'Folder Name', 'Enter the name of the folder')[0]
-            folder_path = os.path.join(self.Projects[0].path, folder_name)
-            if os.path.exists(folder_path):
+            folder_path = os.path.join(self.Projects[0].path, folder_name)                
+
+            if folder_path not in [batch.path for batch in self.Batches]:
+                os.makedirs(folder_path)
+                # Add the batch to the top of the list
+                self.Batches.insert(0, Batch.Batch(folder_path))
+            else:
                 shutil.rmtree(folder_path)
-            os.makedirs(folder_path)
+                # Move the batch to the top of the list
+                self.Batches.insert(0, self.Batches[[batch.path for batch in self.Batches].index(folder_path)])
 
         # If the user selects the default folder option, create the folder if it doesn't exist
         else:
@@ -646,30 +650,31 @@ class MainWindow(QMainWindow):
             print("Saving results in the default folder...")
 
             folder_number = 1
-            folder_path = os.path.join(self.Projects[0].path, os.path.join('runs', 'detect', 'exp'))
+            folder_path = os.path.join(self.Projects[0].path, os.path.join('exp'))
             while os.path.exists(folder_path + str(folder_number)):
                 folder_number += 1
             folder_path = folder_path + str(folder_number)
-            os.makedirs(folder_path)
 
+            if folder_path not in [batch.path for batch in self.Batches]:
+                os.makedirs(folder_path)
+                # Add the batch to the top of the list
+                self.Batches.insert(0, Batch.Batch(folder_path))
+            else:
+                shutil.rmtree(folder_path)
+                # Move the batch to the top of the list
+                self.Batches.insert(0, self.Batches[[batch.path for batch in self.Batches].index(folder_path)])
+
+        print(self.Batches[0].path)
         # Display the folder path in the BatchFolder label
-        self.ui.BatchFolder.setText(os.path.basename(folder_path))
+        self.ui.BatchFolder.setText(self.Batches[0].name)
 
-        return folder_path
-    
-    # Define a function to set the value of the variable
-    def set_project_results_folder(self):
-        folder_path = self.select_project_results_folder()
-        self.project_results_folder = folder_path
-        print("Project results folder: " + self.project_results_folder)
-
-    def run_detection_with_results_folder(self):
-        self.run_detection(self.project_results_folder)
-
-    def run_detection(self, folder_path):
+    def run_detection(self):
         model_path = os.path.join(self.Models.path, self.ui.comboBox.currentText() + '.pt')
-        
+
         print("Yolo Model selected: " + os.path.basename(model_path))
+
+        # Select the folder where the results will be saved
+        batch_folder = self.Batches[0].path
 
         # Run the detection
         model = torch.hub.load('ultralytics/yolov5', 'custom', model_path) # load model
@@ -678,7 +683,7 @@ class MainWindow(QMainWindow):
         results = model([im.image_cv for im in self.Images]) # inference
 
         # Save the results
-        results.save(save_dir=folder_path, exist_ok=True)
+        results.save(save_dir=batch_folder, exist_ok=True)
         
         # Display the results
         results.print()
@@ -687,15 +692,15 @@ class MainWindow(QMainWindow):
         print("Renaming images...")
         for i in range(len(self.Images)):
             # Set the new path of the image
-            self.Images[i].new_path_result(folder_path)
-            file = os.path.join(folder_path, "image" + str(i) + ".jpg")
+            self.Images[i].new_path_result(batch_folder)
+            file = os.path.join(batch_folder, "image" + str(i) + ".jpg")
             if file.lower().endswith('.jpg') or file.lower().endswith('.jpeg') or file.lower().endswith('.png') or file.lower().endswith('.bmp'):
-                os.replace(os.path.join(folder_path, file), self.Images[i].path_result)
+                os.replace(os.path.join(batch_folder, file), self.Images[i].path_result)
 
         # Save results to text file
         print("Saving results to text file...")
-        with open(os.path.join(folder_path, 'results.txt'), 'w') as save_results_file:
-            save_results_file.write('Saved ' + str(len(self.Images)) + ' images to ' + folder_path + '\n')
+        with open(os.path.join(batch_folder, 'results.txt'), 'w') as save_results_file:
+            save_results_file.write('Saved ' + str(len(self.Images)) + ' images to ' + batch_folder + '\n')
             save_results_file.write('\n')
             save_results_file.write(str(results))
 
@@ -722,13 +727,13 @@ class MainWindow(QMainWindow):
             image.new_pixmap_result(image.path_result)
 
             # Create subdirectories
-            self.create_subdirectories(folder_path, image)
+            self.create_subdirectories(batch_folder, image)
 
             # Move images to subfolders according to their classes
             try:
-                shutil.move(image.path_result, os.path.join(folder_path, image.class_folder_name, image.name_result))
+                shutil.move(image.path_result, os.path.join(batch_folder, image.class_folder_name, image.name_result))
                 # Also move the corresponding JSON file
-                shutil.move(image.json_result_path, os.path.join(folder_path, image.class_folder_name, os.path.basename(image.json_result_path)))
+                shutil.move(image.json_result_path, os.path.join(batch_folder, image.class_folder_name, os.path.basename(image.json_result_path)))
             except Exception as e:
                 # Message box to inform the user of the error
                 QMessageBox.warning(self, 'Error', f'Error moving the images to their subfolders: {str(e)}', QMessageBox.Ok)
@@ -741,7 +746,7 @@ class MainWindow(QMainWindow):
         self.load_image_result(self.Images[0])
 
         # Export the report
-        self.export_report(folder_path)
+        self.export_report()
 
         # Enable the previous and next buttons
         self.ui.next.setEnabled(True)
@@ -751,12 +756,12 @@ class MainWindow(QMainWindow):
         self.ui.next.clicked.connect(self.show_next_result)
         self.ui.previous.clicked.connect(self.show_previous_result)
 
-    def export_report(self, folder_path):
+    def export_report(self):
 
         print("Exporting report...")
         
         # Call nbconvert to convert the notebook to HTML
         subprocess.call(["python", "src/stat_results.py"])
 
-        shutil.move(os.path.join(os.getcwd(), 'stats.html'), folder_path)
-        webbrowser.open(f'file://{folder_path}/stats.html')
+        shutil.move(os.path.join(os.getcwd(), 'stats.html'), self.Batches[0].path)
+        webbrowser.open(f'file://{self.Batches[0].path}/stats.html')
