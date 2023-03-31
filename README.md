@@ -20,17 +20,32 @@ conda activate GUI-env                      # activate environment in terminal
 pip install -r requirements.txt             # install requirements
 ```
 
-#### Run the script
+#### Running the script from the command line
 
 3. Run the main.py script from the BPT_Cranfield/GUI folder by using this command:
 
 ```
 python src/main.py
 ```
+The GUI then opens and you can follow the steps in the next section.
+
+## Use of the GUI
+
+#### Entering the user information
+
+Once the GUI is launched, a form asking for the user information pops up:
+
+
 
 ## Requirements
 
 * python 3.9.13
 * opencv-python 4.7.0.72
 * PySide2 5.15.2.1
-* torch 1.13.1
+* torch 2.0.0
+* torchvision 0.15.1
+* matplotlib 3.7.1
+* numpy 1.24.2
+* PyYAML 6.0
+* scipy 1.10.1
+* seaborn 0.12.2
