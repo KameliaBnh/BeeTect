@@ -42,6 +42,8 @@ class MainWindow(QMainWindow):
         self.cpt_image_result = 0
 
         results_path = os.path.join(os.getcwd(), "results")
+
+        self.project_results_folder = ""
         
         # If the results folder doesn't exist, create it
         if not os.path.exists(results_path):
@@ -49,8 +51,6 @@ class MainWindow(QMainWindow):
         
         # Create a list of Project objects
         self.Projects = [Project.Project(os.path.join(results_path, dir)) for dir in os.listdir(results_path) if os.path.isdir(os.path.join(results_path, dir))]
-
-        self.project_results_path = None
 
         # Call the parent class constructor
         super().__init__()
@@ -69,9 +69,10 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Automated Pollinator Monitoring")
 
         # Set the icon of the application
-        self.setWindowIcon(QIcon(os.path.join(os.getcwd(), "resources\\bee.png")))
+        self.setWindowIcon(QIcon(os.path.join(os.getcwd(), "resources/bee.png")))
         
         # Check if the user_info.txt file exists when the application starts
+        self.check_flag = False
         self.check_preferences()
 
         # Load models from the models folder in the combobox
@@ -95,21 +96,24 @@ class MainWindow(QMainWindow):
         self.Models.submit_button.clicked.connect(self.close_model_form)
 
         # Deactivate the OpenFile and OpenFolder buttons until the user selects a project
-        self.ui.OpenFile.setEnabled(False)
-        self.ui.OpenFolder.setEnabled(False)
+        if self.ui.ProjectNameDisplay.text() == "":
+            self.ui.OpenFile.setEnabled(False)
+            self.ui.OpenFolder.setEnabled(False)
 
         # Connect the button to the function open_image
         self.ui.OpenFile.triggered.connect(self.show_image)
         # Connect the button to the function open_image_folder
         self.ui.OpenFolder.triggered.connect(self.show_image_from_folder)
 
+        # Connect the button to the function select_project_results_folder
+        self.ui.SelectFolder.clicked.connect(lambda: self.set_project_results_folder())
         # Connect the button to the function on_click
-        self.ui.Start.clicked.connect(self.run_detection)
+        self.ui.Start.clicked.connect(self.run_detection_with_results_folder)
         # Deactivate the 'Start detection' button until the user selects an image or folder
         self.ui.Start.setEnabled(False)
 
         # Press the button to export the html report 
-        self.ui.ExportReport.triggered.connect(self.export_report)
+        #self.ui.ExportReport.triggered.connect(self.export_report)
 
         # Disable the next and previous buttons until the user selects a folder
         self.ui.next.setEnabled(False)
@@ -120,72 +124,68 @@ class MainWindow(QMainWindow):
         self.ui.openFolder.clicked.connect(self.show_image_from_folder)
 
     def check_preferences(self):
-        # Check if the user_info.txt file exists
-        if not os.path.isfile(os.path.join(os.getcwd(), 'user_info.txt')):
-            self.User.open_user_form()
-            print("Getting user information...")
+        if not self.check_flag:
+            # Check if the user_info.txt file exists
+            if not os.path.isfile(os.path.join(os.getcwd(), 'user_info.txt')):
+                self.User.open_user_form()
+                print("Getting user information...")
 
-        else:
-
-            print("Retrieving user information...")
-            with open(os.path.join(os.getcwd(), 'user_info.txt'), 'r') as file:
-
-                # Create an empty dictionary to store the user information
-                info_dict = {}
-
-                for line in file.readlines()[:10]:
-                    if ': ' in line:
-                        x = line.split(': ')
-                        info_dict[x[0].strip()] = x[1].strip()
-
-                # Assign values to the class attributes
-                self.User.name = info_dict['Name']
-                self.User.surname = info_dict['Surname']
-                self.User.email = info_dict['Email']
-                self.User.date = info_dict['Date']
-                self.User.time = info_dict['Time']
-
-            # Retrieve the 5 most recent projects from the self.Projects list
-            recent_projects_dict = {}
-
-            # Create a menu for the recent projects
-            self.ui.RecentProjects.setMenu(QMenu(self.ui.File))
-            
-            #### TODO
-
-            # If there are less than 5 projects, add all the projects to the menu
-            if len(self.Projects) < 5:
-                for project in self.Projects:
-                    recent_projects_dict[project.name] = project.path
-            
             else:
-                # Add the 5 most recent projects to the dictionary
-                for i in range(5):
-                    recent_projects_dict[self.Projects[i].name] = self.Projects[i].path
-            
-            # Add recent projects to the menu
-            for project_name, project_path in recent_projects_dict.items():
-                self.ui.RecentProjects.menu().addAction(project_name)
 
-                # Link the recent projects to the open_selected_project function
-                self.ui.RecentProjects.menu().triggered.connect(lambda name=project_name, path=project_path: self.open_selected_project(name, path))
+                print("Retrieving user information...")
+                with open(os.path.join(os.getcwd(), 'user_info.txt'), 'r') as file:
 
-            #### TODO
+                    # Create an empty dictionary to store the user information
+                    info_dict = {}
 
-        # Display user information if the variables are not empty
-        if self.User.name != None and self.User.surname != None and self.User.email != None and self.User.date != None and self.User.time != None:
-            print("User information retrieved successfully!")
-            print("User: " + self.User.name + " " + self.User.surname)
-            print("Email: " + self.User.email)
-            print("Date: " + self.User.date)
-            print("Time: " + self.User.time)
+                    for line in file.readlines()[:10]:
+                        if ': ' in line:
+                            x = line.split(': ')
+                            info_dict[x[0].strip()] = x[1].strip()
+
+                    # Assign values to the class attributes
+                    self.User.name = info_dict['Name']
+                    self.User.surname = info_dict['Surname']
+                    self.User.email = info_dict['Email']
+                    self.User.date = info_dict['Date']
+                    self.User.time = info_dict['Time']
+
+                # Retrieve the 5 most recent projects from the self.Projects list
+                recent_projects_dict = {}
+
+                # Create a menu for the recent projects
+                self.ui.RecentProjects.setMenu(QMenu(self.ui.File))
+                
+                #### TODO
+
+                # If there are less than 5 projects, add all the projects to the menu
+                if len(self.Projects) < 5:
+                    for project in self.Projects:
+                        recent_projects_dict[project.name] = project.path
+                
+                else:
+                    # Add the 5 most recent projects to the dictionary
+                    for i in range(5):
+                        recent_projects_dict[self.Projects[i].name] = self.Projects[i].path
+                
+                # Add recent projects to the menu
+                for project_name, project_path in recent_projects_dict.items():
+                    self.ui.RecentProjects.menu().addAction(project_name)
+
+                    # Link the recent projects to the open_selected_project function
+                    self.ui.RecentProjects.menu().triggered.connect(lambda name=project_name, path=project_path: self.open_selected_project(name, path))
+
+                #### TODO
+
+            # Set the flag to True
+            self.check_flag = True
 
         if len(self.Projects) != 0:
             # Display project information
             self.ui.ProjectNameDisplay.setText(self.Projects[0].name)
             self.ui.ProjectPathDisplay.setText(self.Projects[0].path)
 
-            print("Current Project: " + self.Projects[0].name)
+            #print("Current Project: " + self.Projects[0].name)
 
     # Save the project to text file
     def write_project_to_text_file(self, name, path):
@@ -409,14 +409,14 @@ class MainWindow(QMainWindow):
 
     def load_models(self):
 
-        print("Loading models...")
+        #print("Loading models...")
 
         # Clear the combobox
         self.ui.comboBox.clear()
         for model in self.Models.list:
             self.ui.comboBox.addItem(model)
 
-        print("Models loaded successfully!")
+        #print("Models loaded successfully!")
 
     def close_model_form(self):
         self.Models.close_models_form()
@@ -612,11 +612,7 @@ class MainWindow(QMainWindow):
         # Create one subfolder for images containing multiple pollinators
         os.makedirs(os.path.join(folder_path, "Pollinator", "Multiple-Pollinators"), exist_ok=True)
 
-    def run_detection(self):
-        model_path = os.path.join(self.Models.path, self.ui.comboBox.currentText() + '.pt')
-        
-        print("Yolo Model selected: " + os.path.basename(model_path))
-
+    def select_project_results_folder(self):
         # Set the window as modal
         self.setWindowModality(Qt.ApplicationModal)
 
@@ -639,10 +635,10 @@ class MainWindow(QMainWindow):
             self.setWindowModality(Qt.ApplicationModal)
 
             folder_name = QInputDialog.getText(self, 'Folder Name', 'Enter the name of the folder')[0]
-            self.project_results_path = os.path.join(self.Projects[0].path, folder_name)
-            if os.path.exists(self.project_results_path):
-                shutil.rmtree(self.project_results_path)
-            os.makedirs(self.project_results_path)
+            folder_path = os.path.join(self.Projects[0].path, folder_name)
+            if os.path.exists(folder_path):
+                shutil.rmtree(folder_path)
+            os.makedirs(folder_path)
 
         # If the user selects the default folder option, create the folder if it doesn't exist
         else:
@@ -650,11 +646,30 @@ class MainWindow(QMainWindow):
             print("Saving results in the default folder...")
 
             folder_number = 1
-            self.project_results_path = os.path.join(self.Projects[0].path, os.path.join('runs', 'detect', 'exp'))
-            while os.path.exists(self.project_results_path + str(folder_number)):
+            folder_path = os.path.join(self.Projects[0].path, os.path.join('runs', 'detect', 'exp'))
+            while os.path.exists(folder_path + str(folder_number)):
                 folder_number += 1
-            self.project_results_path = self.project_results_path + str(folder_number)
-            os.makedirs(self.project_results_path)
+            folder_path = folder_path + str(folder_number)
+            os.makedirs(folder_path)
+
+        # Display the folder path in the BatchFolder label
+        self.ui.BatchFolder.setText(os.path.basename(folder_path))
+
+        return folder_path
+    
+    # Define a function to set the value of the variable
+    def set_project_results_folder(self):
+        folder_path = self.select_project_results_folder()
+        self.project_results_folder = folder_path
+        print("Project results folder: " + self.project_results_folder)
+
+    def run_detection_with_results_folder(self):
+        self.run_detection(self.project_results_folder)
+
+    def run_detection(self, folder_path):
+        model_path = os.path.join(self.Models.path, self.ui.comboBox.currentText() + '.pt')
+        
+        print("Yolo Model selected: " + os.path.basename(model_path))
 
         # Run the detection
         model = torch.hub.load('ultralytics/yolov5', 'custom', model_path) # load model
@@ -663,7 +678,7 @@ class MainWindow(QMainWindow):
         results = model([im.image_cv for im in self.Images]) # inference
 
         # Save the results
-        results.save(save_dir=self.project_results_path, exist_ok=True)
+        results.save(save_dir=folder_path, exist_ok=True)
         
         # Display the results
         results.print()
@@ -672,15 +687,15 @@ class MainWindow(QMainWindow):
         print("Renaming images...")
         for i in range(len(self.Images)):
             # Set the new path of the image
-            self.Images[i].new_path_result(self.project_results_path)
-            file = os.path.join(self.project_results_path, "image" + str(i) + ".jpg")
+            self.Images[i].new_path_result(folder_path)
+            file = os.path.join(folder_path, "image" + str(i) + ".jpg")
             if file.lower().endswith('.jpg') or file.lower().endswith('.jpeg') or file.lower().endswith('.png') or file.lower().endswith('.bmp'):
-                os.replace(os.path.join(self.project_results_path, file), self.Images[i].path_result)
+                os.replace(os.path.join(folder_path, file), self.Images[i].path_result)
 
         # Save results to text file
         print("Saving results to text file...")
-        with open(os.path.join(self.project_results_path, 'results.txt'), 'w') as save_results_file:
-            save_results_file.write('Saved ' + str(len(self.Images)) + ' images to ' + self.project_results_path + '\n')
+        with open(os.path.join(folder_path, 'results.txt'), 'w') as save_results_file:
+            save_results_file.write('Saved ' + str(len(self.Images)) + ' images to ' + folder_path + '\n')
             save_results_file.write('\n')
             save_results_file.write(str(results))
 
@@ -707,24 +722,26 @@ class MainWindow(QMainWindow):
             image.new_pixmap_result(image.path_result)
 
             # Create subdirectories
-            self.create_subdirectories(self.project_results_path, image)
+            self.create_subdirectories(folder_path, image)
 
             # Move images to subfolders according to their classes
             try:
-                shutil.move(image.path_result, os.path.join(self.project_results_path, image.class_folder_name, image.name_result))
+                shutil.move(image.path_result, os.path.join(folder_path, image.class_folder_name, image.name_result))
                 # Also move the corresponding JSON file
-                shutil.move(image.json_result_path, os.path.join(self.project_results_path, image.class_folder_name, os.path.basename(image.json_result_path)))
+                shutil.move(image.json_result_path, os.path.join(folder_path, image.class_folder_name, os.path.basename(image.json_result_path)))
             except Exception as e:
                 # Message box to inform the user of the error
                 QMessageBox.warning(self, 'Error', f'Error moving the images to their subfolders: {str(e)}', QMessageBox.Ok)
 
-        
         print("Subdirectories created!")
 
         print("Images moved to subfolders!")
 
         # Display results images
         self.load_image_result(self.Images[0])
+
+        # Export the report
+        self.export_report(folder_path)
 
         # Enable the previous and next buttons
         self.ui.next.setEnabled(True)
@@ -734,12 +751,12 @@ class MainWindow(QMainWindow):
         self.ui.next.clicked.connect(self.show_next_result)
         self.ui.previous.clicked.connect(self.show_previous_result)
 
-    def export_report(self):
+    def export_report(self, folder_path):
 
         print("Exporting report...")
         
         # Call nbconvert to convert the notebook to HTML
         subprocess.call(["python", "src/stat_results.py"])
 
-        #shutil.move(os.path.join(os.getcwd(), 'stats.html'), self.project_results_path)
-        #webbrowser.open(f'file://{self.project_results_path}/stats.html')
+        shutil.move(os.path.join(os.getcwd(), 'stats.html'), folder_path)
+        webbrowser.open(f'file://{folder_path}/stats.html')

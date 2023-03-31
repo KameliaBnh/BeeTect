@@ -3,10 +3,13 @@ Name: Kamelia
 Surname: Benhamna
 Email: kamelia.benhamna.592@cranfield.ac.uk
 Date: 30/03/2023 
-Time: 11:10:02
+Time: 13:38:26
 
 Current Project:
 Project Name: newProject
 Project Folder: C:/Users/benha/Documents/Cranfield/Group_Project/BPT_Cranfield/GUI/results\newProject
 
 Recently Opened Projects:
+
+Project Name: newProject
+Project Folder: C:/Users/benha/Documents/Cranfield/Group_Project/BPT_Cranfield/GUI/results/newProject

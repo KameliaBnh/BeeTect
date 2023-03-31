@@ -9,7 +9,7 @@ a = Analysis(
     ['src\\main.py'],
     pathex=[],
     binaries=[],
-    datas=[('interface.ui', '.'), ('data', 'data'), ('models', 'models'), ('resources', 'resources'), ('results', 'results'), ('src/Image.py', 'src'), ('src/MainWindow.py', 'src'), ('src/Models.py', 'src'), ('src/Project.py', 'src'), ('src/stats.ipynb', 'src'), ('src/User.py', 'src'), ],
+    datas=[('interface.ui', '.'), ('data', 'data'), ('models', 'models'), ('resources', 'resources'), ('results', 'results'), ('src/Image.py', 'src'), ('src/MainWindow.py', 'src'), ('src/Models.py', 'src'), ('src/Project.py', 'src'), ('src/stat_results.py', 'src'), ('src/User.py', 'src'), ],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},

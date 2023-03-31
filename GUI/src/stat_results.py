@@ -17,7 +17,7 @@ import sys
 import MainWindow as mw
 
 # Create the Qt application
-app = QApplication(sys.argv)
+app = QApplication(sys.argv).instance()
 
 # Create an object for the main window
 main_window = mw.MainWindow()
@@ -28,7 +28,7 @@ warnings.filterwarnings("ignore", message="this method is deprecated")
 user_info_path = os.path.join(os.getcwd(), 'user_info.txt')
 
 # Load the YAML data from the folder corresponding to the currently selected model
-with open(os.path.join(main_window.Models.path, main_window.ui.comboBox.currentText()), 'r') as f:
+with open(os.path.join(main_window.Models.path, main_window.ui.comboBox.currentText(), 'opt.yaml'), 'r') as f:
     data = yaml.safe_load(f)
 
 # Extract the relevant information for the model summary
@@ -61,11 +61,13 @@ with open(user_info_path) as f:
 
 full_user_name = first_name + ' ' + last_name
 
+print(main_window.ui.BatchFolder.text())
+
 # Path of the text file storing the YOLO detection results
-results_path = f'{main_window.project_results_path}/results.txt'
+results_path = os.path.join(main_window.Projects[0].path, main_window.ui.BatchFolder.text(), 'results.txt')
 
 #creating a directory to save all the output graphs 
-output_directory = f'{main_window.project_results_path}/Output_Graphs'
+output_directory = f'{os.path.join(main_window.Projects[0].path, main_window.ui.BatchFolder.text())}/Output_Graphs'
 if not os.path.exists(output_directory):
     os.makedirs(output_directory)
 
