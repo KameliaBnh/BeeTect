@@ -33,8 +33,15 @@ The GUI then opens and you can follow the steps in the next section.
 
 #### Entering the user information
 
-Once the GUI is launched, a form asking for the user information pops up:
+Once the BeeDeteKt app (GUI) is launched, a form asking for the user information pops up:
 
+<img width="252" alt="image" src="https://user-images.githubusercontent.com/126243509/229311728-9885e759-4c02-4a7c-989e-36180e5ccb53.png">
+
+Enter the required (and optional) information and click on the 'Submit' button.
+
+Then, you will see the following window: 
+
+<img width="567" alt="image" src="https://user-images.githubusercontent.com/126243509/229311819-e307b137-b00a-48ee-94f3-406e924b8a8e.png">
 
 
 ## Requirements
