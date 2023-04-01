@@ -52,7 +52,9 @@ class MainWindow(QMainWindow):
         # Create a list of Project objects
         self.Projects = [Project.Project(os.path.join(results_path, dir)) for dir in os.listdir(results_path) if os.path.isdir(os.path.join(results_path, dir))]
 
-        self.Batches = [Batch.Batch(os.path.join(self.Projects[0].path, dir)) for dir in os.listdir(self.Projects[0].path) if os.path.isdir(os.path.join(self.Projects[0].path, dir))]
+        # Create a list of Batch objects
+        if len(self.Projects) > 0:
+            self.Batches = [Batch.Batch(os.path.join(self.Projects[0].path, dir)) for dir in os.listdir(self.Projects[0].path) if os.path.isdir(os.path.join(self.Projects[0].path, dir))]
 
         # Call the parent class constructor
         super().__init__()
@@ -793,7 +795,7 @@ class MainWindow(QMainWindow):
         shutil.move(os.path.join(os.getcwd(), 'batch_stats.html'), self.Batches[0].path)
         webbrowser.open(f'file://{self.Batches[0].path}/batch_stats.html')
 
-    #def open_app_help(self):
+    def open_app_help(self):
         # Create a window to display the help
-    #    self.help_window = HelpWindow()
-    #    self.help_window.show()
+        self.help_window = HelpWindow()
+        self.help_window.show()
