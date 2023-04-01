@@ -1,0 +1,81 @@
+Saved 78 images to C:\Users\benha\Documents\Cranfield\Group_Project\BPT_Cranfield\GUI\results\newProject\test_2022
+
+image 1/78: 3456x4608 1 flower, 1 apis_cerana
+image 2/78: 3456x4608 1 apis_cerana
+image 3/78: 3456x4608 1 flower, 1 apis_cerana
+image 4/78: 3456x4608 1 apis_cerana
+image 5/78: 3456x4608 1 apis_cerana
+image 6/78: 3456x4608 1 flower, 1 apis_cerana
+image 7/78: 3456x4608 1 apis_cerana
+image 8/78: 3456x4608 1 apis_cerana
+image 9/78: 3456x4608 1 flower, 1 apis_cerana
+image 10/78: 3456x4608 1 flower, 1 apis_cerana
+image 11/78: 3456x4608 1 flower
+image 12/78: 3456x4608 1 flower
+image 13/78: 3456x4608 1 flower
+image 14/78: 3456x4608 1 flower
+image 15/78: 3456x4608 1 flower
+image 16/78: 3456x4608 1 flower, 1 apis_cerana
+image 17/78: 3456x4608 1 flower, 1 apis_cerana
+image 18/78: 3456x4608 1 flower, 1 apis_cerana
+image 19/78: 3456x4608 1 flower, 1 apis_cerana
+image 20/78: 3456x4608 1 flower, 1 apis_cerana
+image 21/78: 3456x4608 1 flower, 2 apis_ceranas
+image 22/78: 3456x4608 1 flower, 1 apis_cerana
+image 23/78: 3456x4608 1 flower, 1 apis_cerana
+image 24/78: 3456x4608 1 flower, 1 apis_cerana
+image 25/78: 3456x4608 (no detections)
+image 26/78: 3456x4608 (no detections)
+image 27/78: 3456x4608 1 flower
+image 28/78: 3456x4608 1 flower
+image 29/78: 3456x4608 1 flower
+image 30/78: 3456x4608 1 flower
+image 31/78: 3456x4608 1 flower
+image 32/78: 3456x4608 1 flower
+image 33/78: 3456x4608 1 flower
+image 34/78: 3456x4608 1 flower
+image 35/78: 3456x4608 1 flower, 1 apis_florea
+image 36/78: 3456x4608 1 flower, 1 apis_florea
+image 37/78: 3456x4608 1 flower, 1 apis_cerana, 1 apis_florea
+image 38/78: 3456x4608 1 flower, 1 apis_florea
+image 39/78: 3456x4608 1 flower
+image 40/78: 3456x4608 1 flower
+image 41/78: 3456x4608 1 flower, 1 apis_cerana
+image 42/78: 3456x4608 1 flower, 1 apis_cerana
+image 43/78: 3456x4608 1 flower
+image 44/78: 3456x4608 1 flower, 1 amegilla
+image 45/78: 3456x4608 1 flower, 1 amegilla
+image 46/78: 3456x4608 1 flower, 1 amegilla
+image 47/78: 3456x4608 1 flower, 1 amegilla
+image 48/78: 3456x4608 1 flower, 1 apis_cerana
+image 49/78: 3456x4608 1 flower, 1 apis_cerana
+image 50/78: 3456x4608 1 flower
+image 51/78: 3456x4608 1 flower
+image 52/78: 3456x4608 1 flower, 1 amegilla
+image 53/78: 3456x4608 1 flower, 1 amegilla
+image 54/78: 3456x4608 1 flower, 1 amegilla
+image 55/78: 3456x4608 1 flower, 1 amegilla
+image 56/78: 3456x4608 1 flower
+image 57/78: 3456x4608 1 flower, 1 amegilla
+image 58/78: 3456x4608 1 flower
+image 59/78: 3456x4608 1 flower
+image 60/78: 3456x4608 1 flower, 1 amegilla
+image 61/78: 3456x4608 1 flower, 1 amegilla
+image 62/78: 3456x4608 1 flower, 1 apis_florea
+image 63/78: 3456x4608 1 flower, 1 apis_florea
+image 64/78: 3456x4608 1 flower, 1 amegilla
+image 65/78: 3456x4608 2 flowers, 1 apis_florea
+image 66/78: 3456x4608 2 flowers, 1 apis_florea
+image 67/78: 3456x4608 2 flowers
+image 68/78: 3456x4608 2 flowers
+image 69/78: 3456x4608 2 flowers
+image 70/78: 3456x4608 1 flower, 1 apis_cerana
+image 71/78: 3456x4608 2 flowers, 1 apis_florea
+image 72/78: 3456x4608 1 flower
+image 73/78: 3456x4608 1 flower
+image 74/78: 3456x4608 1 flower, 2 amegillas
+image 75/78: 3456x4608 1 amegilla
+image 76/78: 3456x4608 1 amegilla
+image 77/78: 3456x4608 1 amegilla
+image 78/78: 3456x4608 1 flower, 1 amegilla
+Speed: 588.9ms pre-process, 1601.0ms inference, 4.0ms NMS per image at shape (78, 3, 480, 640)

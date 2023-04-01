@@ -6,10 +6,13 @@ Date: 30/03/2023
 Time: 13:38:26
 
 Current Project:
-Project Name: newProject
-Project Folder: C:/Users/benha/Documents/Cranfield/Group_Project/BPT_Cranfield/GUI/results\newProject
+Project Name: newnew
+Project Folder: C:/Users/benha/Documents/Cranfield/Group_Project/BPT_Cranfield/GUI/results\newnew
 
 Recently Opened Projects:
+
+Project Name: newProject
+Project Folder: C:/Users/benha/Documents/Cranfield/Group_Project/BPT_Cranfield/GUI/results\newProject
 
 Project Name: newProject
 Project Folder: C:/Users/benha/Documents/Cranfield/Group_Project/BPT_Cranfield/GUI/results/newProject
