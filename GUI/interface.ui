@@ -606,7 +606,7 @@
     <addaction name="separator"/>
     <addaction name="Exit"/>
    </widget>
-   <widget class="QMenu" name="Export">
+   <widget class="QMenu" name="ExportBatchRep">
     <property name="font">
      <font>
       <pointsize>10</pointsize>
@@ -616,10 +616,8 @@
      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Export HTML report containing model information and batch comparison statistics.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
     <property name="title">
-     <string>Export</string>
+     <string>Export Batch Report</string>
     </property>
-    <addaction name="ExportReport"/>
-    <addaction name="ExportBatchReport"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -634,7 +632,7 @@
    </widget>
    <addaction name="File"/>
    <addaction name="menuEdit"/>
-   <addaction name="Export"/>
+   <addaction name="ExportBatchRep"/>
    <addaction name="menuHelp"/>
   </widget>
   <action name="OpenFile">

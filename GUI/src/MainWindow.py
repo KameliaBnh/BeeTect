@@ -26,6 +26,7 @@ import User
 import Models
 import Image
 import Batch
+#import HelpWindow
 
 class MainWindow(QMainWindow):
 
@@ -67,7 +68,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.ui)
 
         # Set the title of the application
-        self.setWindowTitle("Automated Pollinator Monitoring")
+        self.setWindowTitle("BeeDeteKt")
 
         # Set the icon of the application
         self.setWindowIcon(QIcon(os.path.join(os.getcwd(), "resources/bee.png")))
@@ -106,12 +107,18 @@ class MainWindow(QMainWindow):
         # Connect the button to the function open_image_folder
         self.ui.OpenFolder.triggered.connect(self.show_image_from_folder)
 
+        # Connect the button to the function export_batch_report
+        self.ui.ExportBatchRep.triggered.connect(self.export_batch_report)
+
         # Connect the button to the function select_project_results_folder
         self.ui.SelectFolder.clicked.connect(self.select_project_results_folder)
         # Connect the button to the function on_click
         self.ui.Start.clicked.connect(self.run_detection)
         # Deactivate the 'Start detection' button until the user selects an image or folder
         self.ui.Start.setEnabled(False)
+
+        # Connect the button to the function open_app_help
+        self.ui.OpenAppHelp.triggered.connect(self.open_app_help)
 
         # Disable the next and previous buttons until the user selects a folder
         self.ui.next.setEnabled(False)
@@ -237,6 +244,9 @@ class MainWindow(QMainWindow):
         # Save project to text file
         self.write_project_to_text_file(self.Projects[0].name, self.Projects[0].path)
 
+        self.Batches.clear()
+        self.Batches = [Batch.Batch(os.path.join(self.Projects[0].path, dir)) for dir in os.listdir(self.Projects[0].path) if os.path.isdir(os.path.join(self.Projects[0].path, dir))]
+
         # Display project information
         self.ui.ProjectNameDisplay.setText(self.Projects[0].name)
         self.ui.ProjectPathDisplay.setText(self.Projects[0].path)
@@ -276,6 +286,9 @@ class MainWindow(QMainWindow):
 
             # Save project to text file
             self.write_project_to_text_file(self.Projects[0].name, project_path)
+
+            self.Batches.clear()
+            self.Batches = [Batch.Batch(os.path.join(self.Projects[0].path, dir)) for dir in os.listdir(self.Projects[0].path) if os.path.isdir(os.path.join(self.Projects[0].path, dir))]
 
         # Display project information
         self.ui.ProjectNameDisplay.setText(self.Projects[0].name)
@@ -325,6 +338,9 @@ class MainWindow(QMainWindow):
             else:
                 # Move the project to the top of the list
                 self.Projects.insert(0, self.Projects[[project.path for project in self.Projects].index(new_project_path)])
+
+                self.Batches.clear()
+                self.Batches = [Batch.Batch(os.path.join(self.Projects[0].path, dir)) for dir in os.listdir(self.Projects[0].path) if os.path.isdir(os.path.join(self.Projects[0].path, dir))]
 
         except Exception as e:
             # Open message box
@@ -549,8 +565,6 @@ class MainWindow(QMainWindow):
         image.pixmap.scaledToHeight(self.ui.image_label.height())
         self.ui.image_label.setPixmap(image.pixmap)
 
-        self.ui.Start.setEnabled(True)
-
     def show_next_image(self):
         self.cpt_image += 1
         self.load_image(self.Images[self.cpt_image % len(self.Images)])
@@ -668,6 +682,9 @@ class MainWindow(QMainWindow):
         # Display the folder path in the BatchFolder label
         self.ui.BatchFolder.setText(self.Batches[0].name)
 
+        # Enable the Start button
+        self.ui.Start.setEnabled(True)
+
     def run_detection(self):
         model_path = os.path.join(self.Models.path, self.ui.comboBox.currentText() + '.pt')
 
@@ -765,3 +782,18 @@ class MainWindow(QMainWindow):
 
         shutil.move(os.path.join(os.getcwd(), 'stats.html'), self.Batches[0].path)
         webbrowser.open(f'file://{self.Batches[0].path}/stats.html')
+
+    def export_batch_report(self):
+
+        print("Exporting batch report...")
+
+        # Call nbconvert to convert the notebook to HTML
+        subprocess.call(["python", "src/stat_batch_results.py"])
+
+        shutil.move(os.path.join(os.getcwd(), 'batch_stats.html'), self.Batches[0].path)
+        webbrowser.open(f'file://{self.Batches[0].path}/batch_stats.html')
+
+    #def open_app_help(self):
+        # Create a window to display the help
+    #    self.help_window = HelpWindow()
+    #    self.help_window.show()
