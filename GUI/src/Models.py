@@ -12,11 +12,11 @@
 import os
 import shutil
 
-from PySide2.QtWidgets import QMessageBox, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QFileDialog
+from PySide2.QtWidgets import QMessageBox, QDialog, QLabel, QLineEdit, QPushButton, QVBoxLayout, QFileDialog
 from PySide2.QtGui import QFont
 from PySide2 import QtCore
 
-class Models(QWidget):
+class Models(QDialog):
 
     def __init__(self):
 
@@ -36,7 +36,7 @@ class Models(QWidget):
 
         # Set the title and size of the form
         self.setWindowTitle('New YOLO Model')
-        self.resize(500, 350)
+        self.resize(550, 400)
 
         # Create labels and line edits for new model
         model_label = QLabel('Model name:')

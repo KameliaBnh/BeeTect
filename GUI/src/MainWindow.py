@@ -20,13 +20,14 @@ from PySide2.QtGui import QIcon, QFont
 from PySide2.QtCore import QFile, Qt
 from PySide2.QtUiTools import QUiLoader
 from PySide2.QtWidgets import QMainWindow, QMainWindow, QMenu, QFileDialog, QMessageBox, QInputDialog, QPushButton, QDialog, QLineEdit, QVBoxLayout, QLabel, QTableWidget, QHeaderView, QTableWidgetItem, QAction
+from PySide2 import QtWidgets
 
 import Project
 import User
 import Models
 import Image
 import Batch
-import HelpWindow
+from HelpWindow import HelpWindow
 
 class MainWindow(QMainWindow):
 
@@ -55,6 +56,9 @@ class MainWindow(QMainWindow):
         # Create a list of Batch objects
         if len(self.Projects) > 0:
             self.Batches = [Batch.Batch(os.path.join(self.Projects[0].path, dir)) for dir in os.listdir(self.Projects[0].path) if os.path.isdir(os.path.join(self.Projects[0].path, dir))]
+
+        else:
+            self.Batches = []
 
         # Call the parent class constructor
         super().__init__()
@@ -120,7 +124,7 @@ class MainWindow(QMainWindow):
         self.ui.Start.setEnabled(False)
 
         # Connect the button to the function open_app_help
-        #self.ui.OpenAppHelp.triggered.connect(self.open_app_help)
+        self.ui.OpenAppHelp.triggered.connect(self.open_app_help)
 
         # Disable the next and previous buttons until the user selects a folder
         self.ui.next.setEnabled(False)
@@ -135,8 +139,6 @@ class MainWindow(QMainWindow):
 
         # Create a menu for the recent projects
         self.ui.RecentProjects.setMenu(QMenu(self.ui.File))
-        
-        #### TODO
 
         # If there are less than 5 projects, add all the projects to the menu
         if len(self.Projects) < 5:
@@ -159,8 +161,6 @@ class MainWindow(QMainWindow):
 
         # Get the name of the item that was clicked in the menu
         self.ui.RecentProjects.menu().triggered.connect(lambda triggered_action: self.open_selected_project(triggered_action.text()))
-
-        #### TODO
 
     def check_preferences(self):
         if not self.check_flag:
@@ -808,7 +808,7 @@ class MainWindow(QMainWindow):
 
         print("Exporting batch report...")
 
-        '''try:
+        try:
             # Open a file dialog to select one or more folders to compare different batches
             self.batch_folders = QFileDialog.getExistingDirectory(self, "Select one or more folders to compare", os.getcwd(), QFileDialog.ShowDirsOnly)
         
@@ -821,7 +821,7 @@ class MainWindow(QMainWindow):
             subprocess.call(["python", "src/stat_batch_results.py"])
 
             #shutil.move(os.path.join(os.getcwd(), 'batch_stats.html'), self.batch_folders)
-            #webbrowser.open(f'file://{self.batch_folders}/batch_stats.html')'''
+            #webbrowser.open(f'file://{self.batch_folders}/batch_stats.html')
 
     def open_app_help(self):
         # Create a window to display the help

@@ -14,11 +14,11 @@
 import os
 import datetime
 
-from PySide2.QtWidgets import QMessageBox, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout
+from PySide2.QtWidgets import QMessageBox, QDialog, QLabel, QLineEdit, QPushButton, QVBoxLayout
 from PySide2 import QtCore
 from PySide2.QtGui import QFont
 
-class User(QWidget):
+class User(QDialog):
 
     def __init__(self):
 
@@ -41,7 +41,7 @@ class User(QWidget):
 
         # Set the title and size of the form
         self.setWindowTitle('User information')
-        self.resize(500, 350)
+        self.resize(550, 400)
 
         # Remove the close button
         self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowCloseButtonHint)
