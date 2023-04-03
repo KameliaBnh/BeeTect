@@ -606,7 +606,7 @@
     <addaction name="separator"/>
     <addaction name="Exit"/>
    </widget>
-   <widget class="QMenu" name="ExportBatchRep">
+   <widget class="QMenu" name="exportBatch">
     <property name="font">
      <font>
       <pointsize>10</pointsize>
@@ -632,7 +632,7 @@
    </widget>
    <addaction name="File"/>
    <addaction name="menuEdit"/>
-   <addaction name="ExportBatchRep"/>
+   <addaction name="exportBatch"/>
    <addaction name="menuHelp"/>
   </widget>
   <action name="OpenFile">
