@@ -307,7 +307,8 @@ class MainWindow(QMainWindow):
             # Save project to text file
             self.write_project_to_text_file(self.Projects[0].name, project_path)
 
-            self.Batches.clear()
+            if self.Batches:
+                self.Batches.clear()
             self.Batches = [Batch.Batch(os.path.join(self.Projects[0].path, dir)) for dir in os.listdir(self.Projects[0].path) if os.path.isdir(os.path.join(self.Projects[0].path, dir))]
 
         # Display project information
