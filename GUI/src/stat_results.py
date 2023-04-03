@@ -57,7 +57,7 @@ with open(user_info_path) as f:
     last_name = lines[2].split(':')[1].strip()
     email = lines[3].split(':')[1].strip()
     project_creation = lines[4]
-    project_name =lines[7].split(':')[1].strip()
+    project_name =lines[8].split(':')[1].strip()
 
 full_user_name = first_name + ' ' + last_name
 

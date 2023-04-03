@@ -19,14 +19,14 @@ import torch
 from PySide2.QtGui import QIcon, QFont
 from PySide2.QtCore import QFile, Qt
 from PySide2.QtUiTools import QUiLoader
-from PySide2.QtWidgets import QMainWindow, QMainWindow, QMenu, QFileDialog, QMessageBox, QInputDialog, QPushButton, QDialog, QLineEdit, QVBoxLayout, QLabel, QTableWidget, QHeaderView, QTableWidgetItem
+from PySide2.QtWidgets import QMainWindow, QMainWindow, QMenu, QFileDialog, QMessageBox, QInputDialog, QPushButton, QDialog, QLineEdit, QVBoxLayout, QLabel, QTableWidget, QHeaderView, QTableWidgetItem, QAction
 
 import Project
 import User
 import Models
 import Image
 import Batch
-#import HelpWindow
+import HelpWindow
 
 class MainWindow(QMainWindow):
 
@@ -43,12 +43,12 @@ class MainWindow(QMainWindow):
         self.cpt_image = 0
         self.cpt_image_result = 0
 
-        results_path = os.path.join(os.getcwd(), "results")
+        results_path = os.path.join(os.getcwd(), "projects")
         
-        # If the results folder doesn't exist, create it
+        # If the projects folder doesn't exist, create it
         if not os.path.exists(results_path):
             os.makedirs(results_path)
-        
+
         # Create a list of Project objects
         self.Projects = [Project.Project(os.path.join(results_path, dir)) for dir in os.listdir(results_path) if os.path.isdir(os.path.join(results_path, dir))]
 
@@ -110,7 +110,7 @@ class MainWindow(QMainWindow):
         self.ui.OpenFolder.triggered.connect(self.show_image_from_folder)
 
         # Connect the button to the function export_batch_report
-        self.ui.ExportBatchRep.triggered.connect(self.export_batch_report)
+        self.ui.exportBatch.triggered.connect(self.export_batch_report)
 
         # Connect the button to the function select_project_results_folder
         self.ui.SelectFolder.clicked.connect(self.select_project_results_folder)
@@ -120,7 +120,7 @@ class MainWindow(QMainWindow):
         self.ui.Start.setEnabled(False)
 
         # Connect the button to the function open_app_help
-        self.ui.OpenAppHelp.triggered.connect(self.open_app_help)
+        #self.ui.OpenAppHelp.triggered.connect(self.open_app_help)
 
         # Disable the next and previous buttons until the user selects a folder
         self.ui.next.setEnabled(False)
@@ -129,6 +129,38 @@ class MainWindow(QMainWindow):
         # Add two buttons to the center of the 'image_frame' QFrame: openImage and openFolder
         self.ui.openImage.clicked.connect(self.show_image)
         self.ui.openFolder.clicked.connect(self.show_image_from_folder)
+
+        # Retrieve the 5 most recent projects from the self.Projects list
+        recent_projects_dict = {}
+
+        # Create a menu for the recent projects
+        self.ui.RecentProjects.setMenu(QMenu(self.ui.File))
+        
+        #### TODO
+
+        # If there are less than 5 projects, add all the projects to the menu
+        if len(self.Projects) < 5:
+            for project in self.Projects:
+                recent_projects_dict[project.name] = project.path
+        
+        else:
+            # Add the 5 most recent projects to the dictionary
+            for i in range(5):
+                recent_projects_dict[self.Projects[i].name] = self.Projects[i].path
+
+        # Add recent projects to the menu
+        for project_name, project_path in recent_projects_dict.items():
+
+            action = QAction(project_name, self)
+            self.ui.RecentProjects.menu().addAction(action)
+
+        # Link the recent projects to the open_selected_project function
+        #action.triggered.connect(lambda path=project_path: self.open_selected_project(path))
+
+        # Get the name of the item that was clicked in the menu
+        self.ui.RecentProjects.menu().triggered.connect(lambda triggered_action: self.open_selected_project(triggered_action.text()))
+
+        #### TODO
 
     def check_preferences(self):
         if not self.check_flag:
@@ -157,32 +189,13 @@ class MainWindow(QMainWindow):
                     self.User.date = info_dict['Date']
                     self.User.time = info_dict['Time']
 
-                # Retrieve the 5 most recent projects from the self.Projects list
-                recent_projects_dict = {}
-
-                # Create a menu for the recent projects
-                self.ui.RecentProjects.setMenu(QMenu(self.ui.File))
-                
-                #### TODO
-
-                # If there are less than 5 projects, add all the projects to the menu
-                if len(self.Projects) < 5:
-                    for project in self.Projects:
-                        recent_projects_dict[project.name] = project.path
-                
-                else:
-                    # Add the 5 most recent projects to the dictionary
-                    for i in range(5):
-                        recent_projects_dict[self.Projects[i].name] = self.Projects[i].path
-                
-                # Add recent projects to the menu
-                for project_name, project_path in recent_projects_dict.items():
-                    self.ui.RecentProjects.menu().addAction(project_name)
-
-                    # Link the recent projects to the open_selected_project function
-                    self.ui.RecentProjects.menu().triggered.connect(lambda name=project_name, path=project_path: self.open_selected_project(name, path))
-
-                #### TODO
+                    # Insert the current Project in the self.Projects list
+                    if info_dict['Project Folder'] not in [project.path for project in self.Projects]:
+                        # Add the project to the top of the list
+                        self.Projects.insert(0, Project.Project(info_dict['Project Folder']))
+                    else:
+                        # Move the project to the top of the list
+                        self.Projects.insert(0, self.Projects[[project.path for project in self.Projects].index(info_dict['Project Folder'])])
 
             # Set the flag to True
             self.check_flag = True
@@ -192,7 +205,7 @@ class MainWindow(QMainWindow):
             self.ui.ProjectNameDisplay.setText(self.Projects[0].name)
             self.ui.ProjectPathDisplay.setText(self.Projects[0].path)
 
-            #print("Current Project: " + self.Projects[0].name)
+            print("Current Project: " + self.Projects[0].name)
 
     # Save the project to text file
     def write_project_to_text_file(self, name, path):
@@ -236,12 +249,18 @@ class MainWindow(QMainWindow):
             
             file.writelines(new_lines)
 
-    def open_selected_project(self, project_name, project_path):
+    def open_selected_project(self, project_name):
 
+        # Get the project from the list of projects
+        project = next((p for p in self.Projects if p.name == project_name), None)
+        if project is None:
+            QMessageBox.warning(self, 'Error', f"Project '{project_name}' not found in list of projects.")
+            return
+        
         # Move the project to the top of the list
-        self.Projects.insert(0, self.Projects[[project.path for project in self.Projects].index(project_path)])
+        self.Projects.insert(0, self.Projects.pop(self.Projects.index(project)))
 
-        print("Opening project: " + project_name)
+        print("Opening project: " + self.Projects[0].name)
 
         # Save project to text file
         self.write_project_to_text_file(self.Projects[0].name, self.Projects[0].path)
@@ -264,7 +283,6 @@ class MainWindow(QMainWindow):
 
         try:
             # Open the project
-            self.Projects.clear()
             project_path = QFileDialog.getExistingDirectory(self, "Open Project", os.getcwd())
             if project_path not in [project.path for project in self.Projects]:
                 # Add the project to the top of the list
@@ -682,7 +700,7 @@ class MainWindow(QMainWindow):
 
         print(self.Batches[0].path)
         # Display the folder path in the BatchFolder label
-        self.ui.BatchFolder.setText(self.Batches[0].name)
+        self.ui.BatchFolder.setText("Batch Folder: " + self.Batches[0].name)
 
         # Enable the Start button
         self.ui.Start.setEnabled(True)
@@ -789,11 +807,20 @@ class MainWindow(QMainWindow):
 
         print("Exporting batch report...")
 
-        # Call nbconvert to convert the notebook to HTML
-        subprocess.call(["python", "src/stat_batch_results.py"])
+        '''try:
+            # Open a file dialog to select one or more folders to compare different batches
+            self.batch_folders = QFileDialog.getExistingDirectory(self, "Select one or more folders to compare", os.getcwd(), QFileDialog.ShowDirsOnly)
+        
+        except Exception as e:
+            # Message box to inform the user of the error
+            QMessageBox.warning(self, 'Error', f'Error selecting the folders to compare: {str(e)}', QMessageBox.Ok)
+        
+        else:
+            # Call nbconvert to convert the notebook to HTML
+            subprocess.call(["python", "src/stat_batch_results.py"])
 
-        shutil.move(os.path.join(os.getcwd(), 'batch_stats.html'), self.Batches[0].path)
-        webbrowser.open(f'file://{self.Batches[0].path}/batch_stats.html')
+            #shutil.move(os.path.join(os.getcwd(), 'batch_stats.html'), self.batch_folders)
+            #webbrowser.open(f'file://{self.batch_folders}/batch_stats.html')'''
 
     def open_app_help(self):
         # Create a window to display the help
