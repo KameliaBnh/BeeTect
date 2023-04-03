@@ -19,8 +19,7 @@ import torch
 from PySide2.QtGui import QIcon, QFont
 from PySide2.QtCore import QFile, Qt
 from PySide2.QtUiTools import QUiLoader
-from PySide2.QtWidgets import QMainWindow, QMainWindow, QMenu, QFileDialog, QMessageBox, QInputDialog, QPushButton, QDialog, QLineEdit, QVBoxLayout, QLabel, QTableWidget, QHeaderView, QTableWidgetItem, QAction
-from PySide2 import QtWidgets
+from PySide2.QtWidgets import QMainWindow, QMainWindow, QMenu, QFileDialog, QMessageBox, QInputDialog, QPushButton, QDialog, QLineEdit, QVBoxLayout, QLabel, QTableWidget, QHeaderView, QTableWidgetItem, QAction, QAbstractItemView, QListView, QTreeView
 
 import Project
 import User
@@ -114,7 +113,7 @@ class MainWindow(QMainWindow):
         self.ui.OpenFolder.triggered.connect(self.show_image_from_folder)
 
         # Connect the button to the function export_batch_report
-        self.ui.exportBatch.triggered.connect(self.export_batch_report)
+        self.ui.ExportBatchRep.triggered.connect(self.export_batch_report)
 
         # Connect the button to the function select_project_results_folder
         self.ui.SelectFolder.clicked.connect(self.select_project_results_folder)
@@ -189,13 +188,15 @@ class MainWindow(QMainWindow):
                     self.User.date = info_dict['Date']
                     self.User.time = info_dict['Time']
 
-                    # Insert the current Project in the self.Projects list
-                    if info_dict['Project Folder'] not in [project.path for project in self.Projects]:
-                        # Add the project to the top of the list
-                        self.Projects.insert(0, Project.Project(info_dict['Project Folder']))
-                    else:
-                        # Move the project to the top of the list
-                        self.Projects.insert(0, self.Projects[[project.path for project in self.Projects].index(info_dict['Project Folder'])])
+                    # Check if the user has selected a project
+                    if 'Project Folder' in info_dict.keys():
+                        # Insert the current Project in the self.Projects list
+                        if info_dict['Project Folder'] not in [project.path for project in self.Projects]:
+                            # Add the project to the top of the list
+                            self.Projects.insert(0, Project.Project(info_dict['Project Folder']))
+                        else:
+                            # Move the project to the top of the list
+                            self.Projects.insert(0, self.Projects[[project.path for project in self.Projects].index(info_dict['Project Folder'])])
 
             # Set the flag to True
             self.check_flag = True
@@ -806,19 +807,39 @@ class MainWindow(QMainWindow):
 
     def export_batch_report(self):
 
-        print("Exporting batch report...")
-
         try:
             # Open a file dialog to select one or more folders to compare different batches
-            self.batch_folders = QFileDialog.getExistingDirectory(self, "Select one or more folders to compare", os.getcwd(), QFileDialog.ShowDirsOnly)
-        
+            file_dialog = QFileDialog()
+            file_dialog.setFileMode(QFileDialog.DirectoryOnly)
+            file_dialog.setOption(QFileDialog.DontUseNativeDialog, True)
+            file_view = file_dialog.findChild(QListView, 'listView')
+
+            # Make it possible to select multiple folders
+            if file_view:
+                file_view.setSelectionMode(QAbstractItemView.MultiSelection)
+            f_tree_view = file_dialog.findChild(QTreeView)
+            if f_tree_view:
+                f_tree_view.setSelectionMode(QAbstractItemView.MultiSelection)
+
+            # Open the file dialog
+            if file_dialog.exec():
+                paths = file_dialog.selectedFiles()
+
+                # Store the paths of the selected folders in a list
+                self.batch_folders = paths
+
+            # Print a text saying that the batches are being compared with their respective names
+            print("Comparing batches: " + ", ".join([os.path.basename(path) for path in self.batch_folders]))
+
         except Exception as e:
             # Message box to inform the user of the error
             QMessageBox.warning(self, 'Error', f'Error selecting the folders to compare: {str(e)}', QMessageBox.Ok)
         
         else:
+            print("Exporting batch report...")
+            
             # Call nbconvert to convert the notebook to HTML
-            subprocess.call(["python", "src/stat_batch_results.py"])
+            #subprocess.call(["python", "src/stat_batch_results.py"])
 
             #shutil.move(os.path.join(os.getcwd(), 'batch_stats.html'), self.batch_folders)
             #webbrowser.open(f'file://{self.batch_folders}/batch_stats.html')
