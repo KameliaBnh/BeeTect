@@ -320,7 +320,7 @@
                  <enum>Qt::LeftToRight</enum>
                 </property>
                 <property name="text">
-                 <string>Open an image..</string>
+                 <string>Load an image..</string>
                 </property>
                </widget>
               </item>
@@ -333,7 +333,7 @@
                  </sizepolicy>
                 </property>
                 <property name="text">
-                 <string>Open an image folder..</string>
+                 <string>Load an image folder..</string>
                 </property>
                </widget>
               </item>
@@ -637,7 +637,7 @@
   </widget>
   <action name="OpenFile">
    <property name="text">
-    <string>Open Image File</string>
+    <string>Load Image File</string>
    </property>
    <property name="toolTip">
     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -648,7 +648,7 @@
   </action>
   <action name="OpenFolder">
    <property name="text">
-    <string>Open Image Folder</string>
+    <string>Load Image Folder</string>
    </property>
    <property name="toolTip">
     <string>Open Folder</string>
@@ -686,7 +686,7 @@
   </action>
   <action name="OpenAppHelp">
    <property name="text">
-    <string>Open App Help</string>
+    <string>Open User Guide..</string>
    </property>
   </action>
   <action name="ExportReport">
