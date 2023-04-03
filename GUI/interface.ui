@@ -32,7 +32,7 @@
        </font>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="VisualisationTab">
        <attribute name="title">
@@ -490,47 +490,7 @@
              <property name="lineWidth">
               <number>0</number>
              </property>
-             <layout class="QGridLayout" name="gridLayout_2">
-              <item row="2" column="0">
-               <widget class="QLabel" name="SpeciesInfoLabel">
-                <property name="lineWidth">
-                 <number>0</number>
-                </property>
-                <property name="text">
-                 <string>Number of Images without Pollinators:</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="0">
-               <widget class="QLabel" name="SpeciesNameLabel">
-                <property name="font">
-                 <font>
-                  <pointsize>8</pointsize>
-                 </font>
-                </property>
-                <property name="lineWidth">
-                 <number>0</number>
-                </property>
-                <property name="text">
-                 <string>Number of Images with Pollinators: </string>
-                </property>
-               </widget>
-              </item>
-              <item row="3" column="0">
-               <widget class="QLabel" name="label">
-                <property name="text">
-                 <string>Most Abundant Species:</string>
-                </property>
-               </widget>
-              </item>
-              <item row="4" column="0">
-               <widget class="QLabel" name="label_2">
-                <property name="text">
-                 <string>Most Abundant Rare Species:</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
+             <layout class="QGridLayout" name="gridLayout_2"/>
             </widget>
            </item>
           </layout>
@@ -606,7 +566,7 @@
     <addaction name="separator"/>
     <addaction name="Exit"/>
    </widget>
-   <widget class="QMenu" name="exportBatch">
+   <widget class="QMenu" name="Export">
     <property name="font">
      <font>
       <pointsize>10</pointsize>
@@ -616,8 +576,9 @@
      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Export HTML report containing model information and batch comparison statistics.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
     <property name="title">
-     <string>Export Batch Report</string>
+     <string>Export</string>
     </property>
+    <addaction name="ExportBatchRep"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -632,7 +593,7 @@
    </widget>
    <addaction name="File"/>
    <addaction name="menuEdit"/>
-   <addaction name="exportBatch"/>
+   <addaction name="Export"/>
    <addaction name="menuHelp"/>
   </widget>
   <action name="OpenFile">
@@ -703,6 +664,11 @@
    </property>
    <property name="toolTip">
     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Export HTML report containing model information and batch comparison statistics.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
+  </action>
+  <action name="ExportBatchRep">
+   <property name="text">
+    <string>Export Batch Report</string>
    </property>
   </action>
  </widget>
