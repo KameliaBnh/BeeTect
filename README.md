@@ -58,6 +58,10 @@ It is recommended to save all the projects in the 'results' folder for organisat
 
 <img width="567" alt="image" src="https://user-images.githubusercontent.com/126243509/229368900-dd0854a3-5ab9-4424-a405-70f8022d1667.png">
 
+* There is also the possibility to access the five last opened projects from the 'File' menu:
+
+<img width="248" alt="image" src="https://user-images.githubusercontent.com/126243509/229460650-71719ea8-2154-4ef7-af86-f26841c70175.png">
+
 * To select the YOLO model you want to use, choose an existing one in the dropdown menu. If you want to add your own YOLO model (trained before hand), you can do that bu selecting the 'Add New Model' button. A dialog will open where you can choose the name of the model, and browse through your computer to seect the weights corresponding to the model:
 
 <img width="185" alt="image" src="https://user-images.githubusercontent.com/126243509/229368916-c4163b47-dedd-4db1-8960-7d3ffb0b6d61.png"> <img width="252" alt="image" src="https://user-images.githubusercontent.com/126243509/229368923-62485399-2c20-4c78-bfa5-dcbe5e8ccbe4.png">
