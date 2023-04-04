@@ -48,7 +48,7 @@ There are different options for you to use here:
 
 <img width="172" alt="image" src="https://user-images.githubusercontent.com/126243509/229368830-3c38e79f-7e5a-4919-ac87-2af8f11cc654.png"> <img width="252" alt="image" src="https://user-images.githubusercontent.com/126243509/229368842-05f56846-7016-4341-b52a-bc5232e8fb53.png">
 
-It is recommended to save all the projects in the 'results' folder for organisation sake. However, you can create a project at the location of your choice.
+It is recommended to save all the projects in the 'projects' folder for organisation sake.
 
 * To open an existing project, use the 'Open Project' option in the 'File' menu:
 
