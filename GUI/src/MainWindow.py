@@ -16,7 +16,7 @@ import webbrowser
 import pandas
 import torch
 
-from PySide2.QtGui import QIcon, QFont
+from PySide2.QtGui import QIcon, QFont, QPixmap
 from PySide2.QtCore import QFile, Qt
 from PySide2.QtUiTools import QUiLoader
 from PySide2.QtWidgets import QMainWindow, QMainWindow, QMenu, QFileDialog, QMessageBox, QInputDialog, QPushButton, QDialog, QLineEdit, QVBoxLayout, QLabel, QTableWidget, QHeaderView, QTableWidgetItem, QAction, QAbstractItemView, QListView, QTreeView
@@ -58,6 +58,12 @@ class MainWindow(QMainWindow):
 
         else:
             self.Batches = []
+
+        # Create an empty list to store the batch folders
+        self.batch_folders = []
+
+        # Create an empty list to store the batch results ('results.txt' files)
+        self.batch_results = []
 
         # Call the parent class constructor
         super().__init__()
@@ -489,7 +495,7 @@ class MainWindow(QMainWindow):
         # Add the models to the table
         for i, model in enumerate(self.Models.list):
             table.setItem(i, 0, QTableWidgetItem(model))
-            table.setItem(i, 1, QTableWidgetItem(os.path.join(self.Models.path, self.Models.list[i] + '.pt')))
+            table.setItem(i, 1, QTableWidgetItem(os.path.join(self.Models.path, self.Models.list[i], self.Models.list[i] + '.pt')))
 
         # Create a button to add a new model
         add_model_button = QPushButton('Add Model')
@@ -543,10 +549,10 @@ class MainWindow(QMainWindow):
             table.removeRow(selected_row)
             
             # Delete the model and the model folder from the models folder
-            model_path = os.path.join(self.Models.path, model_name)
+            model_path = os.path.join(self.Models.path, model_name, model_name)
             if os.path.exists(model_path):
                 shutil.rmtree(model_path)
-            model_file = os.path.join(self.Models.path, model_name + '.pt')
+            model_file = os.path.join(self.Models.path, model_name, model_name + '.pt')
             if os.path.exists(model_file):
                 os.remove(model_file)
 
@@ -708,7 +714,7 @@ class MainWindow(QMainWindow):
         self.ui.Start.setEnabled(True)
 
     def run_detection(self):
-        model_path = os.path.join(self.Models.path, self.ui.comboBox.currentText() + '.pt')
+        model_path = os.path.join(self.Models.path, self.ui.comboBox.currentText(), self.ui.comboBox.currentText() + '.pt')
 
         print("Yolo Model selected: " + os.path.basename(model_path))
 
@@ -803,9 +809,20 @@ class MainWindow(QMainWindow):
         subprocess.call(["python", "src/stat_results.py"])
 
         shutil.move(os.path.join(os.getcwd(), 'stats.html'), self.Batches[0].path)
-        webbrowser.open(f'file://{self.Batches[0].path}/stats.html')
+
+        report_name = self.Batches[0].name + '_report.html'
+
+        os.rename(os.path.join(self.Batches[0].path, 'stats.html'), os.path.join(self.Batches[0].path, report_name))
+        webbrowser.open(f'file://{self.Batches[0].path}/{report_name}')
+
+        # Add the graphs to the visualisation pane, in the graph1 and graph2 labels
+        self.ui.graph1.setPixmap(QPixmap(os.path.join(self.Batches[0].path, 'Output_Graphs', 'Bar_plot.png')).scaledToHeight(self.ui.stats_graphs_frame.height()))
+        self.ui.graph2.setPixmap(QPixmap(os.path.join(self.Batches[0].path, 'Output_Graphs', 'bee_species_counts.png')).scaledToHeight(self.ui.stats_graphs_frame.height()))
 
     def export_batch_report(self):
+
+        self.batch_folders.clear()
+        self.batch_results.clear()
 
         try:
             # Open a file dialog to select one or more folders to compare different batches
@@ -827,6 +844,8 @@ class MainWindow(QMainWindow):
 
                 # Store the paths of the selected folders in a list
                 self.batch_folders = paths
+                self.batch_results = [os.path.join(path, 'results.txt') for path in self.batch_folders]
+                print(self.batch_results)
 
             # Print a text saying that the batches are being compared with their respective names
             print("Comparing batches: " + ", ".join([os.path.basename(path) for path in self.batch_folders]))

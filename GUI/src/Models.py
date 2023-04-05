@@ -22,7 +22,11 @@ class Models(QDialog):
 
         # Class attributes
         self.path = os.path.join(os.getcwd(), 'models')
-        self.list = [os.path.basename(file).split('.')[0] for file in os.listdir(self.path) if file.endswith('.pt')]
+        self.list = []
+        for root, dirs, files in os.walk(self.path):
+            for file in files:
+                if file.endswith('.pt') and root.endswith(os.path.basename(file).split('.')[0]):
+                    self.list.append(os.path.basename(file).split('.')[0])
 
         # Call the parent class constructor
         super().__init__()
@@ -95,6 +99,10 @@ class Models(QDialog):
             model_name = self.model_edit.text()
             model_weight = self.model_weight_edit.text()
 
+            # Create a new directory for the model
+            if model_name and model_name not in self.list:
+                os.makedirs(os.path.join(self.path, model_name), exist_ok=True)
+
             if not model_name or not model_weight or not os.path.isfile(model_weight):
                 raise Exception('Please retry to enter the model information.')
 
@@ -103,13 +111,12 @@ class Models(QDialog):
 
         else:
             # Get the path to the model weight file
-            model_weight_path = os.path.join(self.path, model_name + '.pt')
+            model_weight_path = os.path.join(self.path, model_name, model_name + '.pt')
 
             # Copy the model weight file to the models directory
             try:
                 print(f'Copying model weight file to {model_weight_path}')
                 shutil.copy(model_weight, model_weight_path)
-                os.makedirs(os.path.join(self.path, model_name), exist_ok=True)
             except Exception as e:
                 QMessageBox.warning(self, 'Error', f'Error copying model weight file: {str(e)}')
                 return
