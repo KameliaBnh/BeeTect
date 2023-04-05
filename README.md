@@ -2,6 +2,7 @@
 
 ## Group Project MsC Applied Bioinformatics - Cranfield University 2022/2023
 
+In recent years, computer vision and deep learning has become a vital component in monitoring the health of bee colony and their behaviour. In this project we aim to build a deep learning detecting model which enables researchers to better understand the health of honeybee colony in Thailand. Previously, we implemented object detection model using YOLO-v5 for detection and classification of rare and common bee species using a dataset including ~1000 ground truth images from year 2021. This model was later validated on an alternative dataset form year 2022, the results show that the detector performs relatively well (with or without pollinator). However, we strive to further optimize our YOLO-V5 model by increasing our ground truth data, including data collected from year 2022, as well as implementing data augmentation for minority classes alongside hyperparameter evolution tunning. Thus, to build a stand-alone user-friendly application for future use in bee monitoring systems.  
 
 
 ## Conda environement
