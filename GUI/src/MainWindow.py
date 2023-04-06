@@ -79,7 +79,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.ui)
 
         # Set the title of the application
-        self.setWindowTitle("BeeDeteKt")
+        self.setWindowTitle("BeeTect")
 
         # Set the icon of the application
         self.setWindowIcon(QIcon(os.path.join(os.getcwd(), "resources/bee.png")))
@@ -160,9 +160,6 @@ class MainWindow(QMainWindow):
 
             action = QAction(project_name, self)
             self.ui.RecentProjects.menu().addAction(action)
-
-        # Link the recent projects to the open_selected_project function
-        #action.triggered.connect(lambda path=project_path: self.open_selected_project(path))
 
         # Get the name of the item that was clicked in the menu
         self.ui.RecentProjects.menu().triggered.connect(lambda triggered_action: self.open_selected_project(triggered_action.text()))
@@ -290,7 +287,7 @@ class MainWindow(QMainWindow):
 
         try:
             # Open the project
-            project_path = QFileDialog.getExistingDirectory(self, "Open Project", os.getcwd())
+            project_path = QFileDialog.getExistingDirectory(self, "Open Project", os.path.join(os.getcwd(), 'projects'))
             if project_path not in [project.path for project in self.Projects]:
                 # Add the project to the top of the list
                 self.Projects.insert(0, Project.Project(project_path))
@@ -325,6 +322,9 @@ class MainWindow(QMainWindow):
         # Enable the OpenFile and OpenFolder buttons
         self.ui.OpenFile.setEnabled(True)
         self.ui.OpenFolder.setEnabled(True)
+
+        # Disable start button
+        self.ui.Start.setEnabled(False)
 
     # Open a file dialog to select the project directory
     def open_project_directory(self, project_directory_edit):
@@ -443,6 +443,9 @@ class MainWindow(QMainWindow):
         # Enable the OpenFile and OpenFolder buttons
         self.ui.OpenFile.setEnabled(True)
         self.ui.OpenFolder.setEnabled(True)
+
+        # Disable start button
+        self.ui.Start.setEnabled(False)
 
     def add_new_model(self):
         self.Models.open_models_form()

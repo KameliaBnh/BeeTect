@@ -117,6 +117,7 @@ class Models(QDialog):
             try:
                 print(f'Copying model weight file to {model_weight_path}')
                 shutil.copy(model_weight, model_weight_path)
+                
             except Exception as e:
                 QMessageBox.warning(self, 'Error', f'Error copying model weight file: {str(e)}')
                 return

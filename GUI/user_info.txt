@@ -1,0 +1,21 @@
+User information:
+Name: Kamelia
+Surname: Benhamna
+Email: kamelia
+Date: 06/04/2023 
+Time: 13:43:43
+
+Current Project:
+Project Name: newProject
+Project Folder: C:/Users/benha/Documents/Cranfield/Group_Project/BPT_Cranfield/GUI/projects/newProject
+
+Recently Opened Projects:
+
+Project Name: test_1
+Project Folder: C:/Users/benha/Documents/Cranfield/Group_Project/BPT_Cranfield/GUI/projects/test_1
+
+Project Name: test_4
+Project Folder: C:/Users/benha/Documents/Cranfield/Group_Project/BPT_Cranfield/GUI/projects\test_4
+
+Project Name: newProject
+Project Folder: C:/Users/benha/Documents/Cranfield/Group_Project/BPT_Cranfield/GUI/projects\newProject
