@@ -32,7 +32,7 @@ The GUI then opens and you can follow the steps in the next section.
 
 #### Entering the user information
 
-Once the BeeDeteKt app (GUI) is launched (for the first time), a form asking for the user information pops up:
+Once the BeeTect app (GUI) is launched (for the first time), a form asking for the user information pops up:
 
 <img width="252" alt="image" src="https://user-images.githubusercontent.com/126243509/229311728-9885e759-4c02-4a7c-989e-36180e5ccb53.png">
 
