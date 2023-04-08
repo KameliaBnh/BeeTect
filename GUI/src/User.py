@@ -16,7 +16,7 @@ import datetime
 
 from PySide2.QtWidgets import QMessageBox, QDialog, QLabel, QLineEdit, QPushButton, QVBoxLayout
 from PySide2 import QtCore
-from PySide2.QtGui import QFont
+from PySide2.QtGui import QFont, QIcon
 
 class User(QDialog):
 
@@ -45,6 +45,9 @@ class User(QDialog):
 
         # Remove the close button
         self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowCloseButtonHint)
+
+        # Set icon
+        self.setWindowIcon(QIcon(os.path.join(os.getcwd(), 'resources', 'user.png')))
 
         # Create labels and line edits for user information
         user_label = QLabel('User Information:')

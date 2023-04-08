@@ -54,16 +54,20 @@ class MainWindow(QMainWindow):
 
         # Create a list of Batch objects
         if len(self.Projects) > 0:
-            self.Batches = [Batch.Batch(os.path.join(self.Projects[0].path, dir)) for dir in os.listdir(self.Projects[0].path) if os.path.isdir(os.path.join(self.Projects[0].path, dir))]
+            if os.path.exists(os.path.join(self.Projects[0].path, "batches.txt")):
+                # Fill the self.Batches list with the batches written in the batches.txt file
+                with open(os.path.join(self.Projects[0].path, "batches.txt"), "r") as batches_file:
+                    self.Batches = [Batch.Batch(batch) for batch in batches_file.read().splitlines()]
 
         else:
             self.Batches = []
 
-        # Create an empty list to store the batch folders
-        self.batch_folders = []
-
-        # Create an empty list to store the batch results ('results.txt' files)
         self.batch_results = []
+
+        # If the selected_batches.txt file exists, fill the self.batches_results list
+        if os.path.exists(os.path.join(os.getcwd(), "selected_batches.txt")):
+            with open(os.path.join(os.getcwd(), "selected_batches.txt"), "r") as save_results_file:
+                self.batch_results = save_results_file.read().splitlines()
 
         # Call the parent class constructor
         super().__init__()
@@ -272,6 +276,11 @@ class MainWindow(QMainWindow):
         self.Batches.clear()
         self.Batches = [Batch.Batch(os.path.join(self.Projects[0].path, dir)) for dir in os.listdir(self.Projects[0].path) if os.path.isdir(os.path.join(self.Projects[0].path, dir))]
 
+        # Write the Batches to a text file
+        with open(os.path.join(self.Projects[0].path, 'batches.txt'), 'w') as file:
+            for batch in self.Batches:
+                file.write(batch.path + '\n')
+
         # Display project information
         self.ui.ProjectNameDisplay.setText(self.Projects[0].name)
         self.ui.ProjectPathDisplay.setText(self.Projects[0].path)
@@ -313,7 +322,13 @@ class MainWindow(QMainWindow):
 
             if self.Batches:
                 self.Batches.clear()
+                
             self.Batches = [Batch.Batch(os.path.join(self.Projects[0].path, dir)) for dir in os.listdir(self.Projects[0].path) if os.path.isdir(os.path.join(self.Projects[0].path, dir))]
+
+            # Write the Batches to a text file
+            with open(os.path.join(self.Projects[0].path, 'batches.txt'), 'w') as file:
+                for batch in self.Batches:
+                    file.write(batch.path + '\n')
 
         # Display project information
         self.ui.ProjectNameDisplay.setText(self.Projects[0].name)
@@ -704,10 +719,21 @@ class MainWindow(QMainWindow):
                 os.makedirs(folder_path)
                 # Add the batch to the top of the list
                 self.Batches.insert(0, Batch.Batch(folder_path))
+                
+                # Write the Batches to a text file
+                with open(os.path.join(self.Projects[0].path, 'batches.txt'), 'w') as file:
+                    for batch in self.Batches:
+                        file.write(batch.path + '\n')
+
             else:
                 shutil.rmtree(folder_path)
                 # Move the batch to the top of the list
                 self.Batches.insert(0, self.Batches[[batch.path for batch in self.Batches].index(folder_path)])
+
+                # Write the Batches to a text file
+                with open(os.path.join(self.Projects[0].path, 'batches.txt'), 'w') as file:
+                    for batch in self.Batches:
+                        file.write(batch.path + '\n')
 
         print(self.Batches[0].path)
         # Display the folder path in the BatchFolder label
@@ -793,6 +819,15 @@ class MainWindow(QMainWindow):
         # Display results images
         self.load_image_result(self.Images[0])
 
+        # Add the current batch to the list of batches
+
+        # Store the paths of the selected folders in a text file
+        with open(os.path.join(os.getcwd(), 'selected_batches.txt'), 'w') as save_results_file:
+            save_results_file.write(os.path.join(self.Batches[0].path, 'results.txt'))
+
+        self.batch_results.clear()
+        self.batch_results.append(os.path.join(self.Batches[0].path, 'results.txt'))
+
         # Export the report
         self.export_report()
 
@@ -804,12 +839,15 @@ class MainWindow(QMainWindow):
         self.ui.next.clicked.connect(self.show_next_result)
         self.ui.previous.clicked.connect(self.show_previous_result)
 
+        # Disable the Start button
+        self.ui.Start.setEnabled(False)
+
     def export_report(self):
 
         print("Exporting report...")
         
         # Call nbconvert to convert the notebook to HTML
-        subprocess.call(["python", "src/stat_results.py"])
+        subprocess.call(["python", "src/layout.py"])
 
         shutil.move(os.path.join(os.getcwd(), 'stats.html'), self.Batches[0].path)
 
@@ -824,14 +862,22 @@ class MainWindow(QMainWindow):
 
     def export_batch_report(self):
 
-        self.batch_folders.clear()
-        self.batch_results.clear()
+        # Clear the text file containing the paths of the selected folders
+        with open(os.path.join(os.getcwd(), 'selected_batches.txt'), 'w') as save_results_file:
+            save_results_file.write('')
 
         try:
+            # Set font
+            font = QFont()
+            font.setPointSize(8)
+
             # Open a file dialog to select one or more folders to compare different batches
             file_dialog = QFileDialog()
             file_dialog.setFileMode(QFileDialog.DirectoryOnly)
             file_dialog.setOption(QFileDialog.DontUseNativeDialog, True)
+            # Open the file dialog in the current project folder
+            file_dialog.setDirectory(self.Projects[0].path)
+            file_dialog.setFont(font)
             file_view = file_dialog.findChild(QListView, 'listView')
 
             # Make it possible to select multiple folders
@@ -845,13 +891,13 @@ class MainWindow(QMainWindow):
             if file_dialog.exec():
                 paths = file_dialog.selectedFiles()
 
-                # Store the paths of the selected folders in a list
-                self.batch_folders = paths
-                self.batch_results = [os.path.join(path, 'results.txt') for path in self.batch_folders]
-                print(self.batch_results)
+                # Store the paths of the selected folders in a text file
+                with open(os.path.join(os.getcwd(), 'selected_batches.txt'), 'w') as save_results_file:
+                    for path in paths:
+                        save_results_file.write(os.path.join(path, 'results.txt') + '\n')
 
-            # Print a text saying that the batches are being compared with their respective names
-            print("Comparing batches: " + ", ".join([os.path.basename(path) for path in self.batch_folders]))
+            # Print a text saying that the batches are being compared with their respective names (the names of the folders before the results.txt file)
+            print("Comparing batches: " + ", ".join([os.path.basename(os.path.dirname(path)) for path in self.batch_results]))
 
         except Exception as e:
             # Message box to inform the user of the error
@@ -861,10 +907,10 @@ class MainWindow(QMainWindow):
             print("Exporting batch report...")
             
             # Call nbconvert to convert the notebook to HTML
-            #subprocess.call(["python", "src/stat_batch_results.py"])
+            subprocess.call(["python", "src/layout.py"])
 
             #shutil.move(os.path.join(os.getcwd(), 'batch_stats.html'), self.batch_folders)
-            #webbrowser.open(f'file://{self.batch_folders}/batch_stats.html')
+            webbrowser.open(f'file://{self.Projects[0].path}/Batch_Comparison.html')
 
     def open_app_help(self):
         # Create a window to display the help
