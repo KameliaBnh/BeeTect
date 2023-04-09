@@ -1,14 +1,3 @@
-# Attributes:
-#   - User: User.User()
-#   - Models: Models.Models()
-#   - Images: list
-#   - cpt_image: int
-#   - cpt_image_result: int
-#   - results_path: str
-#   - Projects: list
-#   - project_results_path: str
-
-
 import os
 import shutil
 import subprocess
@@ -31,6 +20,11 @@ from HelpWindow import HelpWindow
 class MainWindow(QMainWindow):
 
     def __init__(self):
+        """
+        Constructor of the MainWindow class.
+        It creates the main window of the application using the 'interface.ui' file.
+        It also creates the User, Models, Images, Projects and Batches objects.
+        """
 
         # Class attributes
     
@@ -169,6 +163,11 @@ class MainWindow(QMainWindow):
         self.ui.RecentProjects.menu().triggered.connect(lambda triggered_action: self.open_selected_project(triggered_action.text()))
 
     def check_preferences(self):
+        """
+        Check if the user_info.txt file exists.
+        If it doesn't, open the user form. If it does, retrieve the user information.
+        """
+
         if not self.check_flag:
             # Check if the user_info.txt file exists
             if not os.path.isfile(os.path.join(os.getcwd(), 'user_info.txt')):
@@ -217,6 +216,9 @@ class MainWindow(QMainWindow):
 
     # Save the project to text file
     def write_project_to_text_file(self, name, path):
+        """
+        Save the current project information to the 'user_info.txt' file.
+        """
 
         print("Saving project information to user_info.txt file...")
 
@@ -258,6 +260,10 @@ class MainWindow(QMainWindow):
             file.writelines(new_lines)
 
     def open_selected_project(self, project_name):
+        """
+        Open the selected project.
+        Move the project to the top of the list of projects. Save the project to the 'user_info.txt' file.    
+        """
 
         # Get the project from the list of projects
         project = next((p for p in self.Projects if p.name == project_name), None)
@@ -290,6 +296,9 @@ class MainWindow(QMainWindow):
         self.ui.OpenFolder.setEnabled(True)
 
     def open_project(self):
+        """
+        Open a project. Add the project to the top of the list of projects. Save the project to the 'user_info.txt' file.
+        """
 
         # Set the window as modal
         self.setWindowModality(Qt.ApplicationModal)
@@ -343,6 +352,9 @@ class MainWindow(QMainWindow):
 
     # Open a file dialog to select the project directory
     def open_project_directory(self, project_directory_edit):
+        """
+        Open a file dialog to select the project directory.
+        """
 
         # Set the window as modal
         self.setWindowModality(Qt.ApplicationModal)
@@ -366,6 +378,9 @@ class MainWindow(QMainWindow):
 
     # Save the new project
     def save_new_project(self, project_name_edit, project_directory_edit):
+        """
+        Save the new project. Add the project to the top of the list of projects. Save the project to the 'user_info.txt' file.
+        """
             
         try:
 
@@ -397,6 +412,9 @@ class MainWindow(QMainWindow):
             print("Project successfully created!")
 
     def new_project(self):
+        """
+        Create a new project.
+        """
         
         # Open a file dialog to select the project name and directory
         dialog = QDialog()
@@ -466,27 +484,38 @@ class MainWindow(QMainWindow):
         self.ui.Start.setEnabled(False)
 
     def add_new_model(self):
+        """
+        Add a new model to the list of models.
+        Open a window to add a new model.
+        """
+
         self.Models.open_models_form()
 
         print("Adding new model...")
 
     def load_models(self):
-
-        #print("Loading models...")
+        """
+        Load the models in the combobox.
+        """
 
         # Clear the combobox
         self.ui.comboBox.clear()
         for model in self.Models.list:
             self.ui.comboBox.addItem(model)
 
-        #print("Models loaded successfully!")
-
     def close_model_form(self):
+        """
+        Close the model form. Refresh the combobox.
+        """
+
         self.Models.close_models_form()
         # Refresh the combobox
         self.load_models()
 
     def edit_models(self):
+        """
+        Open a window to edit the models. Allow the user to add, remove, and edit models.
+        """
 
         print("Editing models...")
 
@@ -549,6 +578,10 @@ class MainWindow(QMainWindow):
         self.load_models()
 
     def remove_model(self, table):
+        """
+        Remove a model from the list of models.
+        """
+
         # Get the selected row
         selected_row = table.currentRow()
 
@@ -584,6 +617,9 @@ class MainWindow(QMainWindow):
             self.load_models()
 
     def get_image(self):
+        """
+        Open a dialog to select an image. Add the image to the list of images.
+        """
 
         print("Loading image...")
 
@@ -599,6 +635,9 @@ class MainWindow(QMainWindow):
         self.Images.append(Image.Image(image_path))
     
     def get_images_from_folder(self):
+        """
+        Open a dialog to select a folder of images. Add the images in the folder to the list of images.
+        """
 
         print("Loading images from folder...")
 
@@ -614,18 +653,34 @@ class MainWindow(QMainWindow):
                     self.Images.append(Image.Image(os.path.join(root, image)))
         
     def load_image(self, image):
+        """
+        Load an image into the image label.
+        """
+
         image.pixmap.scaledToHeight(self.ui.image_label.height())
         self.ui.image_label.setPixmap(image.pixmap)
 
     def show_next_image(self):
+        """
+        Show the next image in the list of images.
+        """
+        
         self.cpt_image += 1
         self.load_image(self.Images[self.cpt_image % len(self.Images)])
 
     def show_previous_image(self):
+        """
+        Show the previous image in the list of images.
+        """
+
         self.cpt_image -= 1
         self.load_image(self.Images[self.cpt_image % len(self.Images)])
 
     def show_image(self):
+        """ 
+        Show the image selected by the user.
+        """
+
         self.get_image()
         self.load_image(self.Images[0])
         
@@ -634,6 +689,10 @@ class MainWindow(QMainWindow):
         self.ui.openFolder.hide()
 
     def show_image_from_folder(self):
+        """
+        Show the images in the folder selected by the user.
+        """
+
         # Enable the previous and next buttons
         self.ui.next.setEnabled(True)
         self.ui.previous.setEnabled(True)
@@ -650,20 +709,38 @@ class MainWindow(QMainWindow):
         self.ui.openFolder.hide()
 
     def load_image_result(self, image):
+        """
+        Load an image after detection into the image label.
+        """
+
         image.pixmap_result.scaledToHeight(self.ui.image_label.height())
         self.ui.image_label.setPixmap(image.pixmap_result)
 
         self.ui.Start.setEnabled(True)
 
     def show_next_result(self):
+        """
+        Show the next image in the list of imagesafter detection.
+        """
+
         self.cpt_image_result += 1
         self.load_image_result(self.Images[self.cpt_image % len(self.Images)])
 
     def show_previous_result(self):
+        """
+        Show the previous image in the list of images after detection.
+        """
+
         self.cpt_image_result -= 1
         self.load_image_result(self.Images[self.cpt_image % len(self.Images)])
 
     def create_subdirectories(self, folder_path, image):
+        """
+        Create subdirectories for the images after detection. 
+        One subdirectory for images with pollinators and one subdirectory for images without pollinators.
+        One subdirectory for each detected class and one subdirectory for images containing multiple pollinators.
+        """
+
         # Create two 'Pollinator' and 'Non-Pollinator' folders
         os.makedirs(os.path.join(folder_path, "Pollinator"), exist_ok=True)
         os.makedirs(os.path.join(folder_path, "Non-Pollinator"), exist_ok=True)
@@ -677,6 +754,11 @@ class MainWindow(QMainWindow):
         os.makedirs(os.path.join(folder_path, "Pollinator", "Multiple-Pollinators"), exist_ok=True)
 
     def select_project_results_folder(self):
+        """
+        Open a dialog to select the folder where the results will be saved.
+        The folder is created if it does not exist. It can be either the default subfolder of the current project or a renamed subfolder.
+        """
+
         # Set the window as modal
         self.setWindowModality(Qt.ApplicationModal)
 
@@ -750,6 +832,13 @@ class MainWindow(QMainWindow):
         self.ui.Start.setEnabled(True)
 
     def run_detection(self):
+        """
+        Run the detection on the images in the current batch.
+        Results are saved in the folder selected by the user.
+        Results are displayed in the image label and also saved in the Images list.
+        The images are renamed after their original name.
+        """
+
         model_path = os.path.join(self.Models.path, self.ui.comboBox.currentText(), self.ui.comboBox.currentText() + '.pt')
 
         print("Yolo Model selected: " + os.path.basename(model_path))
@@ -850,6 +939,10 @@ class MainWindow(QMainWindow):
         self.ui.Start.setEnabled(False)
 
     def export_report(self):
+        """
+        Export the report in HTML format.
+        Rename the HTML file to the name of the batch. Save it in the same folder as the batch.
+        """
 
         print("Exporting report...")
         
@@ -868,6 +961,10 @@ class MainWindow(QMainWindow):
         self.ui.graph2.setPixmap(QPixmap(os.path.join(self.Batches[0].path, 'Output_Graphs', 'bee_species_counts.png')).scaledToHeight(self.ui.stats_graphs_frame.height()))
 
     def export_batch_report(self):
+        """
+        Export the report in HTML format.
+        The report is a comparison of the results of the selected batches.
+        """
 
         # Clear the text file containing the paths of the selected folders
         with open(os.path.join(os.getcwd(), 'selected_batches.txt'), 'w') as save_results_file:
@@ -916,10 +1013,13 @@ class MainWindow(QMainWindow):
             # Call nbconvert to convert the notebook to HTML
             subprocess.call(["python", "src/layout.py"])
 
-            #shutil.move(os.path.join(os.getcwd(), 'batch_stats.html'), self.batch_folders)
-            webbrowser.open(f'file://{self.Projects[0].path}/Batch_Comparison.html')
+            webbrowser.open(f'file://{os.getcwd()}/Batch_Comparison.html')
 
     def open_app_help(self):
+        """
+        Open the help window. Gives information about the application (User Guide).
+        """
+
         # Create a window to display the help
         self.help_window = HelpWindow()
         self.help_window.show()

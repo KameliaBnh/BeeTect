@@ -1,14 +1,3 @@
-# Attributes:
-#   - path: Path to the models directory
-#   - list: List of models in the models directory
-
-# Functions:
-#   - __init__(self): Class constructor
-#   - open_models_form(self): Open the models form
-#   - close_models_form(self): Close the models form
-#   - open_model_weight(self): Open a file dialog to select the model weight file
-#   - save_new_model(self): Save the new model
-
 import glob
 import os
 import shutil
@@ -21,6 +10,9 @@ from PySide2 import QtCore
 class Models(QDialog):
 
     def __init__(self):
+        """
+        This class is used to create a new YOLO model.
+        """
 
         # Class attributes
         self.path = os.path.join(os.getcwd(), 'models')
@@ -106,6 +98,10 @@ class Models(QDialog):
         self.setLayout(layout)
 
     def toggle_files(self):
+        """
+        Enable or disable the buttons to select the additional files. It shows or hide the supplementary files section.
+        """
+
         if self.file_selection_group_box.isChecked():
             self.confusion_matrix_button.setEnabled(True)
             self.f1_curve_button.setEnabled(True)
@@ -126,11 +122,18 @@ class Models(QDialog):
         self.close()
 
     def open_model_weight(self):
+        """
+        Opens a file dialog to select the model weight file.
+        """
+
         # Open a file dialog to select the model weight file
         model_weight_file, _ = QFileDialog.getOpenFileName(self, 'Select model weight file', self.path, 'Model weight (*.pt)')
         self.model_weight_edit.setText(model_weight_file)
 
     def save_new_model(self):
+        """
+        Save the new model in the models directory. It creates a new directory with the model name and copy the model weight file in it, as well as the supplementary files.
+        """
 
         model_name = None
         model_weight = None
@@ -186,7 +189,12 @@ class Models(QDialog):
                 self.list.append(model_name)
 
     def open_file_dialog(self):
+        """
+        Open a file dialog to select the supplementary files.
+        """
+
         sender = self.sender()
+
         if sender.text() == 'Select Confusion Matrix':
             confusion_matrix_file, _ = QFileDialog.getOpenFileName(self, 'Select Confusion Matrix', self.path, 'Confusion Matrix (*.png)')
             self.confusion_matrix_line_edit.setText(confusion_matrix_file)

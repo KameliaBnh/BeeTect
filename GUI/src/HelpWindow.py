@@ -1,5 +1,3 @@
-# Class that is a window that displays help information
-
 import os
 
 from PySide2.QtCore import QFile
@@ -11,6 +9,11 @@ from PySide2.QtGui import QFont, QIcon
 class HelpWindow(QMainWindow):
 
     def __init__(self):
+        """
+        User Guide Window class constructor.
+        Opens the user guide window with the 'userGuide.ui' file.
+        """
+
         super().__init__()
 
         # Load the .ui file
