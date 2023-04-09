@@ -9,9 +9,11 @@
 #   - open_model_weight(self): Open a file dialog to select the model weight file
 #   - save_new_model(self): Save the new model
 
+import glob
 import os
 import shutil
 
+from PySide2 import QtWidgets
 from PySide2.QtWidgets import QMessageBox, QDialog, QLabel, QLineEdit, QPushButton, QVBoxLayout, QFileDialog
 from PySide2.QtGui import QFont
 from PySide2 import QtCore
@@ -22,11 +24,9 @@ class Models(QDialog):
 
         # Class attributes
         self.path = os.path.join(os.getcwd(), 'models')
-        self.list = []
-        for root, dirs, files in os.walk(self.path):
-            for file in files:
-                if file.endswith('.pt') and root.endswith(os.path.basename(file).split('.')[0]):
-                    self.list.append(os.path.basename(file).split('.')[0])
+
+        # Get the list of models in the models directory with the glob module
+        self.list = [os.path.splitext(os.path.basename(file))[0] for file in glob.glob(os.path.join(self.path, '*', '*.pt'))]
 
         # Call the parent class constructor
         super().__init__()
@@ -42,37 +42,77 @@ class Models(QDialog):
         self.setWindowTitle('New YOLO Model')
         self.resize(550, 400)
 
-        # Create labels and line edits for new model
-        model_label = QLabel('Model name:')
-        model_label.setFont(font)
         self.model_edit = QLineEdit()
-        self.model_edit.setPlaceholderText('Required')
-        self.model_edit.setFont(font)
-
-        # Create a model weight label that open a file dialog to select the model weight file
-        model_weight_label = QLabel('Model weight:')
-        model_weight_label.setFont(font)
         self.model_weight_edit = QLineEdit()
-        self.model_weight_edit.setReadOnly(True)
-        self.model_weight_edit.setFont(font)
+        
+        # Create a layout for the form
+        layout = QVBoxLayout()
+
+        labels_and_edits = {
+            'Model name:': self.model_edit,
+            'Model weight:': self.model_weight_edit,
+        }
+
+        for label_text, line_edit in labels_and_edits.items():
+            label = QLabel(label_text)
+            label.setFont(font)
+            line_edit.setPlaceholderText('Required' if label_text == 'Model name:' else '')
+            line_edit.setFont(font)
+            layout.addWidget(label)
+            layout.addWidget(line_edit)
+
         self.model_weight_button = QPushButton('Browse')
         self.model_weight_button.setFont(font)
         self.model_weight_button.clicked.connect(self.open_model_weight)
+        layout.addWidget(self.model_weight_button)
 
+        self.confusion_matrix_line_edit = QLineEdit()
+        self.f1_curve_line_edit = QLineEdit()
+        self.results_line_edit = QLineEdit()
+        self.opt_yaml_line_edit = QLineEdit()
+
+        buttons_and_edits = [
+            ('Select Confusion Matrix', self.confusion_matrix_line_edit),
+            ('Select F1 Curve', self.f1_curve_line_edit),
+            ('Select Results (PNG)', self.results_line_edit),
+            ('Select opt.yaml', self.opt_yaml_line_edit),
+        ]
+
+        self.file_selection_group_box = QtWidgets.QGroupBox('Additional Files', self)
+        self.file_selection_group_box.setFont(font)
+        self.file_selection_group_box.setCheckable(True)
+        self.file_selection_group_box.setChecked(False)
+        self.file_selection_layout = QVBoxLayout(self.file_selection_group_box)
+
+        for button_text, line_edit in buttons_and_edits:
+            button = QtWidgets.QPushButton(button_text, self.file_selection_group_box)
+            button.setFont(font)
+            button.clicked.connect(self.open_file_dialog)
+            line_edit.setFont(font)
+            self.file_selection_layout.addWidget(button)
+            self.file_selection_layout.addWidget(line_edit)
+
+        # Create a submit button to save the new model
         self.submit_button = QPushButton('Submit')
         self.submit_button.setFont(font)
         self.submit_button.clicked.connect(self.save_new_model)
 
-        # Create a layout for the form
-        layout = QVBoxLayout()
-        layout.addWidget(model_label)
-        layout.addWidget(self.model_edit)
-        layout.addWidget(model_weight_label)
-        layout.addWidget(self.model_weight_edit)
-        layout.addWidget(self.model_weight_button)
+        layout.addWidget(self.file_selection_group_box)
         layout.addWidget(self.submit_button)
 
         self.setLayout(layout)
+
+    def toggle_files(self):
+        if self.file_selection_group_box.isChecked():
+            self.confusion_matrix_button.setEnabled(True)
+            self.f1_curve_button.setEnabled(True)
+            self.results_button.setEnabled(True)
+            self.opt_yaml_button.setEnabled(True)
+        else:
+            self.confusion_matrix_button.setEnabled(False)
+            self.f1_curve_button.setEnabled(False)
+            self.results_button.setEnabled(False)
+            self.opt_yaml_button.setEnabled(False)
 
     # Open models form
     def open_models_form(self):
@@ -117,6 +157,22 @@ class Models(QDialog):
             try:
                 print(f'Copying model weight file to {model_weight_path}')
                 shutil.copy(model_weight, model_weight_path)
+
+                if self.confusion_matrix_line_edit.text():
+                    confusion_matrix_file = self.confusion_matrix_line_edit.text()
+                    shutil.copy(confusion_matrix_file, os.path.join(self.path, self.model_edit.text(), 'confusion_matrix.png'))
+
+                if self.f1_curve_line_edit.text():
+                    f1_curve_file = self.f1_curve_line_edit.text()
+                    shutil.copy(f1_curve_file, os.path.join(self.path, self.model_edit.text(), 'f1_curve.png'))
+
+                if self.results_line_edit.text():
+                    results_file = self.results_line_edit.text()
+                    shutil.copy(results_file, os.path.join(self.path, self.model_edit.text(), 'results.png'))
+
+                if self.opt_yaml_line_edit.text():
+                    opt_yaml_file = self.opt_yaml_line_edit.text()
+                    shutil.copy(opt_yaml_file, os.path.join(self.path, self.model_edit.text(), 'opt.yaml'))
                 
             except Exception as e:
                 QMessageBox.warning(self, 'Error', f'Error copying model weight file: {str(e)}')
@@ -125,3 +181,18 @@ class Models(QDialog):
             # Add the new model to the models list
             if model_name not in self.list:
                 self.list.append(model_name)
+
+    def open_file_dialog(self):
+        sender = self.sender()
+        if sender.text() == 'Select Confusion Matrix':
+            confusion_matrix_file, _ = QFileDialog.getOpenFileName(self, 'Select Confusion Matrix', self.path, 'Confusion Matrix (*.png)')
+            self.confusion_matrix_line_edit.setText(confusion_matrix_file)
+        elif sender.text() == 'Select F1 Curve':
+            f1_curve_file, _ = QFileDialog.getOpenFileName(self, 'Select F1 Curve', self.path, 'F1 Curve (*.png)')
+            self.f1_curve_line_edit.setText(f1_curve_file)
+        elif sender.text() == 'Select Results (PNG)':
+            results_file, _ = QFileDialog.getOpenFileName(self, 'Select Results (PNG)', self.path, 'Results (*.png)')
+            self.results_line_edit.setText(results_file)
+        elif sender.text() == 'Select opt.yaml':
+            opt_yaml_file, _ = QFileDialog.getOpenFileName(self, 'Select opt.yaml', self.path, 'opt.yaml (*.yaml)')
+            self.opt_yaml_line_edit.setText(opt_yaml_file)

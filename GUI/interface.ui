@@ -87,7 +87,7 @@
                  <bool>true</bool>
                 </property>
                 <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select the detection model that will be used for the prediction and classification of the images.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select the YOLOv5 detection model that will be used for the prediction and classification of the images.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                 <property name="locale">
                  <locale language="English" country="UnitedKingdom"/>
@@ -134,6 +134,9 @@
              <layout class="QVBoxLayout" name="verticalLayout_6">
               <item>
                <widget class="QPushButton" name="addModel">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Add a new YOLOv5 model.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
                 <property name="text">
                  <string>Add a new model..</string>
                 </property>
@@ -144,6 +147,9 @@
               </item>
               <item>
                <widget class="QPushButton" name="editModels">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Edit current YOLOv5 models.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
                 <property name="text">
                  <string>Edit models</string>
                 </property>
@@ -158,6 +164,9 @@
               <font>
                <pointsize>9</pointsize>
               </font>
+             </property>
+             <property name="toolTip">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select a folder where all the results images of the batch will be saved.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
              <property name="text">
               <string>Select Batch Folder</string>
@@ -289,6 +298,9 @@
                   <verstretch>0</verstretch>
                  </sizepolicy>
                 </property>
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Load an image of a field to detect the pollinators using the selected YOLOv5 model.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
                 <property name="layoutDirection">
                  <enum>Qt::LeftToRight</enum>
                 </property>
@@ -304,6 +316,9 @@
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
+                </property>
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Load a folder of image of a field to detect the pollinators using the selected YOLOv5 model.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                 <property name="text">
                  <string>Load an image folder..</string>
@@ -322,6 +337,9 @@
                  <font>
                   <pointsize>10</pointsize>
                  </font>
+                </property>
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Current image.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                 <property name="text">
                  <string/>
@@ -348,6 +366,9 @@
              <layout class="QGridLayout" name="gridLayout_3">
               <item row="0" column="0">
                <widget class="QPushButton" name="previous">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Navigate to previous image.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
                 <property name="text">
                  <string>&lt;&lt;</string>
                 </property>
@@ -355,6 +376,9 @@
               </item>
               <item row="0" column="1">
                <widget class="QPushButton" name="next">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Navigate to next image.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
                 <property name="text">
                  <string>&gt;&gt;</string>
                 </property>
@@ -454,6 +478,9 @@
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
+             </property>
+             <property name="toolTip">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Statistics table of the current batch.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
              <property name="frameShape">
               <enum>QFrame::StyledPanel</enum>
@@ -568,8 +595,11 @@
              <layout class="QGridLayout" name="gridLayout_2">
               <item row="0" column="2">
                <widget class="QLabel" name="graph2">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Bee Species Abundance.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
                 <property name="text">
-                 <string>graph2</string>
+                 <string/>
                 </property>
                 <property name="alignment">
                  <set>Qt::AlignCenter</set>
@@ -578,8 +608,11 @@
               </item>
               <item row="0" column="1">
                <widget class="QLabel" name="graph1">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Bee Species Count.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
                 <property name="text">
-                 <string>graph1</string>
+                 <string/>
                 </property>
                 <property name="alignment">
                  <set>Qt::AlignCenter</set>
@@ -682,6 +715,9 @@
     </property>
    </widget>
    <widget class="QMenu" name="menuHelp">
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Open App Help.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
     <property name="title">
      <string>Help</string>
     </property>
