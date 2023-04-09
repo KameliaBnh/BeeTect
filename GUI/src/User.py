@@ -1,16 +1,3 @@
-# Attributes:
-#   - name: Name of the user
-#   - surname: Surname of the user
-#   - email: Email of the user
-#   - date: Date of the user information form submission
-#   - time: Time of the user information form submission
-
-# Functions:
-#   - __init__(self): Class constructor
-#   - open_user_form(self): Open the user information form
-#   - close_user_form(self): Close the user information form
-#   - submit_user_info(self): Save the user information
-
 import os
 import datetime
 
@@ -21,6 +8,10 @@ from PySide2.QtGui import QFont, QIcon
 class User(QDialog):
 
     def __init__(self):
+        """
+        User information window class constructor.
+        Opens once when the application is started for the first time.
+        """
 
         # Class attributes
         self.name = None
@@ -100,6 +91,10 @@ class User(QDialog):
         self.close()
 
     def submit_user_info(self):
+        """
+        Save user information in the 'user_info.txt' file.
+        """
+
         # Retrieve user information
         self.name = self.name_edit.text()
         self.surname = self.surname_edit.text()

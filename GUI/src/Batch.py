@@ -3,6 +3,9 @@ import os
 class Batch():
     
     def __init__(self, path):
+        """
+        Batch class constructor.
+        """
 
         # Class attributes
         self.path = path

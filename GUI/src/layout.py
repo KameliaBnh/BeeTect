@@ -1,13 +1,8 @@
-
 import refined_stats as rs
 import batch_2_comp as bc 
 import os 
 
-
-
 # HTML Layout for 1 batch
-
-
 if len(bc.main_window.batch_results) == 1:
     print(bc.main_window.batch_results)
 
@@ -116,7 +111,6 @@ if len(bc.main_window.batch_results) == 1:
 
 
 # HTML layout for more than two batches
-
 else: 
 
     #The Quick Links Section
@@ -328,13 +322,9 @@ else:
                     <h1 style="margin-left: 60px; margin-top: 30px; font-size: 20px; border: 1px solid khaki; padding: 10px; background-color: khaki;"> Dunn's Test </h1>
                     <div class="Dunn's Test" style="margin-left:90px; margin-top:50px;">{2}</div>  
                 </div>
-            """.format(rs.html8, bc.Conclusion4, rs.html8)
+            """.format(rs.html8, bc.Conclusion4, rs.html9)
 
-
-
-
-
-if len(bc.main_window.batch_results) ==1:
+if len(bc.main_window.batch_results) == 1:
 
     html = f"""
             <html>
@@ -407,7 +397,6 @@ if len(bc.main_window.batch_results) ==1:
 
     with open('stats.html', "w") as f:
         f.write(html)
-
 
 else: 
 
@@ -588,7 +577,6 @@ else:
 
     </body>
     </html>""" 
-
 
     with open('Batch_Comparison.html', "w") as f:
         f.write(html)

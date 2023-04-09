@@ -1,21 +1,20 @@
-
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 import os
+import sys
 import pandas as pd
 import scipy.stats as stats
 from scipy.stats import ttest_ind
 from scipy.stats import levene
 from scipy.stats import shapiro
 from scipy.stats import kruskal
-#from scikit_posthocs import posthoc_dunn
+from scikit_posthocs import posthoc_dunn
 from scipy.stats import f_oneway
 import statsmodels.api as sm
 from statsmodels.stats.multicomp import pairwise_tukeyhsd
 
 from PySide2.QtWidgets import QApplication
-import sys
 
 # Import the main window object (mw) to access variables
 import MainWindow as mw
@@ -26,10 +25,7 @@ app = QApplication(sys.argv)
 # Create an object for the main window
 main_window = mw.MainWindow()
 
-#Setting the significance level 
-alpha = 0.05
-
-##creating a function to extract the bee counts from each results.txt file
+# Creating a function to extract the bee counts from each results.txt file
 def read_results(file_path):
     with open(file_path) as f:
             bee_counts = {"amegilla":0, "ceratina":0, "meliponini":0, "xylocopa_aestuans":0, "pollinator":0, "apis":0, "unknown":0, "apis_cerana":0, "apis_florea":0} # creating empty dictionary to store the counts 
@@ -99,7 +95,7 @@ def read_results(file_path):
     filtered_counts = {k:v for k,v in bee_counts.items() if v > 0}
     return (filtered_counts, per_image_counts, no_detection_images, image_no)
 
-## doing a grouped bar plot 
+# Creating a grouped bar plot 
 def plot_filtered_counts(paths):
     """
     Plots a grouped bar chart of the filtered counts for the given list of paths.
@@ -148,12 +144,7 @@ def plot_filtered_counts(paths):
     plt.close()
     return filtered_counts, filtered_counts_list, per_image_counts, no_detection_images, image_no, folder_names
 
-
-filtered_counts, filtered_counts_list, per_image_counts, no_detection_images, image_no, folder_names = plot_filtered_counts(main_window.batch_results)
-
-
-## creating a dataframe with all the counts 
-
+# Creating a dataframe with all the counts 
 def filtered_counts_table(paths):
     """
     Creates a dataframe to store the bee counts
@@ -223,10 +214,6 @@ def filtered_counts_table(paths):
 
     return df,overview_df
 
-df, overview_df = filtered_counts_table(main_window.batch_results)
-
-
-
 def normality(df):
 
     # 1) Checking Normality of Residuals
@@ -256,20 +243,7 @@ def normality(df):
 
     return p, normality_df
 
-
-#Calling the normality function
-
-p, normality_df = normality(df)
-
-#Storing all the bee counts 
-batch_values = []
-for counts in filtered_counts_list:
-    batch_values.append(list(counts.values()))
-
-
-
 # Creating a function that will perform all the statistics 
-
 def comp_stats(paths, filtered_counts_list, folder_names):
 
     if p > alpha:
@@ -368,10 +342,7 @@ def comp_stats(paths, filtered_counts_list, folder_names):
 
             return Output1,krushal_p, krushal_df, Conclusion4
 
-
-
 # Creating a function to perform Post Hoc Tukey tests
-
 def tukey(p_value):
     #Creating a boxplot for visual analysis 
     fig, ax = plt.subplots(1, 1)
@@ -394,24 +365,35 @@ def tukey(p_value):
 
     return tukey_df
 
+# Creating a function to perform Dunn tests
+def dunn(krushal_p):
 
+    if krushal_p < 0.05:
+        data = np.array(batch_values, dtype=object)
+        #data = np.array(batch_values).astype(float)
+        #labels = np.repeat(folder_names, [len(batch_values[i]) for i in range(len(batch_values))])
+        dunn_results = posthoc_dunn(data, p_adjust='bonferroni')
 
-## Creating a function to perform Dunn tests
-# def dunn(krushal_p):
-
-#     if krushal_p < 0.05:
-#         data = np.array(batch_values, dtype=object)
-#         #data = np.array(batch_values).astype(float)
-#         #labels = np.repeat(folder_names, [len(batch_values[i]) for i in range(len(batch_values))])
-#         dunn_results = posthoc_dunn(data, p_adjust='bonferroni')
-
-#         # Convert the results to a pandas DataFrame
-#         dunn_df = pd.DataFrame(dunn_results)
-#         dunn_df.columns = folder_names[:dunn_df.shape[1]]
+        # Convert the results to a pandas DataFrame
+        dunn_df = pd.DataFrame(dunn_results)
+        dunn_df.columns = folder_names[:dunn_df.shape[1]]
         
-#     return dunn_df
+    return dunn_df
 
+# Setting the significance level 
+alpha = 0.05
 
+filtered_counts, filtered_counts_list, per_image_counts, no_detection_images, image_no, folder_names = plot_filtered_counts(main_window.batch_results)
+
+df, overview_df = filtered_counts_table(main_window.batch_results)
+
+# Calling the normality function
+p, normality_df = normality(df)
+
+# Storing all the bee counts 
+batch_values = []
+for counts in filtered_counts_list:
+    batch_values.append(list(counts.values()))
 
 # Extracting stat values from the function
 
@@ -428,8 +410,3 @@ if len(main_window.batch_results) > 1:
         else:
             Output1, krushal_p, krushal_df, Conclusion4 = comp_stats(main_window.batch_results, filtered_counts_list, folder_names)
             #dunn_df = dunn(krushal_p)
-
-
-
-
-    

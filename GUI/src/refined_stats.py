@@ -61,7 +61,6 @@ max_value = max(bc.filtered_counts.values())
 min_key = min(bc.filtered_counts, key=lambda k: bc.filtered_counts[k])
 min_value = min(bc.filtered_counts.values())
 
-
 ##Creating a table with the above information
 #create data
 data = [["Number of Input Images","-", no_input_img], 
@@ -84,7 +83,6 @@ total_count = abundance_df['Occurence'].sum()
 abundance_df['Abundance'] = abundance_df['Occurence'] / total_count
 abundance_df['Abundance'] = abundance_df['Abundance'].round(2)
 
-
 #Creating a function to style the tables 
 def create_styled_table(df):
     styled_table = df.style.set_table_styles([{'selector': 'th', 'props': [ ('font-size', '24px'), ('text-align', 'center'), ('color', 'black'), ('background-color', 'lightblue'), ('font-weight', 'bold'),('padding', '5px'), ('border', '1px solid black')]}, {'selector': 'td','props': [('font-size', '20px'),('padding', '5px'), ('border', '1px solid black'), ('text-align', 'center')]}])
@@ -97,7 +95,6 @@ html2 = create_styled_table(bc.overview_df)
 html_summary =  create_styled_table(summary_df)
 html_counts = create_styled_table(counts_df)
 html_abundance = create_styled_table(abundance_df)
-
 
 if len(bc.main_window.batch_results) == 1:
 
@@ -122,13 +119,10 @@ if len(bc.main_window.batch_results) == 1:
         else:
                 print("")
 
-
-
     #creating a directory to save all the output graphs 
     output_directory_single_batch = os.path.join(bc.main_window.Batches[0].path,'Output_Graphs')
     if not os.path.exists(output_directory_single_batch):
         os.makedirs(output_directory_single_batch)
-
 
     #Creating a bar chart
     colors = plt.cm.Set1(np.linspace(0, 1, len(abundance_df['Species'])))
@@ -141,7 +135,6 @@ if len(bc.main_window.batch_results) == 1:
     plt.savefig(f'{output_directory_single_batch}/Bar_plot.png', dpi=700)
     plt.close()
 
-
     #creating a pie chart depicting species abundance 
     species_names = list(bc.filtered_counts.keys())
     species_counts = list(bc.filtered_counts.values())
@@ -150,7 +143,6 @@ if len(bc.main_window.batch_results) == 1:
     ax.set_title('Bee Species Abundance')
     fig.savefig(f'{output_directory_single_batch}/bee_species_counts.png', dpi=700)
     plt.close()
-
 
 else:
 
@@ -193,5 +185,4 @@ else:
 
         else: 
             html8 = create_styled_table(bc.krushal_df)
-            #html9 = create_styled_table(bc.dunn_df)
-     
+            html9 = create_styled_table(bc.dunn_df)
