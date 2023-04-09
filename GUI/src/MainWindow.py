@@ -409,6 +409,9 @@ class MainWindow(QMainWindow):
         font = QFont()
         font.setPointSize(8)
 
+        # Add window icon
+        dialog.setWindowIcon(QIcon(QPixmap(os.path.join(os.getcwd(), 'resources', 'newProject.png'))))
+
         # Create a label and line edit for the project name
         project_name_label = QLabel('Project name:')
         project_name_label.setFont(font)
@@ -493,6 +496,9 @@ class MainWindow(QMainWindow):
         window.setModal(True)
         window.setFixedSize(500, 300)
         layout = QVBoxLayout(window)
+        
+        # Add window icon
+        window.setWindowIcon(QIcon(QPixmap(os.path.join(os.getcwd(), 'resources', 'editModel.png'))))
 
         # Set the font
         font = QFont()
@@ -683,6 +689,7 @@ class MainWindow(QMainWindow):
         msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
         msg.button(QMessageBox.Ok).setText('Default Folder')
         msg.button(QMessageBox.Cancel).setText('Select Folder')
+        msg.setWindowIcon(QIcon(QPixmap(os.path.join(os.getcwd(), 'resources', 'select.png'))))
 
         # If the user selects the custom folder option, let him write the name of the folder
         if msg.exec_() == QMessageBox.Cancel:

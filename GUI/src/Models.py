@@ -15,7 +15,7 @@ import shutil
 
 from PySide2 import QtWidgets
 from PySide2.QtWidgets import QMessageBox, QDialog, QLabel, QLineEdit, QPushButton, QVBoxLayout, QFileDialog
-from PySide2.QtGui import QFont
+from PySide2.QtGui import QFont, QIcon, QPixmap
 from PySide2 import QtCore
 
 class Models(QDialog):
@@ -33,6 +33,9 @@ class Models(QDialog):
 
         # Set the window as modal
         self.setWindowModality(QtCore.Qt.ApplicationModal)
+
+        # Add window icon
+        self.setWindowIcon(QIcon(QPixmap(os.path.join(os.getcwd(), 'resources', 'addModel.png'))))
 
         # Set the font
         font = QFont()
