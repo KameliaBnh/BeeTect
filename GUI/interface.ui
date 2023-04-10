@@ -32,7 +32,7 @@
        </font>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="VisualisationTab">
        <attribute name="title">
@@ -521,56 +521,6 @@
                 <attribute name="verticalHeaderCascadingSectionResizes">
                  <bool>true</bool>
                 </attribute>
-                <row>
-                 <property name="text">
-                  <string>row1</string>
-                 </property>
-                </row>
-                <row>
-                 <property name="text">
-                  <string>row2</string>
-                 </property>
-                </row>
-                <row>
-                 <property name="text">
-                  <string>row3</string>
-                 </property>
-                </row>
-                <row>
-                 <property name="text">
-                  <string>row4</string>
-                 </property>
-                </row>
-                <column>
-                 <property name="text">
-                  <string>column1</string>
-                 </property>
-                </column>
-                <column>
-                 <property name="text">
-                  <string>column2</string>
-                 </property>
-                </column>
-                <column>
-                 <property name="text">
-                  <string>column3</string>
-                 </property>
-                </column>
-                <column>
-                 <property name="text">
-                  <string>column4</string>
-                 </property>
-                </column>
-                <column>
-                 <property name="text">
-                  <string>column5</string>
-                 </property>
-                </column>
-                <column>
-                 <property name="text">
-                  <string>column6</string>
-                 </property>
-                </column>
                </widget>
               </item>
              </layout>
@@ -593,10 +543,10 @@
               <number>0</number>
              </property>
              <layout class="QGridLayout" name="gridLayout_2">
-              <item row="0" column="2">
-               <widget class="QLabel" name="graph2">
+              <item row="0" column="0">
+               <widget class="QLabel" name="graph1">
                 <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Bee Species Abundance.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Bee Species Count.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                 <property name="text">
                  <string/>
@@ -607,9 +557,9 @@
                </widget>
               </item>
               <item row="0" column="1">
-               <widget class="QLabel" name="graph1">
+               <widget class="QLabel" name="graph2">
                 <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Bee Species Count.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Bee Species Abundance.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                 <property name="text">
                  <string/>
