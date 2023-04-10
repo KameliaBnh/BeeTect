@@ -35,45 +35,57 @@ The GUI then opens and you can follow the steps in the next section.
 
 Once the BeeTect app (GUI) is launched (for the first time), a form asking for the user information pops up:
 
-<img width="252" alt="image" src="https://user-images.githubusercontent.com/126243509/229311728-9885e759-4c02-4a7c-989e-36180e5ccb53.png">
+<img width="277" alt="image" src="https://user-images.githubusercontent.com/126243509/230937591-4bfe59d7-85d8-485b-ad49-e005500efbdd.png">
 
 Enter the required (and optional) information and click on the 'Submit' button.
-The next time you will open the BeeDeteKt app, yout information will be saved and you will not need to fill this form again.
+The next time you will open the BeeTect app, yout information will be saved and you will not need to fill this form again.
+
+#### Creating or opening a project
 
 Then, you will see the following window: 
 
-<img width="567" alt="image" src="https://user-images.githubusercontent.com/126243509/229311819-e307b137-b00a-48ee-94f3-406e924b8a8e.png">
+<img width="568" alt="image" src="https://user-images.githubusercontent.com/126243509/230937830-09084b2e-e66a-455b-8e26-3da5be9fd606.png">
 
 There are different options for you to use here:
 
 * To create a new project, open the 'File' menu item, and select 'New Project':
 
-<img width="172" alt="image" src="https://user-images.githubusercontent.com/126243509/229368830-3c38e79f-7e5a-4919-ac87-2af8f11cc654.png"> <img width="252" alt="image" src="https://user-images.githubusercontent.com/126243509/229368842-05f56846-7016-4341-b52a-bc5232e8fb53.png">
+<img width="268" alt="image" src="https://user-images.githubusercontent.com/126243509/230937968-72e3f121-f9d0-4860-82bb-2b70349cbf16.png"> <img width="252" alt="image" src="https://user-images.githubusercontent.com/126243509/230938062-5c29a169-515d-43c0-aeb1-d9b2f2813fcd.png">
 
-It is recommended to save all the projects in the 'projects' folder for organisation sake.
+All the projects have to be saved in the 'projects' folder.
 
 * To open an existing project, use the 'Open Project' option in the 'File' menu:
 
-<img width="168" alt="image" src="https://user-images.githubusercontent.com/126243509/229368864-42c6e8f2-b89f-45e7-85a3-159775106bfb.png">
+<img width="265" alt="image" src="https://user-images.githubusercontent.com/126243509/230938342-c92f6297-c6e0-486f-92aa-a70682bdec45.png">
 
 * There is also the possibility to access the five last opened projects from the 'File' menu:
 
-<img width="248" alt="image" src="https://user-images.githubusercontent.com/126243509/229460650-71719ea8-2154-4ef7-af86-f26841c70175.png">
+<img width="266" alt="image" src="https://user-images.githubusercontent.com/126243509/230938719-d4e3e6c2-90f2-4cc7-a72b-869f06968331.png">
+
+#### Loading images
 
 * Once a project is opened, you have the possibility to either open a single image ('Open Image') or a folder containing several images ('Open Image Folder'). You can either do that from the 'File' menu or directly from the 'Visualisation Pane' by clicking on the corresponding buttons:
 
-<img width="567" alt="image" src="https://user-images.githubusercontent.com/126243509/229368900-dd0854a3-5ab9-4424-a405-70f8022d1667.png">
+<img width="336" alt="image" src="https://user-images.githubusercontent.com/126243509/230938784-2acf10c6-031a-422d-8c44-a2b6aee33b69.png"> <img width="266" alt="image" src="https://user-images.githubusercontent.com/126243509/230938843-5ba3490d-1b51-4c91-91dc-76888e033327.png">
+
+#### Selecting the YOLOv5 model
 
 * To select the YOLO model you want to use, choose an existing one in the dropdown menu. If you want to add your own YOLO model (trained before hand), you can do that bu selecting the 'Add New Model' button. A dialog will open where you can choose the name of the model, and browse through your computer to seect the weights corresponding to the model:
 
-<img width="185" alt="image" src="https://user-images.githubusercontent.com/126243509/229368916-c4163b47-dedd-4db1-8960-7d3ffb0b6d61.png"> <img width="252" alt="image" src="https://user-images.githubusercontent.com/126243509/229368923-62485399-2c20-4c78-bfa5-dcbe5e8ccbe4.png">
+<img width="187" alt="image" src="https://user-images.githubusercontent.com/126243509/230938922-f407da93-4e72-4054-9fe4-5562dbc76288.png"> <img width="277" alt="image" src="https://user-images.githubusercontent.com/126243509/230938967-3a3b9c05-2385-4237-b27a-d3e83c8edb1a.png">
+
+You can also select supplementary files for the model summary in the HTML report exported to be more complete: the confusion matric .png file, the F1 curve .png file, the results .png file and the opt.yaml file containing the YOLO model parameters. To add these files, you have to check the box and browse through your files via the file dialogs.
+
+#### Results /  Batch folder
 
 * It is also mandatory to select a 'Batch folder' before testing the selected model on the selected images: to do that, click on the 'Select Batch Folder' button in the main window:
 
-<img width="243" alt="image" src="https://user-images.githubusercontent.com/126243509/229368948-3a4cfc31-2225-4aa8-bf02-42766e38baf2.png">
+<img width="182" alt="image" src="https://user-images.githubusercontent.com/126243509/230939381-e16cd402-39ac-47cb-a375-48b9e5467f42.png">
 
 
 Once all of these steps are done, you can click on the 'Start Detection' button. The results will be saved in the selected fodler, along with a 'results.txt' file containing the data for each image, and an HTML report with statistics, graphs and details on the model and on the batch of images.
+
+
 
 
 ## Requirements
