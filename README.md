@@ -83,7 +83,27 @@ You can also select supplementary files for the model summary in the HTML report
 <img width="182" alt="image" src="https://user-images.githubusercontent.com/126243509/230939381-e16cd402-39ac-47cb-a375-48b9e5467f42.png">
 
 
-Once all of these steps are done, you can click on the 'Start Detection' button. The results will be saved in the selected fodler, along with a 'results.txt' file containing the data for each image, and an HTML report with statistics, graphs and details on the model and on the batch of images.
+Once all of these steps are done, you can click on the 'Start Detection' button. 
+
+<img width="190" alt="image" src="https://user-images.githubusercontent.com/126243509/230941331-12fe7827-8faa-4761-9126-2d14f21a6d15.png">
+
+
+## Results and HTML Reports
+
+#### Individual Batch Results
+
+The results will be saved in the selected fodler, along with a 'results.txt' file containing the data for each image, and an HTML report with statistics, graphs and details on the model and on the batch of images.
+
+The images with bounding boxes for the detected pollinators (along with a .json file of the same name), are also saved in different subfolders in the selected folder:
+* 'No-Pollinator' folder: the images that don't contain any pollinators.
+* 'Pollinator' folder: the images containing at least one pollinator.
+    ** A subfolder with the name of the detected species is created for each pollinator detected on an image: if there is only one pollionator on an image, it will be saved in that subfolder.
+    ** If there are more than one pollinator on an image, it will be saved in the 'Multiple-Pollinators' subfolder.
+    
+The HTML report name after the batch is saved in the selected folder.
+
+#### Multiple Batches Comparison Results
+
 
 
 
