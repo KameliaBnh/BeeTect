@@ -102,12 +102,12 @@ if len(bc.main_window.batch_results) == 1:
     </div>
 
     <div class="section2">
-         <div><p style="margin-left: 180px; margin-top: 100px;"><img src="C:/Users/benha/Documents/Cranfield/Group_Project/BPT_Cranfield/GUI/models/YOLO_v5_2021/results.png" width="1000" height="1000"></p></div>
-         <div><p style="margin-left: 180px; margin-top: 100px;"><img src="C:/Users/benha/Documents/Cranfield/Group_Project/BPT_Cranfield/GUI/models/YOLO_v5_2021/F1_curve.png" width="1000" height="1000"></p></div>
-         <div><p style="margin-left: 55px; margin-top: 100px;"><img src="C:/Users/benha/Documents/Cranfield/Group_Project/BPT_Cranfield/GUI/models/YOLO_v5_2021/confusion_matrix.png" width="1000" height="1000"></p></div>
+         <div><p style="margin-left: 180px; margin-top: 100px;"><img src="{1}/{2}/results.png" width="1000" height="1000"></p></div>
+         <div><p style="margin-left: 180px; margin-top: 100px;"><img src="{1}/{2}/F1_curve.png" width="1000" height="1000"></p></div>
+         <div><p style="margin-left: 55px; margin-top: 100px;"><img src="{1}/{2}/confusion_matrix.png" width="1000" height="1000"></p></div>
     </div>
     
-    """.format(rs.html_summary)
+    """.format(rs.html_summary, bc.main_window.Models.path, bc.main_window.ui.comboBox.currentText())
 
 
 # HTML layout for more than two batches

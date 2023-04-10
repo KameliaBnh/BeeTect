@@ -32,7 +32,7 @@
        </font>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="VisualisationTab">
        <attribute name="title">
@@ -388,9 +388,9 @@
             </widget>
            </item>
            <item>
-            <widget class="QProgressBar" name="progressBar">
-             <property name="value">
-              <number>0</number>
+            <widget class="QLabel" name="status_bar">
+             <property name="text">
+              <string/>
              </property>
             </widget>
            </item>

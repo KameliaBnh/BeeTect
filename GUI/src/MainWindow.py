@@ -173,10 +173,14 @@ class MainWindow(QMainWindow):
             if not os.path.isfile(os.path.join(os.getcwd(), 'user_info.txt')):
                 self.User.open_user_form()
                 print("Getting user information...")
+                # Add message to the status bar
+                self.ui.status_bar.setText("Getting user information...")
 
             else:
 
                 print("Retrieving user information...")
+                # Add message to the status bar
+                self.ui.status_bar.setText("Retrieving user information...")
                 with open(os.path.join(os.getcwd(), 'user_info.txt'), 'r') as file:
 
                     # Create an empty dictionary to store the user information
@@ -213,6 +217,8 @@ class MainWindow(QMainWindow):
             self.ui.ProjectPathDisplay.setText(self.Projects[0].path)
 
             print("Current Project: " + self.Projects[0].name)
+            # Add message to the status bar
+            self.ui.status_bar.setText("Current Project: " + self.Projects[0].name)
 
     # Save the project to text file
     def write_project_to_text_file(self, name, path):
@@ -221,6 +227,8 @@ class MainWindow(QMainWindow):
         """
 
         print("Saving project information to user_info.txt file...")
+        # Add message to the status bar
+        self.ui.status_bar.setText("Saving project information to user_info.txt file...")
 
         # Open 'user_info.txt' file
         with open(os.path.join(os.getcwd(), 'user_info.txt'), 'r') as file:
@@ -275,6 +283,8 @@ class MainWindow(QMainWindow):
         self.Projects.insert(0, self.Projects.pop(self.Projects.index(project)))
 
         print("Opening project: " + self.Projects[0].name)
+        # Add message to the status bar
+        self.ui.status_bar.setText("Opening project: " + self.Projects[0].name)
 
         # Save project to text file
         self.write_project_to_text_file(self.Projects[0].name, self.Projects[0].path)
@@ -314,6 +324,8 @@ class MainWindow(QMainWindow):
                 self.Projects.insert(0, self.Projects[[project.path for project in self.Projects].index(project_path)])
 
             print("Opening project: " + self.Projects[0].name)
+            # Add message to the status bar
+            self.ui.status_bar.setText("Opening project: " + self.Projects[0].name)
 
         except Exception as e:
             # Open message box
@@ -322,6 +334,8 @@ class MainWindow(QMainWindow):
         
         else:
             print("Project opened successfully!")
+            # Add message to the status bar
+            self.ui.status_bar.setText("Project opened successfully!")
 
             # Update the project last modification date
             self.Projects[0].update_last_modification_date()
@@ -364,6 +378,8 @@ class MainWindow(QMainWindow):
             project_directory = QFileDialog.getExistingDirectory(self, "Select Project Directory", os.getcwd())
 
             print("Selecting project directory...")
+            # Add message to the status bar
+            self.ui.status_bar.setText("Selecting project directory...")
 
         except Exception as e:
             # Open message box
@@ -375,6 +391,8 @@ class MainWindow(QMainWindow):
             project_directory_edit.setText(project_directory)
 
             print(project_directory + " selected successfully!")
+            # Add message to the status bar
+            self.ui.status_bar.setText(project_directory + " selected successfully!")
 
     # Save the new project
     def save_new_project(self, project_name_edit, project_directory_edit):
@@ -385,6 +403,8 @@ class MainWindow(QMainWindow):
         try:
 
             print("Creating project: " + project_name_edit.text())
+            # Add message to the status bar
+            self.ui.status_bar.setText("Creating project: " + project_name_edit.text())
 
             # Add the project to the list of projects
             new_project_path = os.path.join(project_directory_edit.text(), project_name_edit.text())
@@ -410,6 +430,8 @@ class MainWindow(QMainWindow):
             QMessageBox.information(self, 'Success', 'Project successfully created', QMessageBox.Ok)
 
             print("Project successfully created!")
+            # Add message to the status bar
+            self.ui.status_bar.setText("Project successfully created!")
 
     def new_project(self):
         """
@@ -465,6 +487,8 @@ class MainWindow(QMainWindow):
         dialog.exec_()
 
         print("Creating new project...")
+        # Add message to the status bar
+        self.ui.status_bar.setText("Creating new project...")
 
         # Save project to text file
         self.write_project_to_text_file(self.Projects[0].name, self.Projects[0].path)
@@ -492,6 +516,8 @@ class MainWindow(QMainWindow):
         self.Models.open_models_form()
 
         print("Adding new model...")
+        # Add message to the status bar
+        self.ui.status_bar.setText("Adding new model...")
 
     def load_models(self):
         """
@@ -518,6 +544,8 @@ class MainWindow(QMainWindow):
         """
 
         print("Editing models...")
+        # Add message to the status bar
+        self.ui.status_bar.setText("Editing models...")
 
         # Open a window displaying the models in a table
         window = QDialog()
@@ -597,6 +625,8 @@ class MainWindow(QMainWindow):
         if confirmation == QMessageBox.Yes:
 
             print("Deleting " + self.Models.list[selected_row] + " model...")
+            # Add message to the status bar
+            self.ui.status_bar.setText("Deleting " + self.Models.list[selected_row] + " model...")
 
             # Remove the model from the list
             model_name = self.Models.list[selected_row]
@@ -622,6 +652,8 @@ class MainWindow(QMainWindow):
         """
 
         print("Loading image...")
+        # Add message to the status bar
+        self.ui.status_bar.setText("Loading image...")
 
         # Disable the next and previous buttons until the user selects a folder
         self.ui.next.setEnabled(False)
@@ -640,6 +672,8 @@ class MainWindow(QMainWindow):
         """
 
         print("Loading images from folder...")
+        # Add message to the status bar
+        self.ui.status_bar.setText("Loading images from folder...")
 
         self.Images.clear()
 
@@ -777,6 +811,8 @@ class MainWindow(QMainWindow):
         if msg.exec_() == QMessageBox.Cancel:
 
             print("Saving results in a custom folder...")
+            # Add message to the status bar
+            self.ui.status_bar.setText("Saving results in a custom folder...")
 
             # Set the window as modal
             self.setWindowModality(Qt.ApplicationModal)
@@ -792,7 +828,8 @@ class MainWindow(QMainWindow):
                 # Write the Batches to a text file
                 with open(os.path.join(self.Projects[0].path, 'batches.txt'), 'w') as file:
                     for batch in self.Batches:
-                        file.write(batch.path + '\n')
+                        if batch.project == os.path.basename(self.Projects[0].path):
+                            file.write(batch.path + '\n')
                 
             else:
                 shutil.rmtree(folder_path)
@@ -802,12 +839,15 @@ class MainWindow(QMainWindow):
                 # Write the Batches to a text file
                 with open(os.path.join(self.Projects[0].path, 'batches.txt'), 'w') as file:
                     for batch in self.Batches:
-                        file.write(batch.path + '\n')
+                        if batch.project == os.path.basename(self.Projects[0].path):
+                            file.write(batch.path + '\n')
 
         # If the user selects the default folder option, create the folder if it doesn't exist
         else:
 
             print("Saving results in the default folder...")
+            # Add message to the status bar
+            self.ui.status_bar.setText("Saving results in the default folder...")
 
             folder_number = 1
             folder_path = os.path.join(self.Projects[0].path, os.path.join('exp'))
@@ -823,7 +863,8 @@ class MainWindow(QMainWindow):
                 # Write the Batches to a text file
                 with open(os.path.join(self.Projects[0].path, 'batches.txt'), 'w') as file:
                     for batch in self.Batches:
-                        file.write(batch.path + '\n')
+                        if batch.project == os.path.basename(self.Projects[0].path):
+                            file.write(batch.path + '\n')
 
             else:
                 shutil.rmtree(folder_path)
@@ -833,9 +874,9 @@ class MainWindow(QMainWindow):
                 # Write the Batches to a text file
                 with open(os.path.join(self.Projects[0].path, 'batches.txt'), 'w') as file:
                     for batch in self.Batches:
-                        file.write(batch.path + '\n')
+                        if batch.project == os.path.basename(self.Projects[0].path):
+                            file.write(batch.path + '\n')
 
-        print(self.Batches[0].path)
         # Display the folder path in the BatchFolder label
         self.ui.BatchFolder.setText("Batch Folder: " + self.Batches[0].name)
 
@@ -853,6 +894,8 @@ class MainWindow(QMainWindow):
         model_path = os.path.join(self.Models.path, self.ui.comboBox.currentText(), self.ui.comboBox.currentText() + '.pt')
 
         print("Yolo Model selected: " + os.path.basename(model_path))
+        # Add message to the status bar
+        self.ui.status_bar.setText("Yolo Model selected: " + os.path.basename(model_path))
 
         # Select the folder where the results will be saved
         batch_folder = self.Batches[0].path
@@ -866,11 +909,18 @@ class MainWindow(QMainWindow):
         # Save the results
         results.save(save_dir=batch_folder, exist_ok=True)
         
+        print("Processing images...")
+        # Add message to the status bar
+        self.ui.status_bar.setText("Processing images...")
+
         # Display the results
         results.print()
 
         # Rename the images in the folder
         print("Renaming images...")
+        # Add message to the status bar
+        self.ui.status_bar.setText("Renaming images...")
+
         for i in range(len(self.Images)):
             # Set the new path of the image
             self.Images[i].new_path_result(batch_folder)
@@ -880,6 +930,9 @@ class MainWindow(QMainWindow):
 
         # Save results to text file
         print("Saving results to text file...")
+        # Add message to the status bar
+        self.ui.status_bar.setText("Saving results to text file...")
+
         with open(os.path.join(batch_folder, 'results.txt'), 'w') as save_results_file:
             save_results_file.write('Saved ' + str(len(self.Images)) + ' images to ' + batch_folder + '\n')
             save_results_file.write('\n')
@@ -920,8 +973,12 @@ class MainWindow(QMainWindow):
                 QMessageBox.warning(self, 'Error', f'Error moving the images to their subfolders: {str(e)}', QMessageBox.Ok)
 
         print("Subdirectories created!")
+        # Add message to the status bar
+        self.ui.status_bar.setText("Subdirectories created!")
 
         print("Images moved to subfolders!")
+        # Add message to the status bar
+        self.ui.status_bar.setText("Images moved to subfolders!")
 
         # Display results images
         self.load_image_result(self.Images[0])
@@ -956,6 +1013,8 @@ class MainWindow(QMainWindow):
         """
 
         print("Exporting report...")
+        # Add message to the status bar
+        self.ui.status_bar.setText("Exporting report...")
         
         # Call nbconvert to convert the notebook to HTML
         subprocess.call(["python", "src/layout.py"])
@@ -999,6 +1058,9 @@ class MainWindow(QMainWindow):
             file_dialog = QFileDialog()
             file_dialog.setFileMode(QFileDialog.DirectoryOnly)
             file_dialog.setOption(QFileDialog.DontUseNativeDialog, True)
+            file_dialog.setOption(QFileDialog.ShowDirsOnly, True)
+            file_dialog.setOption(QFileDialog.DontResolveSymlinks, True)
+            file_dialog.setOption(QFileDialog.ReadOnly, True)
             # Open the file dialog in the current project folder
             file_dialog.setDirectory(self.Projects[0].path)
             file_dialog.setFont(font)
@@ -1022,6 +1084,8 @@ class MainWindow(QMainWindow):
 
             # Print a text saying that the batches are being compared with their respective names (the names of the folders before the results.txt file)
             print("Comparing batches: " + ", ".join([os.path.basename(os.path.dirname(path)) for path in self.batch_results]))
+            # Add message to the status bar
+            self.ui.status_bar.setText("Comparing batches: " + ", ".join([os.path.basename(os.path.dirname(path)) for path in self.batch_results]))
 
         except Exception as e:
             # Message box to inform the user of the error
@@ -1029,6 +1093,8 @@ class MainWindow(QMainWindow):
         
         else:
             print("Exporting batch report...")
+            # Add message to the status bar
+            self.ui.status_bar.setText("Exporting batch report...")
             
             # Call nbconvert to convert the notebook to HTML
             subprocess.call(["python", "src/layout.py"])
