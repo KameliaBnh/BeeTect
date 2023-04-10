@@ -9,7 +9,7 @@ In recent years, computer vision and deep learning has become a vital component 
 
 #### Install conda and dependencies
 
-1. Install Miniconda/Anaconda
+1. Install Miniconda/Anaconda (if you don't already have)
 
 2. Open the terminal and write the following commands:
 
