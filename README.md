@@ -97,14 +97,22 @@ The results will be saved in the selected fodler, along with a 'results.txt' fil
 The images with bounding boxes for the detected pollinators (along with a .json file of the same name), are also saved in different subfolders in the selected folder:
 * 'No-Pollinator' folder: the images that don't contain any pollinators.
 * 'Pollinator' folder: the images containing at least one pollinator.
-    ** A subfolder with the name of the detected species is created for each pollinator detected on an image: if there is only one pollionator on an image, it will be saved in that subfolder.
-    ** If there are more than one pollinator on an image, it will be saved in the 'Multiple-Pollinators' subfolder.
+    * A subfolder with the name of the detected species is created for each pollinator detected on an image: if there is only one pollionator on an image, it will be saved in that subfolder.
+    * If there are more than one pollinator on an image, it will be saved in the 'Multiple-Pollinators' subfolder.
     
 The HTML report name after the batch is saved in the selected folder.
 
 #### Multiple Batches Comparison Results
 
+To compare different batches from the same project, you can select the 'Export Batch Report' button in the menu bar:
 
+<img width="262" alt="image" src="https://user-images.githubusercontent.com/126243509/230942515-d4d2022f-0563-4fe7-8285-748c85e911e3.png">
+
+It will open a file dialog for you to select multiple batches to be compared:
+
+<img width="354" alt="image" src="https://user-images.githubusercontent.com/126243509/230942625-e8289917-43bb-4679-9e4d-4c8e3e294071.png">
+
+Once you submit the batches you want to comapre, an HTML report will be generated with statistical comaprison of the selected batches.
 
 
 
