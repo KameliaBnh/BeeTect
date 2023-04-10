@@ -788,10 +788,21 @@ class MainWindow(QMainWindow):
                 os.makedirs(folder_path)
                 # Add the batch to the top of the list
                 self.Batches.insert(0, Batch.Batch(folder_path))
+
+                # Write the Batches to a text file
+                with open(os.path.join(self.Projects[0].path, 'batches.txt'), 'w') as file:
+                    for batch in self.Batches:
+                        file.write(batch.path + '\n')
+                
             else:
                 shutil.rmtree(folder_path)
                 # Move the batch to the top of the list
                 self.Batches.insert(0, self.Batches[[batch.path for batch in self.Batches].index(folder_path)])
+
+                # Write the Batches to a text file
+                with open(os.path.join(self.Projects[0].path, 'batches.txt'), 'w') as file:
+                    for batch in self.Batches:
+                        file.write(batch.path + '\n')
 
         # If the user selects the default folder option, create the folder if it doesn't exist
         else:
@@ -959,6 +970,15 @@ class MainWindow(QMainWindow):
         # Add the graphs to the visualisation pane, in the graph1 and graph2 labels
         self.ui.graph1.setPixmap(QPixmap(os.path.join(self.Batches[0].path, 'Output_Graphs', 'Bar_plot.png')).scaledToHeight(self.ui.stats_graphs_frame.height()))
         self.ui.graph2.setPixmap(QPixmap(os.path.join(self.Batches[0].path, 'Output_Graphs', 'bee_species_counts.png')).scaledToHeight(self.ui.stats_graphs_frame.height()))
+
+        # Fill the table with the results
+        self.fill_table()
+
+    # def fill_table(self):
+    #     """
+    #     Fill the table with the results of the batch.
+    #     """
+
 
     def export_batch_report(self):
         """

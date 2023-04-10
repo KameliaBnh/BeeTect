@@ -13,6 +13,9 @@ pyside2_dir = os.path.dirname(QtWidgets.__file__)
 # Add the PySide2 plugins directory to the Qt plugin search path
 os.environ["QT_PLUGIN_PATH"] = os.path.join(pyside2_dir, "plugins") #qt5_applications\Qt\plugins
 
+# Setting environment variable for MKL
+os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
+
 if __name__ == "__main__":
     
     # Set the Qt::AA_ShareOpenGLContexts attribute
