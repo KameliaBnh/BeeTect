@@ -4,7 +4,6 @@ import os
 
 # HTML Layout for 1 batch
 if len(bc.main_window.batch_results) == 1:
-    print(bc.main_window.batch_results)
 
 
     toc_html = f"""

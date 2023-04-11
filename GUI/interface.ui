@@ -32,7 +32,7 @@
        </font>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="VisualisationTab">
        <attribute name="title">
@@ -488,9 +488,12 @@
              <property name="frameShadow">
               <enum>QFrame::Raised</enum>
              </property>
-             <layout class="QVBoxLayout" name="verticalLayout_7">
-              <item>
-               <widget class="QTableWidget" name="statsTable">
+             <layout class="QGridLayout" name="gridLayout_6">
+              <item row="1" column="2">
+               <widget class="QTableWidget" name="statsTable"/>
+              </item>
+              <item row="1" column="3">
+               <widget class="QTableWidget" name="modelTable">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                   <horstretch>0</horstretch>
@@ -521,6 +524,32 @@
                 <attribute name="verticalHeaderCascadingSectionResizes">
                  <bool>true</bool>
                 </attribute>
+               </widget>
+              </item>
+              <item row="0" column="2">
+               <widget class="QLabel" name="stats_label">
+                <property name="font">
+                 <font>
+                  <weight>75</weight>
+                  <bold>true</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Batch Statistics:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="3">
+               <widget class="QLabel" name="model_label">
+                <property name="font">
+                 <font>
+                  <weight>75</weight>
+                  <bold>true</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Model Summary:</string>
+                </property>
                </widget>
               </item>
              </layout>
