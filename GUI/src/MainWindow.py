@@ -4,6 +4,7 @@ import subprocess
 import webbrowser
 import pandas
 import torch
+import csv
 
 from PySide2.QtGui import QIcon, QFont, QPixmap
 from PySide2.QtCore import QFile, Qt
@@ -52,6 +53,8 @@ class MainWindow(QMainWindow):
                 # Fill the self.Batches list with the batches written in the batches.txt file
                 with open(os.path.join(self.Projects[0].path, "batches.txt"), "r") as batches_file:
                     self.Batches = [Batch.Batch(batch) for batch in batches_file.read().splitlines()]
+            else:
+                self.Batches = []
 
         else:
             self.Batches = []
@@ -906,6 +909,10 @@ class MainWindow(QMainWindow):
 
         results = model([im.image_cv for im in self.Images]) # inference
 
+        print("Running detection...")
+        # Add message to the status bar
+        self.ui.status_bar.setText("Running detection...")
+
         # Save the results
         results.save(save_dir=batch_folder, exist_ok=True)
         
@@ -1033,11 +1040,36 @@ class MainWindow(QMainWindow):
         # Fill the table with the results
         self.fill_table()
 
-    # def fill_table(self):
-    #     """
-    #     Fill the table with the results of the batch.
-    #     """
+    def fill_table(self):
+        """
+        Fill the table with the results of the batch using csv files.
+        """
 
+        # Read the data from the Counts.csv file
+        data_counts = os.path.join(self.Batches[0].path, 'Counts.csv')
+
+        # Read the data from the Model_Summary.csv file
+        data_model = os.path.join(self.Batches[0].path, 'Model_Summary.csv')
+
+        tables = [
+            ('Counts.csv', self.ui.statsTable),
+            ('Model_Summary.csv', self.ui.modelTable)
+        ]
+        
+        for filename, table in tables:
+            with open(os.path.join(self.Batches[0].path, filename)) as file:
+                reader = csv.DictReader(file)
+                rows = [row for row in reader]
+                
+            table.setColumnCount(len(rows[0]))
+            table.setHorizontalHeaderLabels(rows[0].keys())
+            
+            for row in rows:
+                i = table.rowCount()
+                table.insertRow(i)
+                for j, value in enumerate(row.values()):
+                    item = QTableWidgetItem(value)
+                    table.setItem(i, j, item)
 
     def export_batch_report(self):
         """

@@ -1,22 +1,3 @@
-# Attributes:
-#   - name: Name of the image
-#   - path: Path of the image
-#   - pixmap: Pixmap of the image
-#   - extension: Extension of the image
-#   - image_cv: OpenCV image
-#   - path_result: Path of the result image
-#   - name_result: Name of the result image
-#   - pixmap_result: Pixmap of the result image
-#   - json_result_path: Path of the json file containing the result
-#   - class_name: Name of the class of the image
-#   - class_folder_name: Name of the folder containing the class of the image
-
-# Functions:
-#   - __init__(self, path): Class constructor
-#   - new_path_result(self, path): Define the path of the result image
-#   - new_pixmap_result(self, path): Define the pixmap of the result image
-#   - store_class_name(self, class_name): Store the name of the class of the image
-
 import os
 import cv2
 

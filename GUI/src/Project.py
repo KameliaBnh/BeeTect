@@ -1,14 +1,3 @@
-# Attributes :
-#   - name : Name of the project
-#   - path : Path to the project
-#   - creation_date : Date of creation of the project
-#   - last_modification_date : Date of the last modification of the project
-#   - description : Description of the project
-
-# Functions :
-#   - __init__(self, name, path) : Class constructor
-#   - update_last_modification_date(self) : Update the last modification date of the project
-
 import os
 
 class Project():

@@ -48,6 +48,9 @@ summary_df = pd.DataFrame({
     'Weight Decay':[Weight_decay]
 })
 
+# Writing the summary to a csv file
+summary_df.to_csv(os.path.join(bc.main_window.Batches[0].path, 'Model_Summary.csv'), index=False)
+
 # Getting the number of input Images 
 # converting the strings of numbers into integers to calculate max value 
 numbers = [int(n) for n in bc.image_no] 
@@ -73,6 +76,9 @@ col_names = ["Metric","Species Name", "Value"]
 
 #Saving the Information in a dataframe 
 counts_df =pd.DataFrame(data, columns=col_names)
+
+# Writing the information to a csv file
+counts_df.to_csv(os.path.join(bc.main_window.Batches[0].path, 'Counts.csv'), index=False)
 
 #Storing the bee counts in a dataframe 
 abundance_df = pd.DataFrame(list(bc.filtered_counts.items()), columns=['Species', 'Occurence'])
