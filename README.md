@@ -102,6 +102,12 @@ The images with bounding boxes for the detected pollinators (along with a .json 
     
 The HTML report name after the batch is saved in the selected folder.
 
+To have a quick summary of the results, you can check the 'Statistics' pane in the GUI:
+
+<img width="568" alt="image" src="https://user-images.githubusercontent.com/126243509/231149237-73aad710-9aa5-45ab-aa06-5fbcb4f4c9e6.png">
+
+There is a summary of the statistics calculated for the current batch, a summary of the model and two representative graphs.
+
 #### Multiple Batches Comparison Results
 
 To compare different batches from the same project, you can select the 'Export Batch Report' button in the menu bar:
