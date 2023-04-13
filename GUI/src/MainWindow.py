@@ -1119,6 +1119,13 @@ class MainWindow(QMainWindow):
             # Add message to the status bar
             self.ui.status_bar.setText("Comparing batches: " + ", ".join([os.path.basename(os.path.dirname(path)) for path in self.batch_results]))
 
+            # Create a directory to save the results of the comparison and increment the number of the directory if it already exists
+            i = 1
+            while os.path.exists(os.path.join(self.Projects[0].path, f'Batch_Comparison_{i}')):
+                i += 1
+            os.mkdir(os.path.join(self.Projects[0].path, f'Batch_Comparison_{i}'))
+
+
         except Exception as e:
             # Message box to inform the user of the error
             QMessageBox.warning(self, 'Error', f'Error selecting the folders to compare: {str(e)}', QMessageBox.Ok)
@@ -1131,7 +1138,13 @@ class MainWindow(QMainWindow):
             # Call nbconvert to convert the notebook to HTML
             subprocess.call(["python", "src/layout.py"])
 
-            webbrowser.open(f'file://{os.getcwd()}/Batch_Comparison.html')
+            number = 0
+            for i in range(1, len(self.Projects[0].path)):
+                if os.path.exists(os.path.join(self.Projects[0].path, 'Batch_Comparison_' + str(i))):
+                    number = i
+
+            shutil.move(os.path.join(os.getcwd(), 'Batch_Comparison.html'), os.path.join(self.Projects[0].path, f'Batch_Comparison_' + str(number)))
+            webbrowser.open(f'file://{os.path.join(self.Projects[0].path, "Batch_Comparison_" + str(number))}/Batch_Comparison.html')
 
     def open_app_help(self):
         """
