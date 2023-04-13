@@ -1,0 +1,12 @@
+
+# Locations of train, test, and validation images.
+train: path/to/images/train/ 
+val: path/to/images/val/
+test: path/to/images/test/
+
+# number of classes
+nc: 9
+
+# class names
+names: ["apis_cerana", "apis_florea", "apis", "amegilla", "ceratina",
+          "meliponini", "xylocopa_aestuans", "pollinator", "unknown"]
