@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 import os
+import glob
 import sys
 import pandas as pd
 import scipy.stats as stats
@@ -126,8 +127,6 @@ def plot_filtered_counts(paths):
 
     for i in range(n):
         plt.bar(x + i * width, sorted_values_list[i], width=width, label=folder_names[i], edgecolor='white')
-        #plt.errorbar(x + i * width, sorted_values_list[i], yerr=errors[i], fmt='none', ecolor='black', capsize=4, alpha=0.5)
-        # if the error bars overlap there is no statistical difference between the groups and vice-versa
 
     plt.title('Bee species count', fontsize=20)
     plt.xticks(x, sorted_keys, fontsize=8)
@@ -368,27 +367,23 @@ def tukey(p_value):
 # Creating a function to perform Dunn tests
 def dunn(krushal_p):
 
-    if krushal_p < 0.05:
-        data = np.array(batch_values, dtype=object)
-        #data = np.array(batch_values).astype(float)
-        #labels = np.repeat(folder_names, [len(batch_values[i]) for i in range(len(batch_values))])
-        dunn_results = posthoc_dunn(data, p_adjust='bonferroni')
+    data = np.array(batch_values, dtype=object)
+    dunn_results = posthoc_dunn(data, p_adjust='bonferroni')
 
-        # Convert the results to a pandas DataFrame
-        dunn_df = pd.DataFrame(dunn_results)
-        dunn_df.columns = folder_names[:dunn_df.shape[1]]
+    # Convert the results to a pandas DataFrame
+    dunn_df = pd.DataFrame(dunn_results)
+    dunn_df.columns = folder_names[:dunn_df.shape[1]]
         
     return dunn_df
+
+
+        
+
 
 # Setting the significance level 
 alpha = 0.05
 
 filtered_counts, filtered_counts_list, per_image_counts, no_detection_images, image_no, folder_names = plot_filtered_counts(main_window.batch_results)
-
-df, overview_df = filtered_counts_table(main_window.batch_results)
-
-# Calling the normality function
-p, normality_df = normality(df)
 
 # Storing all the bee counts 
 batch_values = []
@@ -398,15 +393,44 @@ for counts in filtered_counts_list:
 # Extracting stat values from the function
 
 if len(main_window.batch_results) > 1:
+
+    df, overview_df = filtered_counts_table(main_window.batch_results)
+
+    # Calling the normality function
+    p, normality_df = normality(df)
+
     if p > alpha:
         if len(main_window.batch_results)==2:
-            Output1, Levene_df, Output2, ttest_df, Conclusion1 = comp_stats(main_window.batch_results,filtered_counts_list, folder_names)
+                Output1, Levene_df, Output2, ttest_df, Conclusion1 = comp_stats(main_window.batch_results,filtered_counts_list, folder_names)
         else:
-            p_value, Output1, anova_df, Conclusion2  = comp_stats(main_window.batch_results,filtered_counts_list, folder_names)
-            tukey_df = tukey(p_value)
+                p_value, Output1, anova_df, Conclusion2  = comp_stats(main_window.batch_results,filtered_counts_list, folder_names)
+                tukey_df = tukey(p_value)
     else: 
         if len(main_window.batch_results)==2:
-            Output1, whitney_df, Conclusion3 = comp_stats(main_window.batch_results,filtered_counts_list, folder_names)
+                Output1, whitney_df, Conclusion3 = comp_stats(main_window.batch_results,filtered_counts_list, folder_names)
         else:
-            Output1, krushal_p, krushal_df, Conclusion4 = comp_stats(main_window.batch_results, filtered_counts_list, folder_names)
-            #dunn_df = dunn(krushal_p)
+                Output1, krushal_p, krushal_df, Conclusion4 = comp_stats(main_window.batch_results, filtered_counts_list, folder_names)
+
+                if krushal_p < 0.05:
+
+                    dunn_df = dunn(krushal_p)
+                else:
+                    Conclusion5 = "Cannot Perform dunn test as p-value is greater than 0.05."
+
+
+
+    html_file_paths = []
+    folder_name_paths = []
+   
+
+
+    with open("selected_batches.txt", "r") as f:
+        for line in f:
+            path = line.strip()  # remove newline character and any extra whitespace
+            folder_name = path.split("\\")[-2]  # extract second-to-last element of path
+            folder_name_paths.append(folder_name)
+
+    for folder in folder_name_paths:
+        html_files = glob.glob(os.path.join(folder, "*.html"))
+        html_file_paths.append(html_files)
+         

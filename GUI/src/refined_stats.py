@@ -7,6 +7,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import yaml
+import base64
 import warnings
 warnings.filterwarnings("ignore", message="this method is deprecated")
 
@@ -26,30 +27,107 @@ with open(user_info_path) as f:
 
 full_user_name = first_name + ' ' + last_name
 
+#path to the selected model
+model_path = os.path.join(bc.main_window.Models.path, bc.main_window.ui.comboBox.currentText())
+
+file_paths = []
+if os.path.isfile(os.path.join(model_path, 'results.png')):
+    file_paths.append(os.path.join(model_path, 'results.png'))
+if os.path.isfile(os.path.join(model_path, 'confusion_matrix.png')):
+    file_paths.append(os.path.join(model_path, 'confusion_matrix.png'))
+if os.path.isfile(os.path.join(model_path, 'F1_curve.png')):
+    file_paths.append(os.path.join(model_path, 'F1_curve.png'))
+
+
+#Creating a function to style the tables 
+def create_styled_table(df):
+    styled_table = df.style.set_table_styles([{'selector': 'th', 'props': [ ('font-size', '24px'), ('text-align', 'center'), ('color', 'black'), ('background-color', 'lightblue'), ('font-weight', 'bold'),('padding', '20px'), ('border', '1px solid black'), ('border-collapse','collapse !important')]}, {'selector': 'td','props': [('font-size', '20px'),('padding', '15px'), ('border', '1px solid black'), ('text-align', 'center')]}])
+    html = styled_table.hide_index().render()
+    return html
+
+
+# Creating a function to encode the image data from a directory
+def image_encode(directory,width, height):
+    img_tags = []
+
+    # get a list of all the image files in the directory
+    img_files = [f for f in os.listdir(directory) if f.endswith('.png')]
+
+    for img_file in img_files:
+        with open(os.path.join(directory, img_file), 'rb') as f:
+            image_bytes = f.read()
+
+            # Encode image data as base64
+            image_base64 = base64.b64encode(image_bytes).decode('utf-8')
+
+           # Create data URL for image
+            image_data_url = f'data:image/png;base64,{image_base64}'
+
+            # Generate HTML with embedded image
+            images = f'<img src="{image_data_url}" alt="plot" style="width: {width}px; height: {height}px;" />'
+
+            img_tags.append(images)
+    return img_tags
+
+
+# Creating a function to encode the image data from a list
+
+def image_encode_list(image_paths, width, height):
+    img_tags = []
+
+    for img_path in image_paths:
+        with open(img_path, 'rb') as f:
+            image_bytes = f.read()
+
+            #extracting subfolder name 
+            subfolder_name = os.path.basename(os.path.dirname(img_path))
+
+            # Encode image data as base64
+            image_base64 = base64.b64encode(image_bytes).decode('utf-8')
+
+            # Create data URL for image
+            image_data_url = f'data:image/png;base64,{image_base64}'
+
+            # Generate HTML with embedded image
+            images = f'<img src="{image_data_url}" title ="{subfolder_name}" style="width: {width}px; height: {height}px; margin-left: 165px; margin-top: 60px;" />'
+
+            img_tags.append(images)
+    return img_tags
+
+
+# Checking if the opt.yaml file is provided to create a model summary dataframe 
+
+if os.path.exists(os.path.join(model_path, 'opt.yaml')):
 # Getting the Model Summmary 
-with open(os.path.join(bc.main_window.Models.path, bc.main_window.ui.comboBox.currentText(), 'opt.yaml'), 'r') as f:
-    data = yaml.safe_load(f)
+    with open(os.path.join(model_path, 'opt.yaml'), 'r') as f:
+        data = yaml.safe_load(f)
 
-# Extract the relevant information for the model summary
-epochs = data['epochs']
-batch_size = data['batch_size']
-imgsz = data['imgsz']
-optimizer = data['optimizer']
-Momentum = data['hyp']['momentum']
-Weight_decay= data['hyp']['weight_decay']
+    # Extract the relevant information for the model summary
+    epochs = data['epochs']
+    batch_size = data['batch_size']
+    imgsz = data['imgsz']
+    optimizer = data['optimizer']
+    Momentum = data['hyp']['momentum']
+    Weight_decay= data['hyp']['weight_decay']
+    Anchor = data['hyp']['anchor_t']
+    learning_rate = data['hyp']['lr0']
 
-# Create a DataFrame to store the summary
-summary_df = pd.DataFrame({
-    'Number of Epochs': [epochs],
-    'Batch Size': [batch_size],
-    'Image Size': [imgsz],
-    'Optimizer': [optimizer],
-    'Momentum':[Momentum],
-    'Weight Decay':[Weight_decay]
-})
+    # Create a DataFrame to store the summary
+    summary_df = pd.DataFrame({
+        'Number of Epochs': [epochs],
+        'Batch Size': [batch_size],
+        'Image Size': [imgsz],
+        'Optimizer': [optimizer],
+        'Momentum':[Momentum],
+        'Weight Decay':[Weight_decay],
+        'Anchor':[Anchor],
+        'Learning rate':[learning_rate]
+    })
 
-# Writing the summary to a csv file
-summary_df.to_csv(os.path.join(bc.main_window.Batches[0].path, 'Model_Summary.csv'), index=False)
+    # Writing the summary to a csv file
+    summary_df.to_csv(os.path.join(bc.main_window.Batches[0].path, 'Model_Summary.csv'), index=False)
+
+    html_summary =  create_styled_table(summary_df)
 
 # Getting the number of input Images 
 # converting the strings of numbers into integers to calculate max value 
@@ -89,19 +167,23 @@ total_count = abundance_df['Occurence'].sum()
 abundance_df['Abundance'] = abundance_df['Occurence'] / total_count
 abundance_df['Abundance'] = abundance_df['Abundance'].round(2)
 
-#Creating a function to style the tables 
-def create_styled_table(df):
-    styled_table = df.style.set_table_styles([{'selector': 'th', 'props': [ ('font-size', '24px'), ('text-align', 'center'), ('color', 'black'), ('background-color', 'lightblue'), ('font-weight', 'bold'),('padding', '5px'), ('border', '1px solid black')]}, {'selector': 'td','props': [('font-size', '20px'),('padding', '5px'), ('border', '1px solid black'), ('text-align', 'center')]}])
-    html = styled_table.hide_index().render()
-    return html
 
-html0 = create_styled_table(bc.normality_df)
-html1 = create_styled_table(bc.df)
-html2 = create_styled_table(bc.overview_df)
-html_summary =  create_styled_table(summary_df)
+# Displaying dataframes as a table 
 html_counts = create_styled_table(counts_df)
 html_abundance = create_styled_table(abundance_df)
 
+
+# Getting the model performance graphs in encoded format
+perform_graphs = image_encode_list(file_paths, 800, 600)
+
+#Getting the names of the performance grphs
+perform_graphs_names = []
+for path in file_paths:
+    name = os.path.basename(path)
+    perform_graphs_names.append(name)
+
+
+# Checking if the length of the selected batches is one or more
 if len(bc.main_window.batch_results) == 1:
 
     # Getting example images for each detected species 
@@ -130,6 +212,7 @@ if len(bc.main_window.batch_results) == 1:
     if not os.path.exists(output_directory_single_batch):
         os.makedirs(output_directory_single_batch)
 
+    
     #Creating a bar chart
     colors = plt.cm.Set1(np.linspace(0, 1, len(abundance_df['Species'])))
     color_dict = dict(zip(abundance_df['Species'], colors))
@@ -150,30 +233,26 @@ if len(bc.main_window.batch_results) == 1:
     fig.savefig(f'{output_directory_single_batch}/bee_species_counts.png', dpi=700)
     plt.close()
 
+    img_tags = image_encode(output_directory_single_batch, 600, 600)
+    img_tags_list = image_encode_list(random_image_paths, 500, 500)
+
+  
 else:
+
+    html0 = create_styled_table(bc.normality_df)
+    html1 = create_styled_table(bc.df)
+    html2 = create_styled_table(bc.overview_df)
 
     #creating a directory to save all the output graphs
     output_directory_batch_comparison = os.path.join(bc.main_window.Projects[0].path,'Output_Graphs')
     if not os.path.exists(output_directory_batch_comparison):
         os.makedirs(output_directory_batch_comparison)
 
-    # Creating a heatmap 
-    bc.df.set_index('Batch Name', inplace=True) # set 'Batch Name' as index
-    heatmap = sns.heatmap(bc.df, cmap='coolwarm', center=0, annot=True, fmt='.2f') # plot heatmap with annotations and specified colormap
-
-    # Set the figure size
-    fig = heatmap.get_figure()
-    fig.set_size_inches(10, 8)
-    plt.title("Bee Count Heatmap")
-    plt.xlabel('Species')
-
-    # Save the heatmap as an image
-    fig.savefig(f'{output_directory_batch_comparison}/heatmap.png', dpi=300, bbox_inches='tight')
-    
     # Save the plots into the output graphs folder 
     shutil.move(os.path.join(os.getcwd(), 'bee_counts.png'),output_directory_batch_comparison)
     shutil.move(os.path.join(os.getcwd(), 'descriptive_stats.png'),output_directory_batch_comparison)
     shutil.move(os.path.join(os.getcwd(), 'QQ-plot.png'),output_directory_batch_comparison)
+
 
     if bc.p > bc.alpha:
         if len(bc.main_window.batch_results)==2:
@@ -191,4 +270,9 @@ else:
 
         else: 
             html8 = create_styled_table(bc.krushal_df)
-            html9 = create_styled_table(bc.dunn_df)
+            if bc.krushal_p < 0.05:
+                html9 = create_styled_table(bc.dunn_df)
+            else:   
+                Conclusion5 = "Cannot Perform dunn test as p-value is greater than 0.05"
+
+    img_tags = image_encode(output_directory_batch_comparison, 800, 600)
