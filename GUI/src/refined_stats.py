@@ -194,7 +194,7 @@ if len(bc.main_window.batch_results) == 1:
     # Loop through each subfolder
     for subfolder in subfolders:
     # Get a list of all image files within the subfolder
-        image_files = [f for f in os.listdir(subfolder) if f.endswith(".JPG")]
+        image_files = [f for f in os.listdir(subfolder) if f.lower().endswith(".jpg")]
 
     # Choose a random image from the list
         if image_files:
