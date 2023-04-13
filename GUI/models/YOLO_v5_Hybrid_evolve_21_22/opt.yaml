@@ -1,36 +1,37 @@
-weights: /tutorials/Project/Group_Project_DL/Data/Data_For_Training/New_Data/YOLOv5x_2022_21_Dataset_run/yolov5x.pt
+weights: /tutorials/Project/Group_Project_DL/Data/Data_For_Training/New_Data/Yolo_Evolve_21_22/train_evolve_21_22/yolov5x.pt
 cfg: ''
 data: /tutorials/Project/Group_Project_DL/Data/Data_For_Training/New_Data/data.yaml
 hyp:
-  lr0: 0.01
-  lrf: 0.01
-  momentum: 0.937
-  weight_decay: 0.0005
-  warmup_epochs: 3.0
-  warmup_momentum: 0.8
-  warmup_bias_lr: 0.1
-  box: 0.05
-  cls: 0.5
-  cls_pw: 1.0
-  obj: 1.0
-  obj_pw: 1.0
+  lr0: 0.0115
+  lrf: 0.0111
+  momentum: 0.91001
+  weight_decay: 0.00054
+  warmup_epochs: 2.8389
+  warmup_momentum: 0.76116
+  warmup_bias_lr: 0.07306
+  box: 0.04732
+  cls: 0.52613
+  cls_pw: 0.83385
+  obj: 0.82512
+  obj_pw: 1.1616
   iou_t: 0.2
-  anchor_t: 4.0
+  anchor_t: 3.9497
   fl_gamma: 0.0
-  hsv_h: 0.015
-  hsv_s: 0.7
-  hsv_v: 0.4
+  hsv_h: 0.01071
+  hsv_s: 0.73437
+  hsv_v: 0.35464
   degrees: 0.0
-  translate: 0.1
-  scale: 0.5
+  translate: 0.14664
+  scale: 0.45511
   shear: 0.0
   perspective: 0.0
   flipud: 0.0
   fliplr: 0.5
-  mosaic: 1.0
+  mosaic: 0.84555
   mixup: 0.0
   copy_paste: 0.0
-epochs: 110
+  anchors: 2.0
+epochs: 112
 batch_size: 32
 imgsz: 640
 rect: false
@@ -49,8 +50,8 @@ single_cls: false
 optimizer: SGD
 sync_bn: false
 workers: 8
-project: ../../../Yolos/yolov5/runs/train
-name: 2022_2021_Dataset_Run
+project: ../../../../../Yolos/yolov5/runs/train
+name: 2022_2021_Evolve_Train
 exist_ok: false
 quad: false
 cos_lr: false
@@ -65,4 +66,4 @@ entity: null
 upload_dataset: false
 bbox_interval: -1
 artifact_alias: latest
-save_dir: ../../../Yolos/yolov5/runs/train/2022_2021_Dataset_Run
+save_dir: ../../../../../Yolos/yolov5/runs/train/2022_2021_Evolve_Train

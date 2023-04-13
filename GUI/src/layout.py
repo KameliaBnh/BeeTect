@@ -4,13 +4,14 @@ import os
 
 # HTML Layout for 1 batch
 if len(bc.main_window.batch_results) == 1:
+   
 
-
+    # The quick links section 
     toc_html = f"""
         <div class="quick-links">
         <nav>
                 <a href="#output-examples">Output Examples</a>
-                <a href="#Detection-results">YOLO Results</a>
+                <a href="#Detection-results">Detection Results</a>
                 <a href="#model-summary">Model Summary</a>
         </nav>
         </div>
@@ -20,8 +21,8 @@ if len(bc.main_window.batch_results) == 1:
     #The User Information section
     user_info_html="""
         <div class="user_section" id="User_info">
-            <h1 style="margin-left: 534px; width: 50%; height: 20px;">User Information</h1>
-            <p style="margin-left: 420px; width: 50%; font-size: 17px;">
+            <h1 style="margin-left: 514px; width: 50%; height: 20px;">User Information</h1>
+            <p style="margin-left: 514px; width: 50%; font-size: 17px;">
             Username: {0}<br>
             Email: {1}<br>
             Date: {2}<br>
@@ -32,31 +33,32 @@ if len(bc.main_window.batch_results) == 1:
     """.format(rs.full_user_name, rs.email, rs.Date, rs.Time)
 
     
-    #Section 1 contains the output example images 
+    #Heading contains the title of the sub-section
     heading_html = """
     <a id="output-examples"></a>
     <div class="section2" id="Output Examples">
         <h1 style="margin-left: 10px; margin-top: 90px; font-size: 24px; border: 1px solid khaki; padding: 10px; background-color: Teal; color: white;">Output Examples</h1>
-        <h1 style="margin-left: 60px; margin-top: 30px; font-size: 20px; border: 1px solid khaki; padding: 10px; background-color: khaki;">Detection of Bees using YOLO</h1>
+        <h1 style="margin-left: 60px; margin-top: 30px; font-size: 20px; border: 1px solid khaki; padding: 10px; background-color: khaki;">Detection of Bees using YOLO Model</h1>
     </div>
         """
 
-    section1_html = '<div style="display: flex; flex-wrap: wrap; margin-top: 60px;">'
-    for i, path in enumerate(rs.random_image_paths):
+
+    #Section 1 contains the output example images 
+    section1_html = '<div style="display: flex; flex-wrap: wrap; margin-top: 30px;">'
+    for i, path in enumerate(rs.img_tags_list):
     
         # Extract subfolder name from image path
         subfolder_name = os.path.basename(os.path.dirname(path))
-        section1_html += f'<p style="margin-left: 165px;"><img src="{path}" title="{subfolder_name}" width="500" height="500"></p>'
+        section1_html += f'{path}'
 
     section1_html += '</div>'
-    
 
-    
+
     # Section 2 contains the detection results 
     section2_html="""
-    <a id="yolo-results"></a>
+    <a id="Detection-results"></a>
     <div class="section1" id="Detection-results">
-        <h1 style="margin-left: 10px; margin-top: 90px; font-size: 24px; border: 1px solid khaki; padding: 10px; background-color: Teal; color: white;">YOLO Results</h1>
+        <h1 style="margin-left: 10px; margin-top: 90px; font-size: 24px; border: 1px solid khaki; padding: 10px; background-color: Teal; color: white;">Detection Results</h1>
         <h1 style="margin-left: 60px; margin-top: 30px; font-size: 20px; border: 1px solid khaki; padding: 10px; background-color: khaki;"> Species Counts and Abundance Summary</h1>
     </div>
 
@@ -73,44 +75,89 @@ if len(bc.main_window.batch_results) == 1:
 
     
     <div class="flex-container" style="margin-left:150px; width:1200px; margin-top: 50px;">
-        <div class="flex-item" style="flex-basis: 50%;"><img src="{2}/Bar_plot.png" style="width: 600px; height: 500px;">
+    <div class="flex-item" style="flex-basis: 50%;">{2}</div>
+    <div class="flex-item" style="flex-basis: 50%;">{3}</div>
+    </div>
+      """.format(rs.html_counts,rs.html_abundance,rs.img_tags[0],rs.img_tags[1])
+
+  
+  # Contains the Model Summary 
+    if os.path.exists(os.path.join(rs.model_path, 'opt.yaml')):
+        section3_html = """
+        
+            <a id="model-summary"></a>
+            <div class="section2" id="Model-summary">
+                <h1 style="margin-left: 60px; margin-top: 30px; font-size: 20px; border: 1px solid khaki; padding: 10px; background-color: khaki;">Optimized Parameters for YOLO Model Performance</h1>
+            </div>
+
+
+            <div class="flex-container" style="margin-left:200px; margin-top:30px;">
+                <div class="flex-item" style="flex-basis: 100%;">{0}</div>
+            </div>""".format(rs.html_summary)
+        
+    else:
+        section3_html = " "
+
+        
+    # Creating section for the performance graphs that were provided
+
+    graph_html_list = []
+    for img_tag, img_name in zip(rs.perform_graphs, rs.perform_graphs_names):
+        image_name = os.path.splitext(img_name)[0]
+        graph_html_list.append(
+            """
+            <div class="graph-container" style="margin: 20px;">
+                <h1 style="margin-left: 100px; margin-top: 10px; font-size: 20px; padding: 10px; background-color: lightblue;">{}</h1>
+                <div class="flex-item" style="flex-basis: 100%; margin-top: 10px; margin-left: 200px; ">{}</div>
+            </div>
+            """.format(image_name, img_tag)
+        )
+
+    # Join the HTML code for each image into a single string
+    graphs_html = '\n'.join(graph_html_list)
+
+    if len(graph_html_list)>0:
+        section4_html = """
+        <a id="model-summary"></a>
+        <div class="section2" id="Model-summary">
+            <h1 style="margin-left: 60px; margin-top: 60px; font-size: 20px; border: 1px solid khaki; padding: 10px; background-color: khaki;">Performance Graphs for YOLO Model Training</h1>
         </div>
-        <div class="flex-item" style="flex-basis: 50%;">
-            <img src="{2}/bee_species_counts.png" style="width: 650px; height: 600px;">
+
+        <div id="plot-container" style="display: flex; flex-wrap: wrap;">
+            {}
         </div>
-    </div> """.format(rs.html_counts,rs.html_abundance,rs.output_directory_single_batch)
+
+        """.format(graphs_html)
+    else:
+        section4_html = " "
 
 
-    section3_html = """
-    
-    
-    <a id="model-summary"></a>
-    <div class="section2" id="Model-summary">
-        <h1 style="margin-left: 10px; margin-top: 90px; font-size: 24px; border: 1px solid khaki; padding: 10px; background-color: Teal; color: white;">Model Summary</h1>
-        <h1 style="margin-left: 60px; margin-top: 30px; font-size: 20px; border: 1px solid khaki; padding: 10px; background-color: khaki;">Optimized Parameters for YOLO Model Performance</h1>
-    </div>
+    # Creating the Model Summary header depending whether either section 3 or 4 is present or not 
+    model_summary_header = ''
+    if section3_html or section4_html:
+        model_summary_header = '<h1 style="margin-left: 10px; margin-top: 90px; font-size: 24px; border: 1px solid khaki; padding: 10px; background-color: Teal; color: white;">Model Summary</h1>'
 
-
-    <div class="flex-container" style="margin-left:200px; margin-top:60px;">
-        <div class="flex-item" style="flex-basis: 100%;">{0}</div>
-    </div>
-
-    
-    <div class="section2" id="Model-summary">
-        <h1 style="margin-left: 60px; margin-top: 90px; font-size: 20px; border: 1px solid khaki; padding: 10px; background-color: khaki;">Performance Graphs for YOLO Model Training</h1>
-    </div>
-
-    <div class="section2">
-         <div><p style="margin-left: 180px; margin-top: 100px;"><img src="{1}/{2}/results.png" width="1000" height="1000"></p></div>
-         <div><p style="margin-left: 180px; margin-top: 100px;"><img src="{1}/{2}/F1_curve.png" width="1000" height="1000"></p></div>
-         <div><p style="margin-left: 55px; margin-top: 100px;"><img src="{1}/{2}/confusion_matrix.png" width="1000" height="1000"></p></div>
-    </div>
-    
-    """.format(rs.html_summary, bc.main_window.Models.path, bc.main_window.ui.comboBox.currentText())
 
 
 # HTML layout for more than two batches
 else: 
+
+
+    ## Creating links to the individual batches 
+    links_html = '<table style="border-collapse: collapse; width: 40%; margin-top: 40px; margin-left: 90px;">'
+    links_html += '<tr><th style="padding: 15px; border: 1px solid black;  background-color:lightblue; font-size :24px;">Batch Name</th><th style="padding: 15px; border: 1px solid black; background-color:lightblue; font-size: 24px;">Report Link</th></tr>'
+
+    for html_file_path in bc.html_file_paths:
+        for folder_path in bc.folder_name_paths:
+            if os.path.basename(str(html_file_path)).startswith(os.path.basename(str(folder_path))):
+                batch_name = os.path.basename(str(folder_path))
+                report_link = '<a href="' + ''.join(html_file_path) + '" target="_blank">Click here to view the report</a>'
+                links_html += f'<tr><td style="padding: 10px; border: 1px solid black;text-align: center; font-size: 20px;">{batch_name}</td><td style="padding: 10px; border: 1px solid black;text-align: center; font-size: 20px;">{report_link}</td></tr>'
+
+    links_html += '</table>'
+
+
+
 
     #The Quick Links Section
     toc_html = f"""
@@ -125,8 +172,8 @@ else:
     #The User Information section
     user_info_html="""
         <div class="user_section" id="User_info">
-            <h1 style="margin-left: 534px; width: 50%; height: 20px;">User Information</h1>
-            <p style="margin-left: 420px; width: 50%; font-size: 17px;">
+            <h1 style="margin-left: 514px; width: 50%; height: 20px;">User Information</h1>
+            <p style="margin-left: 514px; width: 50%; font-size: 17px;">
             Username: {0}<br>
             Email: {1}<br>
             Date: {2}<br>
@@ -168,15 +215,13 @@ else:
             <div id="plot-container">
             <div id="counts-container">
                 <a id="counts-graph"></a>
-                <div class="flex-item" style="flex-basis: 100%; margin-top:70px;"> 
-                <p style ="margin-left: 370px;"><img src="{0}/bee_counts.png" width="800" height="600"></p>
+                <div class="flex-item" style="flex-basis: 50%; margin-left:370px; margin-top:70px;">{0}</div>
                 </div>
             </div>
             
             <div id="stats-container" style="display: none;">
                 <a id="stats-graph"></a>
-                <div class="flex-item" style="flex-basis: 100%; margin-top:70px;"> 
-                <p style ="margin-left: 370px;"><img src="{0}/descriptive_stats.png" width="800" height="600"></p>
+                <div class="flex-item" style="flex-basis: 50%;  margin-left:370px; margin-top:70px;">{1}</div>
                 </div>
             </div>
             </div>
@@ -200,7 +245,7 @@ else:
                     }});
                 </script>
         </div>
-        """.format(rs.output_directory_batch_comparison)
+        """.format(rs.img_tags[0], rs.img_tags[1])
 
 
     ## Section 3 : The normality section 
@@ -210,13 +255,13 @@ else:
             <div class="section1" id="statistics-summary">
                 <h1 style="margin-left: 10px; margin-top: 90px; font-size: 24px; border: 1px solid khaki; padding: 10px; background-color: Teal; color: white;"> Normality Checks</h1>
                 <h1 style="margin-left: 60px; margin-top: 50px; font-size: 20px; border: 1px solid khaki; padding: 10px; background-color: khaki;"> QQ-Plot </h1>
-                <div class="QQ-Plot" style="margin-left:270px; margin-top:50px;"> <p><img src="{0}/QQ-plot.png" width="800" height="600"></p></div>   
+                <div class="QQ-Plot" style="margin-left:370px; margin-top:50px;">{0}</div>   
                 <h1 style="margin-left: 60px; margin-top: 70px; font-size: 20px; border: 1px solid khaki; padding: 10px; background-color: khaki;"> Shapiro-Wilk Test </h1>
                 <div class="Shapiro-Wilk Test" style="width:600px; margin-left:90px; margin-top:50px;">{1}</div> 
                 <div class="Shapiro-Wilk Test" style="width:770px; margin-left:90px; margin-top:50px; background-color: lightgrey; font-size: 21px;">{2}</div> 
                 <h1 style="margin-left: 10px; margin-top: 90px; font-size: 24px; border: 1px solid khaki; padding: 10px; background-color: Teal; color: white;">Statistics Summary</h1>
             </div>
-        """.format(rs.output_directory_batch_comparison, rs.html0, bc.Output1)
+        """.format(rs.img_tags[2], rs.html0, bc.Output1)
 
 
 
@@ -253,49 +298,11 @@ else:
 
                 <h1 style="margin-left: 60px; margin-top: 50px; font-size: 20px; border: 1px solid khaki; padding: 10px; background-color: khaki;"> Visualisation </h1>        
 
-                <div class="Graph-links">
-                <nav>
-                    <a href="#" class="graph-link" data-target="boxplot-graph">View Boxplot</a>
-                    <a href="#" class="graph-link" data-target="heatmap-graph">View Heatmap</a>
-                </nav>
-                </div>
-
-                <div id="plot-container">
-                <div id="boxplot-container">
-                    <a id="boxplot-graph"></a>
-                    <div class="flex-item" style="flex-basis: 100%; margin-top:70px;"> 
-                    <p style ="margin-left: 370px;"><img src="{3}/Boxplot.png" width="800" height="600"></p>
-                    </div>
-                </div>
-                
-                <div id="heatmap-container" style="display: none;">
-                    <a id="heatmap-graph"></a>
-                    <div class="flex-item" style="flex-basis: 100%; margin-top:70px;"> 
-                    <p style ="margin-left: 370px;"><img src="{3}/Heatmap.png" width="800" height="600"></p>
-                    </div>
-                </div>
-                </div>
-
-                    <script>
-                        // Add click event listener to graph links
-                        $('.graph-link').click(function(event) {{
-                            event.preventDefault();  // Prevent default link behavior
-
-                            // Get the ID of the target div from the data-target attribute
-                            var target = $(this).data('target');
-
-                            // Show the selected container and hide the other one
-                            if (target == 'boxplot-graph') {{
-                            $('#boxplot-container').show();
-                            $('#heatmap-container').hide();
-                            }} else {{
-                            $('#heatmap-container').show();
-                            $('#boxplot-container').hide();
-                            }}
-                        }});
-                    </script>
+                    <div class="flex-item" style="flex-basis: 100%; margin-top:70px; margin-left:370px;">{3}</div>
+                    
+               
             </div>
-            """.format(rs.html5, bc.Conclusion2, rs.html6, rs.output_directory_batch_comparison)
+            """.format(rs.html5, bc.Conclusion2, rs.html6, rs.img_tags[3])
 
     else:
 
@@ -307,28 +314,52 @@ else:
                 <div class="section1" id="statistics-summary">
                     <h1 style="margin-left: 60px; margin-top: 30px; font-size: 20px; border: 1px solid khaki; padding: 10px; background-color: khaki;"> Mann Whitney- U Test </h1>
                     <div class="Mann Whitney- U Test " style="margin-left:90px; margin-top:50px;">{0}</div>  
-                    <div class="Mann Whitney- U Test " style="width:600px; margin-left:90px; margin-top:50px; background-color: lightgrey; font-size: 21px;">{1}</div> 
+                    <div class="Mann Whitney- U Test " style="width:800px; margin-left:90px; margin-top:50px; background-color: lightgrey; font-size: 21px;">{1}</div> 
                 </div>
             """.format(rs.html7, bc.Conclusion3)
 
-        else:
-            non_parametric_html = """
+        if len(bc.main_window.batch_results)>2:
 
-                <div class="section1" id="statistics-summary">
-                    <h1 style="margin-left: 60px; margin-top: 30px; font-size: 20px; border: 1px solid khaki; padding: 10px; background-color: khaki;"> Krushal-Wallis Test </h1>
-                    <div class="Krushal-Wallis Test " style="margin-left:90px; margin-top:50px;">{0}</div>  
-                    <div class="Krushal-Wallis Test" style="width:600px; margin-left:90px; margin-top:50px; background-color: lightgrey; font-size: 21px;">{1}</div> 
-                    <h1 style="margin-left: 60px; margin-top: 30px; font-size: 20px; border: 1px solid khaki; padding: 10px; background-color: khaki;"> Dunn's Test </h1>
-                    <div class="Dunn's Test" style="margin-left:90px; margin-top:50px;">{2}</div>  
-                </div>
-            """.format(rs.html8, bc.Conclusion4, rs.html9)
+            if bc.krushal_p<0.05:
+                non_parametric_html = """
 
+                    <div class="section1" id="statistics-summary">
+                        <h1 style="margin-left: 60px; margin-top: 30px; font-size: 20px; border: 1px solid khaki; padding: 10px; background-color: khaki;"> Krushal-Wallis Test </h1>
+                        <div class="Krushal-Wallis Test " style="margin-left:90px; margin-top:50px;">{0}</div>  
+                        <div class="Krushal-Wallis Test" style="width:600px; margin-left:90px; margin-top:50px; background-color: lightgrey; font-size: 21px;">{1}</div> 
+                        <h1 style="margin-left: 60px; margin-top: 30px; font-size: 20px; border: 1px solid khaki; padding: 10px; background-color: khaki;"> Dunn's Test </h1>
+                        <div class="Dunn's Test" style="margin-left:90px; margin-top:50px;">{2}</div>  
+                    </div>
+                """.format(rs.html8, bc.Conclusion4, rs.html9)
+
+            else:
+                non_parametric_html = """
+
+                    <div class="section1" id="statistics-summary">
+                        <h1 style="margin-left: 60px; margin-top: 30px; font-size: 20px; border: 1px solid khaki; padding: 10px; background-color: khaki;"> Krushal-Wallis Test </h1>
+                        <div class="Krushal-Wallis Test " style="margin-left:90px; margin-top:50px;">{0}</div>  
+                        <div class="Krushal-Wallis Test" style="width:600px; margin-left:90px; margin-top:50px; background-color: lightgrey; font-size: 21px;">{1}</div> 
+                        <div class="Dunn's Test" style="width:550px; margin-left:90px; margin-top:20px; background-color: lightgrey; font-size: 21px;">{2}</div> 
+                    </div>
+                """.format(rs.html8, bc.Conclusion4, bc.Conclusion5)
+
+
+    link_heading = """
+        <h1 style="margin-left: 10px; margin-top: 90px; font-size: 24px; border: 1px solid khaki; padding: 10px; background-color: Teal; color: white;"> Links to Individual Batches </h1>
+
+
+    """
+
+
+
+
+# Setting the HTML Layout 
 if len(bc.main_window.batch_results) == 1:
 
     html = f"""
             <html>
             <head>
-                <title>YOLO Statistics Report</title>
+                <title> Statistics Report</title>
                     <style>
                         .flex-container {{
                             display: flex;
@@ -371,7 +402,6 @@ if len(bc.main_window.batch_results) == 1:
                             background-color: lightgrey;
                             }} 
 
-
                         body {{
                             background-color: #F8F8FF;
                             }}    
@@ -389,7 +419,9 @@ if len(bc.main_window.batch_results) == 1:
                         {heading_html}
                         {section1_html}
                         {section2_html}
+                        {model_summary_header}
                         {section3_html}
+                        {section4_html}
 
 </body>
 </html>""" 
@@ -404,7 +436,7 @@ else:
         html = f"""
                 <html>
                 <head>
-                    <title>YOLO Statistics Report</title>
+                    <title> Statistics Report</title>
                         <style>
                             .flex-container {{
                                 display: flex;
@@ -434,6 +466,15 @@ else:
                                 
                                 }}    
 
+                            .Graph-links nav a {{
+                                text-align: center;
+                                padding: 16px 18px;
+                                background-color: lightblue; 
+                                color: black !important;
+                                font-size: 20px;
+                            
+                            }}
+
                             .quick-links nav a {{
                                 text-align: center;
                                 padding: 14px 16px;
@@ -443,27 +484,18 @@ else:
                                 
                                 }}
 
-                            .Graph-links nav a {{
-                                text-align: center;
-                                padding: 16px 18px;
-                                background-color: lightblue; 
-                                color: black !important;
-                                font-size: 20px;
-                                
-                                }}
-
                             .quick-links nav a:hover {{
                                 background-color: lightgrey;
                                 }} 
 
                             .Graph-links nav a:hover {{
                                 background-color: lightgrey;
-                                }} 
+                            }} 
 
                             .Graph-links nav {{
                                 margin-left: 70px;
                                 margin-top: 30px;
-                                }}
+                            }}
 
                             body {{
                                 background-color: #F8F8FF;
@@ -484,6 +516,8 @@ else:
                             {section2_html}
                             {section3_html}
                             {parametric_html}
+                            {link_heading}
+                            {links_html}
 
     </body>
     </html>""" 
@@ -493,7 +527,7 @@ else:
         html = f"""
             <html>
             <head>
-                <title>YOLO Statistics Report</title>
+                <title> Statistics Report</title>
                     <style>
                         .flex-container {{
                             display: flex;
@@ -538,8 +572,8 @@ else:
                             background-color: lightblue; 
                             color: black !important;
                             font-size: 20px;
-                            
-                            }}
+                        
+                        }}
 
                         .quick-links nav a:hover {{
                             background-color: lightgrey;
@@ -547,12 +581,13 @@ else:
 
                         .Graph-links nav a:hover {{
                             background-color: lightgrey;
-                            }} 
+                        }} 
 
                         .Graph-links nav {{
                             margin-left: 70px;
                             margin-top: 30px;
-                            }}
+                        }}
+                        
 
                         body {{
                             background-color: #F8F8FF;
@@ -573,6 +608,8 @@ else:
                         {section2_html}
                         {section3_html}
                         {non_parametric_html}
+                        {link_heading}
+                        {links_html}
 
     </body>
     </html>""" 
