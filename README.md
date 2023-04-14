@@ -38,7 +38,13 @@ Once the BeeTect app (GUI) is launched (for the first time), a form asking for t
 <img width="277" alt="image" src="https://user-images.githubusercontent.com/126243509/230937591-4bfe59d7-85d8-485b-ad49-e005500efbdd.png">
 
 Enter the required (and optional) information and click on the 'Submit' button.
-The next time you will open the BeeTect app, yout information will be saved and you will not need to fill this form again.
+The next time you will open the BeeTect app, your information will be saved and you will not need to fill this form again.
+
+#### Change User
+
+If several persons are working on the same project, it is possible to switch users in the BeeTect app:
+
+<img width="208" alt="image" src="https://user-images.githubusercontent.com/126243509/232086518-1d821aea-8c27-494c-9b93-519e1b59982e.png">
 
 #### Creating or opening a project
 
