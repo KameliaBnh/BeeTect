@@ -1,5 +1,4 @@
 import datetime
-import glob
 import os
 import shutil
 import subprocess
@@ -351,20 +350,19 @@ class MainWindow(QMainWindow):
                     if f'{self.Users[0].name} {self.Users[0].surname}' in line:
                         # If the user exists in the file, move it to the top of the file
                         lines = f.readlines()
-                        lines.insert(0, lines.pop(lines.index(line)))
+                        lines.insert(0, line)
                         with open(users_file, 'w') as f2:
                             f2.writelines(lines)
                         user_exists = True
                         break
-        if not user_exists:
-            # If the user doesn't exist in the file, add it at the end of the file
-            with open(users_file, 'a') as f:
-                f.write(f'{self.Users[0].name} {self.Users[0].surname}\n')
-        if not os.path.isfile(users_file):
+            if not user_exists:
+                # If the user doesn't exist in the file, add it at the end of the file
+                with open(users_file, 'a') as f:
+                    f.write(f'{self.Users[0].name} {self.Users[0].surname}\n')
+        else:
             # If the file doesn't exist, create it
             with open(users_file, 'w') as f:
                 f.write(f'{self.Users[0].name} {self.Users[0].surname}\n')
-
 
         # Display the name of the user
         self.ui.currentUser.setText(self.Users[0].name + " " + self.Users[0].surname)
@@ -384,20 +382,37 @@ class MainWindow(QMainWindow):
         
         # Save the user information in the user_info.txt file
         # os.path.dirname(os.getcwd()) returns the path of the parent folder of the current working directory
-        with open(os.path.join(os.getcwd(), 'user_info.txt'), 'w') as f:
-            f.write('User information:\n')
-            f.write(f'Name: {self.Users[0].name}\n')
-            f.write(f'Surname: {self.Users[0].surname}\n')
-            f.write(f'Email: {self.Users[0].email}\n')
-            # Write the date and time when the user information was saved
-            now = datetime.datetime.now()
-            date_str = now.strftime("%d/%m/%Y")
-            self.Users[0].date = date_str
-            time_str = now.strftime("%H:%M:%S")
-            self.Users[0].time = time_str
-            f.write(f'Date: {date_str} \nTime: {time_str}\n')
+        user_info_file = os.path.join(os.getcwd(), 'user_info.txt')
+        if os.path.exists(user_info_file):
+            with open(user_info_file, 'r') as f:
+                lines = f.readlines()
+            with open(user_info_file, 'w') as f:
+                for line in lines:
+                    if line.startswith('User information:'):
+                        # Go to the next line
+                        f.write('User information:\n')
+                    elif line.startswith('Name:'):
+                        f.write(f'Name: {self.Users[0].name}\n')
+                    elif line.startswith('Surname:'):
+                        f.write(f'Surname: {self.Users[0].surname}\n')
+                    elif line.startswith('Email:'):
+                        f.write(f'Email: {self.Users[0].email}\n')
+                    elif line.startswith('Date:'):
+                        f.write(f'Date: {date_str}\n')
+                    elif line.startswith('Time:'):
+                        f.write(f'Time: {time_str}\n')
+                    else:
+                        f.write(line)
+        else:
+            with open(user_info_file, 'w') as f:
+                f.write('User information:\n')
+                f.write(f'Name: {self.Users[0].name}\n')
+                f.write(f'Surname: {self.Users[0].surname}\n')
+                f.write(f'Email: {self.Users[0].email}\n')
+                f.write(f'Date: {date_str}\n')
+                f.write(f'Time: {time_str}\n')
 
-        # Close the form
+        # Close the user information form
         dialog.close()
 
     def add_user(self):
