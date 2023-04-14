@@ -28,7 +28,7 @@ with open(user_info_path) as f:
 full_user_name = first_name + ' ' + last_name
 
 #path to the selected model
-model_path = os.path.join(bc.main_window.Models.path, bc.main_window.ui.comboBox.currentText())
+model_path = os.path.dirname(bc.main_window.Models[0].path)
 
 file_paths = []
 if os.path.isfile(os.path.join(model_path, 'results.png')):

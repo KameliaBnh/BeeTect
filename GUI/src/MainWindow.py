@@ -1,4 +1,5 @@
 import datetime
+import glob
 import os
 import shutil
 import subprocess
@@ -10,11 +11,11 @@ import csv
 from PySide2.QtGui import QIcon, QFont, QPixmap
 from PySide2.QtCore import QFile, Qt
 from PySide2.QtUiTools import QUiLoader
-from PySide2.QtWidgets import QMainWindow, QMainWindow, QMenu, QFileDialog, QMessageBox, QInputDialog, QPushButton, QDialog, QLineEdit, QVBoxLayout, QLabel, QTableWidget, QHeaderView, QTableWidgetItem, QAction, QAbstractItemView, QListView, QTreeView
+from PySide2.QtWidgets import QMainWindow, QMainWindow, QMenu, QFileDialog, QMessageBox, QInputDialog, QPushButton, QDialog, QLineEdit, QVBoxLayout, QLabel, QTableWidget, QHeaderView, QTableWidgetItem, QAction, QAbstractItemView, QListView, QTreeView, QGroupBox
 
 import Project
 import User
-import Models
+import Model
 import Image
 import Batch
 from HelpWindow import HelpWindow
@@ -25,7 +26,7 @@ class MainWindow(QMainWindow):
         """
         Constructor of the MainWindow class.
         It creates the main window of the application using the 'interface.ui' file.
-        It also creates the User, Models, Images, Projects and Batches objects.
+        It also creates the User, Model, Images, Projects and Batches objects.
         """
 
         # Call the parent class constructor
@@ -61,7 +62,25 @@ class MainWindow(QMainWindow):
             self.ui.userSelection.clear()
             self.ui.userSelection.addItems([user.name + " " + user.surname for user in self.Users])
 
-        self.Models = Models.Models()
+        self.Models = []
+        # Create an empty list to store the models filled with the models written in the models.txt file if it exists
+        if os.path.exists(os.path.join(os.getcwd(), 'models', "models.txt")):
+            with open(os.path.join(os.getcwd(), 'models', "models.txt"), "r") as models_file:
+                for line in models_file.read().splitlines():
+                    self.Models.append(Model.Model(line))
+        else:
+            # Write the models currently available in the models folder in the models.txt file
+            with open(os.path.join(os.getcwd(), 'models', "models.txt"), "w") as models_file:
+                for root, dirs, files in os.walk(os.path.join(os.getcwd(), "models")):
+                    for file in files:
+                        if file.endswith('.pt'):
+                            model_path = os.path.join(root, file)
+                            models_file.write(model_path + "\n")
+                            self.Models.append(Model.Model(model_path))
+
+        # Update the combobox with the models
+        self.ui.modelSelection.clear()
+        self.ui.modelSelection.addItems([model.name for model in self.Models])
 
         # Create an empty list to store the images
         self.Images = []
@@ -123,9 +142,6 @@ class MainWindow(QMainWindow):
 
         # Connect the editModels button to the function edit_models
         self.ui.editModels.clicked.connect(self.edit_models)
-
-        # Connect the button to the function close_model_form
-        self.Models.submit_button.clicked.connect(self.close_model_form)
 
         # Deactivate the OpenFile and OpenFolder buttons until the user selects a project
         if self.ui.ProjectNameDisplay.text() == "":
@@ -722,6 +738,187 @@ class MainWindow(QMainWindow):
 
         # Disable start button
         self.ui.Start.setEnabled(False)
+        
+    # Open models form
+    def open_models_form(self):
+        
+        dialog = QDialog()
+
+        # Set the window as modal
+        dialog.setWindowModality(Qt.ApplicationModal)
+
+        # Add window icon
+        dialog.setWindowIcon(QIcon(QPixmap(os.path.join(os.getcwd(), 'resources', 'addModel.png'))))
+
+        # Set the font
+        font = QFont()
+        font.setPointSize(8)
+
+        # Set the title and size of the form
+        dialog.setWindowTitle('New YOLO Model')
+        dialog.resize(550, 400)
+
+        dialog.model_edit = QLineEdit()
+        dialog.model_weight_edit = QLineEdit()
+        
+        # Create a layout for the form
+        layout = QVBoxLayout()
+
+        labels_and_edits = {
+            'Model name:': dialog.model_edit,
+            'Model weight:': dialog.model_weight_edit,
+        }
+
+        for label_text, line_edit in labels_and_edits.items():
+            label = QLabel(label_text)
+            label.setFont(font)
+            line_edit.setPlaceholderText('Required' if label_text == 'Model name:' else '')
+            line_edit.setFont(font)
+            layout.addWidget(label)
+            layout.addWidget(line_edit)
+
+        dialog.model_weight_button = QPushButton('Browse')
+        dialog.model_weight_button.setFont(font)
+        dialog.model_weight_button.clicked.connect(lambda: self.open_model_weight(dialog))
+        layout.addWidget(dialog.model_weight_button)
+
+        dialog.confusion_matrix_line_edit = QLineEdit()
+        dialog.f1_curve_line_edit = QLineEdit()
+        dialog.results_line_edit = QLineEdit()
+        dialog.opt_yaml_line_edit = QLineEdit()
+
+        buttons_and_edits = [ ('Select Confusion Matrix', 'confusion_matrix', dialog.confusion_matrix_line_edit),
+                              ('Select F1 Curve', 'f1_curve', dialog.f1_curve_line_edit),
+                              ('Select Results (PNG)', 'results', dialog.results_line_edit),
+                              ('Select opt.yaml', 'opt_yaml', dialog.opt_yaml_line_edit),]
+
+        dialog.file_selection_group_box = QGroupBox('Additional Files', dialog)
+        dialog.file_selection_group_box.setFont(font)
+        dialog.file_selection_group_box.setCheckable(True)
+        dialog.file_selection_group_box.setChecked(False)
+        dialog.file_selection_layout = QVBoxLayout(dialog.file_selection_group_box)
+
+        for button_text, file_type, line_edit in buttons_and_edits:
+            button = QPushButton(button_text, dialog.file_selection_group_box)
+            button.setFont(font)
+            button.clicked.connect(lambda dialog=dialog, file_type=file_type: self.open_file_dialog(dialog, file_type))
+            line_edit.setFont(font)
+            dialog.file_selection_layout.addWidget(button)
+            dialog.file_selection_layout.addWidget(line_edit)
+
+        # Create a submit button to save the new model
+        dialog.submit_button = QPushButton('Submit')
+        dialog.submit_button.setFont(font)
+        dialog.submit_button.clicked.connect(lambda: self.save_new_model(dialog))
+
+        layout.addWidget(dialog.file_selection_group_box)
+        layout.addWidget(dialog.submit_button)
+
+        dialog.setLayout(layout)
+
+        dialog.show()
+
+    def open_model_weight(self, dialog):
+        """
+        Opens a file dialog to select the model weight file.
+        """
+
+        # Open a file dialog to select the model weight file
+        model_weight_file, _ = QFileDialog.getOpenFileName(self, 'Select model weight file', os.path.join(os.getcwd(), 'models'), 'Model weight (*.pt)')
+        dialog.model_weight_edit.setText(model_weight_file)
+
+    def save_new_model(self, dialog):
+        """
+        Save the new model in the models directory. It creates a new directory with the model name and copy the model weight file in it, as well as the supplementary files.
+        """
+
+        model_name = None
+        model_weight = None
+
+        try:
+            # Retrieve the model information
+            model_name = dialog.model_edit.text()
+            model_weight = dialog.model_weight_edit.text()
+
+            # Create a new directory for the model
+            if model_name not in self.Models:
+                self.Models.insert(0, Model.Model(os.path.join(os.getcwd(), 'models', model_name, model_name + '.pt')))
+                # Write the model path to the models.txt file if it doesn't exist in it, else, move it to the top
+                with open(os.path.join(os.getcwd(), 'models', 'models.txt'), 'a') as f:
+                    f.write(self.Models[0].path + '\n')
+                os.makedirs(os.path.join(os.getcwd(), 'models', model_name), exist_ok=True)
+
+            else:
+                raise Exception('This model already exists.')
+
+            if not model_name or not model_weight or not os.path.isfile(model_weight):
+                raise Exception('Please retry to enter the model information.')
+
+        except Exception as e:
+            QMessageBox.warning(self, 'Error', str(e), QMessageBox.Ok)
+
+        else:
+
+            # Copy the model weight file to the models directory
+            try:
+                print(f'Copying model weight file to {self.Models[0].path}')
+                shutil.copy(model_weight, self.Models[0].path)
+
+                if dialog.confusion_matrix_line_edit.text():
+                    confusion_matrix_file = dialog.confusion_matrix_line_edit.text()
+                    confusion_matrix_path = os.path.join(os.path.dirname(self.Models[0].path), 'confusion_matrix.png')
+                    shutil.copy(confusion_matrix_file, confusion_matrix_path)
+                    self.Models[0].set_confusion_matrix(confusion_matrix_path)
+
+                if dialog.f1_curve_line_edit.text():
+                    f1_curve_file = dialog.f1_curve_line_edit.text()
+                    f1_curve_path = os.path.join(os.path.dirname(self.Models[0].path), 'f1_curve.png')
+                    shutil.copy(f1_curve_file, f1_curve_path)
+                    self.Models[0].set_f1_curve(f1_curve_path)
+
+                if dialog.results_line_edit.text():
+                    results_file = dialog.results_line_edit.text()
+                    results_path = os.path.join(os.path.dirname(self.Models[0].path), 'results.png')
+                    shutil.copy(results_file, results_path)
+                    self.Models[0].set_results(results_path)
+
+                if dialog.opt_yaml_line_edit.text():
+                    opt_yaml_file = dialog.opt_yaml_line_edit.text()
+                    opt_yaml_path = os.path.join(os.path.dirname(self.Models[0].path), 'opt.yaml')
+                    shutil.copy(opt_yaml_file, opt_yaml_path)
+                    self.Models[0].set_opt_yaml(opt_yaml_path)
+                
+            except Exception as e:
+                QMessageBox.warning(self, 'Error', f'Error copying model weight file: {str(e)}')
+                return
+            
+            # Close the dialog
+            dialog.close()
+
+    def open_file_dialog(self, dialog, file_type):
+        """
+        Open a file dialog to select the supplementary files.
+        """
+
+        file_filter = None
+        if file_type == 'confusion_matrix':
+            file_filter = 'Confusion Matrix (*.png)'
+            line_edit = dialog.confusion_matrix_line_edit
+        elif file_type == 'f1_curve':
+            file_filter = 'F1 Curve (*.png)'
+            line_edit = dialog.f1_curve_line_edit
+        elif file_type == 'results':
+            file_filter = 'Results (*.png)'
+            line_edit = dialog.results_line_edit
+        elif file_type == 'opt_yaml':
+            file_filter = 'opt.yaml (*.yaml)'
+            line_edit = dialog.opt_yaml_line_edit
+        else:
+            return
+
+        file_name, _ = QFileDialog.getOpenFileName(self, f'Select {file_type}', os.getcwd(), file_filter)
+        if file_name:
+            line_edit.setText(file_name)
 
     def add_new_model(self):
         """
@@ -729,7 +926,7 @@ class MainWindow(QMainWindow):
         Open a window to add a new model.
         """
 
-        self.Models.open_models_form()
+        self.open_models_form()
 
         print("Adding new model...")
         # Add message to the status bar
@@ -741,16 +938,15 @@ class MainWindow(QMainWindow):
         """
 
         # Clear the combobox
-        self.ui.comboBox.clear()
-        for model in self.Models.list:
-            self.ui.comboBox.addItem(model)
+        self.ui.modelSelection.clear()
+        for model in self.Models:
+            self.ui.modelSelection.addItem(model.name)
 
     def close_model_form(self):
         """
         Close the model form. Refresh the combobox.
         """
-
-        self.Models.close_models_form()
+        
         # Refresh the combobox
         self.load_models()
 
@@ -779,7 +975,7 @@ class MainWindow(QMainWindow):
 
         # Create a table widget
         table = QTableWidget()
-        table.setRowCount(len(self.Models.list))
+        table.setRowCount(len(self.Models))
         table.setColumnCount(2)
         table.setHorizontalHeaderLabels(['Model', 'Path'])
         # Set the resize mode of the header to allow for resizing of columns
@@ -790,9 +986,9 @@ class MainWindow(QMainWindow):
         table.setFont(font)
 
         # Add the models to the table
-        for i, model in enumerate(self.Models.list):
-            table.setItem(i, 0, QTableWidgetItem(model))
-            table.setItem(i, 1, QTableWidgetItem(os.path.join(self.Models.path, self.Models.list[i], self.Models.list[i] + '.pt')))
+        for i, model in enumerate(self.Models):
+            table.setItem(i, 0, QTableWidgetItem(model.name))
+            table.setItem(i, 1, QTableWidgetItem(model.path))
 
         # Create a button to add a new model
         add_model_button = QPushButton('Add Model')
@@ -830,7 +1026,7 @@ class MainWindow(QMainWindow):
         selected_row = table.currentRow()
 
         # Check that the selected row is a valid index
-        if selected_row < 0 or selected_row >= len(self.Models.list):
+        if selected_row < 0 or selected_row >= len(self.Models):
             return
         
         # Ask the user to confirm the deletion
@@ -840,22 +1036,22 @@ class MainWindow(QMainWindow):
         
         if confirmation == QMessageBox.Yes:
 
-            print("Deleting " + self.Models.list[selected_row] + " model...")
+            print("Deleting " + self.Models[selected_row].name + " model...")
             # Add message to the status bar
-            self.ui.status_bar.setText("Deleting " + self.Models.list[selected_row] + " model...")
+            self.ui.status_bar.setText("Deleting " + self.Models[selected_row].name + " model...")
 
             # Remove the model from the list
-            model_name = self.Models.list[selected_row]
-            self.Models.list.pop(selected_row)
+            model_name = self.Models[selected_row].name
+            self.Models.pop(selected_row)
 
             # Remove the model from the table
             table.removeRow(selected_row)
             
             # Delete the model and the model folder from the models folder
-            model_path = os.path.join(self.Models.path, model_name, model_name)
+            model_path = os.path.dirname(self.Models[selected_row].path)
             if os.path.exists(model_path):
                 shutil.rmtree(model_path)
-            model_file = os.path.join(self.Models.path, model_name, model_name + '.pt')
+            model_file = self.Models[selected_row].path
             if os.path.exists(model_file):
                 os.remove(model_file)
 
@@ -1066,7 +1262,7 @@ class MainWindow(QMainWindow):
             self.ui.status_bar.setText("Saving results in the default folder...")
 
             folder_number = 1
-            folder_path = os.path.join(self.Projects[0].path, os.path.join('exp'))
+            folder_path = os.path.join(self.Projects[0].path, 'exp')
             while os.path.exists(folder_path + str(folder_number)):
                 folder_number += 1
             folder_path = folder_path + str(folder_number)
@@ -1107,17 +1303,24 @@ class MainWindow(QMainWindow):
         The images are renamed after their original name.
         """
 
-        model_path = os.path.join(self.Models.path, self.ui.comboBox.currentText(), self.ui.comboBox.currentText() + '.pt')
+        # If the selected model is not the first one, move it to the top of the list and at the top of the text file
+        
+        if self.Models[0].path != self.Models[self.ui.modelSelection.currentIndex()].path:
+            self.Models.insert(0, self.Models[self.ui.modelSelection.currentIndex()])
+            self.Models.pop(self.ui.modelSelection.currentIndex() + 1)
+            with open(os.path.join(os.getcwd(), 'models', 'models.txt'), 'w') as file:
+                for model in self.Models:
+                    file.write(model.path + '\n')
 
-        print("Yolo Model selected: " + os.path.basename(model_path))
+        print("Yolo Model selected: " + self.Models[0].name)
         # Add message to the status bar
-        self.ui.status_bar.setText("Yolo Model selected: " + os.path.basename(model_path))
+        self.ui.status_bar.setText("Yolo Model selected: " + self.Models[0].name)
 
         # Select the folder where the results will be saved
         batch_folder = self.Batches[0].path
 
         # Run the detection
-        model = torch.hub.load('ultralytics/yolov5', 'custom', model_path) # load model
+        model = torch.hub.load('ultralytics/yolov5', 'custom', self.Models[0].path) # load model
         model.conf = 0.5 # confidence threshold
 
         results = model([im.image_cv for im in self.Images]) # inference
@@ -1212,9 +1415,6 @@ class MainWindow(QMainWindow):
         self.batch_results.clear()
         self.batch_results.append(os.path.join(self.Batches[0].path, 'results.txt'))
 
-        # Export the report
-        self.export_report()
-
         # Enable the previous and next buttons
         self.ui.next.setEnabled(True)
         self.ui.previous.setEnabled(True)
@@ -1225,6 +1425,9 @@ class MainWindow(QMainWindow):
 
         # Disable the Start button
         self.ui.Start.setEnabled(False)
+
+        # Export the report
+        self.export_report()
 
     def export_report(self):
         """
