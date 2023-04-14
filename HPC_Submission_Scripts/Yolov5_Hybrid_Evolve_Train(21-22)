@@ -1,0 +1,117 @@
+ #!/bin/bash
+##
+## MATLAB submission script for PBS on CRESCENT
+## --------------------------------------------
+##
+## Follow the 6 steps below to configure your job
+## 
+## STEP 1:
+##
+## Enter a job name after the -N on the line below:
+##
+#PBS -N YOLOv5x_21_22_evolve_train
+##
+## STEP 2:
+##
+## Select the number of cpus/cores required by modifying the #PBS -l select line below
+##
+## Normally you select cpus in chunks of 16 cpus
+## The Maximum value for ncpus is 16 and mpiprocs MUST be the same value as ncpus.
+##
+## PLEASE NOTE
+## ===========
+## The standard matlab application does not run on more than one node
+## This select line must not be altered except that you can use 32 CPUs
+## if you submit your job to the core32 queue and select 2 chunks of 16
+##	32 CPUs: select=2:ncpus=16:mpiprocs=16
+##
+#PBS -l select=2:ncpus=16:mpiprocs=16
+##
+## STEP 3:
+##
+## Select the correct queue by modifying the #PBS -q line below
+##
+## half_hour	-  30 minutes
+## one_hour	-   1 hour
+## three_hour   -   3 hours
+## six_hour     -   6 hours
+## half_day	-  12 hours
+## one_day	-  24 hours
+## two_day	-  48 hours
+## five_day	- 120 hours
+## ten_day	- 240 hours (by special arrangement)
+## core32	-  24 hours (default) maximum 120 hours
+## 		      to increase the walltime modify the #PBS -l walltime line below
+##		      and remove one of the leading # characters 
+##
+#PBS -q seven_day
+##
+##PBS -l walltime=120:00:00
+##
+## STEP 4:
+##
+## Replace the hpc@cranfield.ac.uk email address
+## with your Cranfield email address on the #PBS -M line below:
+## Your email address is NOT your username
+##
+#PBS -m abe 
+#PBS -M hpc@cranfield.ac.uk
+##
+## ====================================
+## DO NOT CHANGE THE LINES BETWEEN HERE
+## ====================================
+##PBS -l application=matlab
+#PBS -j oe
+#PBS -W sandbox=PRIVATE
+#PBS -k n
+ln -s $PWD $PBS_O_WORKDIR/$PBS_JOBID
+## Change to working directory
+cd $PBS_O_WORKDIR
+## Calculate number of CPUs
+export cpus=`cat $PBS_NODEFILE | wc -l`
+## ========
+## AND HERE
+## ========
+##
+## STEP 5: 
+## 
+##  Load the default application environment
+##module use /apps/modules/all
+##  module load MATLAB/2016b
+##
+####################################################################
+
+## ==================================================================================
+## YOLOv5 Training Script
+
+
+module load git/2.23.0-GCCcore-8.3.0-nodocs 
+
+##############################
+# activate conda environment #
+# in this case ./yolo_env/   #
+##############################
+source .bashrc
+conda activate ./conda_env/
+
+#############################
+# train the model on Evolve #
+# generated Hyperparameters #
+#############################
+
+## Make sure to set the path to train, test and val set in the data.yaml file to that of merged dataset i.e. 2021_22 ##
+
+python ./yolov5/train.py --img 640 --batch 32 --epochs 150 --data /path/to/data.yaml --weights /path/to/weight/yolov5x.pt --name 2022_2021_Evolve_Train --hyp ./yolov5/runs/evolve/Yolov5_evolve_21_22/hyp_evolve.yaml --device cpu &> /path/to/save/logfile_run10.log
+
+
+## ==================================================================================
+
+####################################################################
+
+##remember to purge modules between tools avoid confict of libraries
+##and potential errors. To do so type module purge below
+## Tidy up the log directory
+## DO NOT CHANGE THE LINE BELOW
+## ============================
+rm $PBS_O_WORKDIR/$PBS_JOBID
+#
