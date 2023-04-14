@@ -50,7 +50,7 @@ If several persons are working on the same project, it is possible to switch use
 
 Then, you will see the following window: 
 
-<img width="568" alt="image" src="https://user-images.githubusercontent.com/126243509/230937830-09084b2e-e66a-455b-8e26-3da5be9fd606.png">
+<img width="567" alt="image" src="https://user-images.githubusercontent.com/126243509/232086712-60ea2cf4-afb5-4e85-874a-5501184245ca.png">
 
 There are different options for you to use here:
 
