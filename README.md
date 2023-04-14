@@ -78,7 +78,7 @@ All the projects have to be saved in the 'projects' folder.
 
 * To select the YOLO model you want to use, choose an existing one in the dropdown menu. If you want to add your own YOLO model (trained before hand), you can do that bu selecting the 'Add New Model' button. A dialog will open where you can choose the name of the model, and browse through your computer to seect the weights corresponding to the model:
 
-<img width="187" alt="image" src="https://user-images.githubusercontent.com/126243509/230938922-f407da93-4e72-4054-9fe4-5562dbc76288.png"> <img width="277" alt="image" src="https://user-images.githubusercontent.com/126243509/230938967-3a3b9c05-2385-4237-b27a-d3e83c8edb1a.png">
+<img width="150" alt="image" src="https://user-images.githubusercontent.com/126243509/232087311-0b8d247a-af28-4bb1-9872-504f2f354216.png"> <img width="277" alt="image" src="https://user-images.githubusercontent.com/126243509/230938967-3a3b9c05-2385-4237-b27a-d3e83c8edb1a.png">
 
 You can also select supplementary files for the model summary in the HTML report exported to be more complete: the confusion matric .png file, the F1 curve .png file, the results .png file and the opt.yaml file containing the YOLO model parameters. To add these files, you have to check the box and browse through your files via the file dialogs.
 
