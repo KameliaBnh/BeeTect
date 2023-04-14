@@ -1,3 +1,4 @@
+import datetime
 import os
 import shutil
 import subprocess
@@ -27,9 +28,39 @@ class MainWindow(QMainWindow):
         It also creates the User, Models, Images, Projects and Batches objects.
         """
 
+        # Call the parent class constructor
+        super().__init__()
+
+        # Load the .ui file
+        ui_file = QFile(os.path.join(os.getcwd(), "interface.ui"), self)
+        ui_file.open(QFile.ReadOnly)
+
+        # Load the .ui file as a widget
+        loader = QUiLoader()
+        self.ui = loader.load(ui_file)
+        ui_file.close()
+        self.setCentralWidget(self.ui)
+
+        # Set the title of the application
+        self.setWindowTitle("BeeTect")
+
+        # Set the icon of the application
+        self.setWindowIcon(QIcon(os.path.join(os.getcwd(), "resources/bee.png")))
+
+        
         # Class attributes
     
-        self.User = User.User()
+        # Create an empty list to store the users filled with the users written in the users.txt file if it exists
+        self.Users = []
+        if os.path.exists(os.path.join(os.getcwd(), "users.txt")):
+            with open(os.path.join(os.getcwd(), "users.txt"), "r") as users_file:
+                for line in users_file.read().splitlines():
+                    self.Users.insert(0, User.User(line.split(" ")[0], line.split(" ")[1]))
+
+            # Update the combobox with the users
+            self.ui.userSelection.clear()
+            self.ui.userSelection.addItems([user.name + " " + user.surname for user in self.Users])
+
         self.Models = Models.Models()
 
         # Create an empty list to store the images
@@ -65,25 +96,6 @@ class MainWindow(QMainWindow):
         if os.path.exists(os.path.join(os.getcwd(), "selected_batches.txt")):
             with open(os.path.join(os.getcwd(), "selected_batches.txt"), "r") as save_results_file:
                 self.batch_results = save_results_file.read().splitlines()
-
-        # Call the parent class constructor
-        super().__init__()
-
-        # Load the .ui file
-        ui_file = QFile(os.path.join(os.getcwd(), "interface.ui"), self)
-        ui_file.open(QFile.ReadOnly)
-
-        # Load the .ui file as a widget
-        loader = QUiLoader()
-        self.ui = loader.load(ui_file)
-        ui_file.close()
-        self.setCentralWidget(self.ui)
-
-        # Set the title of the application
-        self.setWindowTitle("BeeTect")
-
-        # Set the icon of the application
-        self.setWindowIcon(QIcon(os.path.join(os.getcwd(), "resources/bee.png")))
         
         # Check if the user_info.txt file exists when the application starts
         self.check_flag = False
@@ -94,6 +106,12 @@ class MainWindow(QMainWindow):
 
         # Close the application when the user clicks the close button
         self.ui.Exit.triggered.connect(self.close)
+
+        # Connect the button to the function add_new_user
+        self.ui.addUser.clicked.connect(self.add_user)
+
+        # Connect the userSelection combo box to the function update_user_info
+        self.ui.userSelection.currentIndexChanged.connect(self.update_user_info)
         
         # Connect the button to the function open_project
         self.ui.OpenProject.triggered.connect(self.open_project)
@@ -174,7 +192,7 @@ class MainWindow(QMainWindow):
         if not self.check_flag:
             # Check if the user_info.txt file exists
             if not os.path.isfile(os.path.join(os.getcwd(), 'user_info.txt')):
-                self.User.open_user_form()
+                self.open_user_form()
                 print("Getting user information...")
                 # Add message to the status bar
                 self.ui.status_bar.setText("Getting user information...")
@@ -195,11 +213,14 @@ class MainWindow(QMainWindow):
                             info_dict[x[0].strip()] = x[1].strip()
 
                     # Assign values to the class attributes
-                    self.User.name = info_dict['Name']
-                    self.User.surname = info_dict['Surname']
-                    self.User.email = info_dict['Email']
-                    self.User.date = info_dict['Date']
-                    self.User.time = info_dict['Time']
+                    self.Users.insert(0, User.User(info_dict['Name'], info_dict['Surname']))
+                    self.Users[0].set_email(info_dict['Email'])
+                    self.Users[0].set_date(info_dict['Date'])
+                    self.Users[0].set_time(info_dict['Time'])
+
+                    # Set the user name in the userSelection combo box and in the userDisplay label
+                    self.ui.userSelection.setCurrentText(self.Users[0].name + ' ' + self.Users[0].surname)
+                    self.ui.currentUser.setText(self.Users[0].name + ' ' + self.Users[0].surname)
 
                     # Check if the user has selected a project
                     if 'Project Folder' in info_dict.keys():
@@ -222,6 +243,198 @@ class MainWindow(QMainWindow):
             print("Current Project: " + self.Projects[0].name)
             # Add message to the status bar
             self.ui.status_bar.setText("Current Project: " + self.Projects[0].name)
+
+    # Open user information form
+    def open_user_form(self):
+
+        dialog = QDialog()
+
+        # Set the window as modal
+        dialog.setWindowModality(Qt.ApplicationModal)
+
+        # Set the font
+        font = QFont()
+        font.setPointSize(8)
+
+        # Set the title and size of the form
+        dialog.setWindowTitle('User information')
+        dialog.resize(550, 400)
+
+        # Remove the close button
+        dialog.setWindowFlags(dialog.windowFlags() & ~Qt.WindowCloseButtonHint)
+
+        # Set icon
+        dialog.setWindowIcon(QIcon(os.path.join(os.getcwd(), 'resources', 'user.png')))
+
+        # Create labels and line edits for user information
+        user_label = QLabel('User Information:')
+        user_label.setFont(font)
+        user_label.setStyleSheet('font-weight: bold')
+        name_label = QLabel('Name:')
+        name_label.setFont(font)
+        dialog.name_edit = QLineEdit()
+        dialog.name_edit.setFont(font)
+        surname_label = QLabel('Surname:')
+        surname_label.setFont(font)
+        dialog.surname_edit = QLineEdit()
+        dialog.surname_edit.setFont(font)
+        email_label = QLabel('Email:')
+        email_label.setFont(font)
+        dialog.email_edit = QLineEdit()
+        dialog.email_edit.setFont(font)
+
+        # Make all line edits required except email
+        dialog.name_edit.setPlaceholderText('Required')
+        dialog.surname_edit.setPlaceholderText('Required')
+        dialog.email_edit.setPlaceholderText('Optional')
+
+        # Create a submit button
+        dialog.submit_button = QPushButton('Submit')
+        dialog.submit_button.setFont(font)
+        dialog.submit_button.clicked.connect(lambda: self.submit_user_info(dialog))
+
+        # Create a layout for the form
+        layout = QVBoxLayout()
+
+        # User information label bold and as a separator
+        layout.addWidget(user_label)
+        layout.addWidget(name_label)
+        layout.addWidget(dialog.name_edit)
+        layout.addWidget(surname_label)
+        layout.addWidget(dialog.surname_edit)
+        layout.addWidget(email_label)
+        layout.addWidget(dialog.email_edit)
+        layout.addWidget(dialog.submit_button)
+
+        dialog.setLayout(layout)
+
+        dialog.show()
+
+    def submit_user_info(self, dialog):
+        """
+        Save user information in the 'user_info.txt' file and in the Users list.
+        """
+
+        # Retrieve user information
+        self.Users.insert(0, User.User(dialog.name_edit.text(), dialog.surname_edit.text(), dialog.email_edit.text()))
+
+        now = datetime.datetime.now()
+        date_str = now.strftime("%d/%m/%Y")
+        self.Users[0].set_date(date_str)
+        time_str = now.strftime("%H:%M:%S")
+        self.Users[0].set_time(time_str)
+
+        # Write the user in the users.txt file
+        # Check if the file exists
+        user_exists = False
+        users_file = os.path.join(os.getcwd(), 'users.txt')
+        if os.path.isfile(users_file):
+            # If the file exists, check if the user exists in the file
+            with open(users_file, 'r') as f:
+                for line in f:
+                    if f'{self.Users[0].name} {self.Users[0].surname}' in line:
+                        # If the user exists in the file, move it to the top of the file
+                        lines = f.readlines()
+                        lines.insert(0, lines.pop(lines.index(line)))
+                        with open(users_file, 'w') as f2:
+                            f2.writelines(lines)
+                        user_exists = True
+                        break
+        if not user_exists:
+            # If the user doesn't exist in the file, add it at the end of the file
+            with open(users_file, 'a') as f:
+                f.write(f'{self.Users[0].name} {self.Users[0].surname}\n')
+        if not os.path.isfile(users_file):
+            # If the file doesn't exist, create it
+            with open(users_file, 'w') as f:
+                f.write(f'{self.Users[0].name} {self.Users[0].surname}\n')
+
+
+        # Display the name of the user
+        self.ui.currentUser.setText(self.Users[0].name + " " + self.Users[0].surname)
+
+        # Add the current user to the comboBox
+        self.ui.userSelection.clear()
+        self.ui.userSelection.addItems([user.name + " " + user.surname for user in self.Users])
+
+        # Check if the user has entered their name and surname
+        if not dialog.name_edit.text():
+            QMessageBox.warning(self, 'Error', 'Please enter your name.')
+            return
+
+        if not dialog.surname_edit.text():
+            QMessageBox.warning(self, 'Error', 'Please enter your surname.')
+            return
+        
+        # Save the user information in the user_info.txt file
+        # os.path.dirname(os.getcwd()) returns the path of the parent folder of the current working directory
+        with open(os.path.join(os.getcwd(), 'user_info.txt'), 'w') as f:
+            f.write('User information:\n')
+            f.write(f'Name: {self.Users[0].name}\n')
+            f.write(f'Surname: {self.Users[0].surname}\n')
+            f.write(f'Email: {self.Users[0].email}\n')
+            # Write the date and time when the user information was saved
+            now = datetime.datetime.now()
+            date_str = now.strftime("%d/%m/%Y")
+            self.Users[0].date = date_str
+            time_str = now.strftime("%H:%M:%S")
+            self.Users[0].time = time_str
+            f.write(f'Date: {date_str} \nTime: {time_str}\n')
+
+        # Close the form
+        dialog.close()
+
+    def add_user(self):
+        """
+        Add a new user to the Users list.
+        """
+
+        print("Adding a new user...")
+        # Add message to the status bar
+        self.ui.status_bar.setText("Adding a new user...")
+
+        # Open the user information form
+        self.open_user_form()
+
+    def update_user_info(self, index):
+        """
+        Update the user information when the user selection combo box is changed.
+        """
+        # Get the selected user from the combo box
+        selected_user = self.ui.userSelection.currentText()
+
+        # Move the selected user to the top of the self.Users list
+        for i, user in enumerate(self.Users):
+            if user.name + " " + user.surname == selected_user:
+                self.Users.insert(0, self.Users.pop(i))
+                break
+
+        # Update the user_info.txt file
+        with open(os.path.join(os.getcwd(), 'user_info.txt'), 'r+') as file:
+            lines = file.readlines()
+            file.seek(0)
+            file.truncate()
+
+            # Write the user information to the file
+            for line in lines:
+                if line.startswith("Name:"):
+                    file.write(f"Name: {self.Users[0].name}\n")
+                elif line.startswith("Surname:"):
+                    file.write(f"Surname: {self.Users[0].surname}\n")
+                elif line.startswith("Email:"):
+                    file.write(f"Email: {self.Users[0].get_email()}\n")
+                elif line.startswith("Date:"):
+                    file.write(f"Date: {self.Users[0].get_date()}\n")
+                elif line.startswith("Time:"):
+                    file.write(f"Time: {self.Users[0].get_time()}\n")
+                else:
+                    file.write(line)
+
+        # Update the current user label
+        self.ui.currentUser.setText(selected_user)
+
+        # Update the current selected item in the combo box
+        self.ui.userSelection.setCurrentIndex(index)
 
     # Save the project to text file
     def write_project_to_text_file(self, name, path):
@@ -1055,6 +1268,10 @@ class MainWindow(QMainWindow):
             ('Counts.csv', self.ui.statsTable),
             ('Model_Summary.csv', self.ui.modelTable)
         ]
+
+        # Clear the tables
+        self.ui.statsTable.clear()
+        self.ui.modelTable.clear()
         
         for filename, table in tables:
             with open(os.path.join(self.Batches[0].path, filename)) as file:
@@ -1119,6 +1336,13 @@ class MainWindow(QMainWindow):
             # Add message to the status bar
             self.ui.status_bar.setText("Comparing batches: " + ", ".join([os.path.basename(os.path.dirname(path)) for path in self.batch_results]))
 
+            # Create a directory to save the results of the comparison and increment the number of the directory if it already exists
+            i = 1
+            while os.path.exists(os.path.join(self.Projects[0].path, f'Batch_Comparison_{i}')):
+                i += 1
+            os.mkdir(os.path.join(self.Projects[0].path, f'Batch_Comparison_{i}'))
+
+
         except Exception as e:
             # Message box to inform the user of the error
             QMessageBox.warning(self, 'Error', f'Error selecting the folders to compare: {str(e)}', QMessageBox.Ok)
@@ -1131,7 +1355,13 @@ class MainWindow(QMainWindow):
             # Call nbconvert to convert the notebook to HTML
             subprocess.call(["python", "src/layout.py"])
 
-            webbrowser.open(f'file://{os.getcwd()}/Batch_Comparison.html')
+            number = 0
+            for i in range(1, len(self.Projects[0].path)):
+                if os.path.exists(os.path.join(self.Projects[0].path, 'Batch_Comparison_' + str(i))):
+                    number = i
+
+            shutil.move(os.path.join(os.getcwd(), 'Batch_Comparison.html'), os.path.join(self.Projects[0].path, f'Batch_Comparison_' + str(number)))
+            webbrowser.open(f'file://{os.path.join(self.Projects[0].path, "Batch_Comparison_" + str(number))}/Batch_Comparison.html')
 
     def open_app_help(self):
         """

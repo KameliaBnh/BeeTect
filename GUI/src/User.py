@@ -1,125 +1,56 @@
-import os
-import datetime
+class User():
 
-from PySide2.QtWidgets import QMessageBox, QDialog, QLabel, QLineEdit, QPushButton, QVBoxLayout
-from PySide2 import QtCore
-from PySide2.QtGui import QFont, QIcon
-
-class User(QDialog):
-
-    def __init__(self):
+    def __init__(self, name, surname, email = None):
         """
         User information window class constructor.
         Opens once when the application is started for the first time.
         """
 
         # Class attributes
-        self.name = None
-        self.surname = None
-        self.email = None
+        self.name = name
+        self.surname = surname
+        self.email = email
         self.date = None
         self.time = None
 
-        # Call the parent class constructor
-        super().__init__()
-
-        # Set the window as modal
-        self.setWindowModality(QtCore.Qt.ApplicationModal)
-
-        # Set the font
-        font = QFont()
-        font.setPointSize(8)
-
-        # Set the title and size of the form
-        self.setWindowTitle('User information')
-        self.resize(550, 400)
-
-        # Remove the close button
-        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowCloseButtonHint)
-
-        # Set icon
-        self.setWindowIcon(QIcon(os.path.join(os.getcwd(), 'resources', 'user.png')))
-
-        # Create labels and line edits for user information
-        user_label = QLabel('User Information:')
-        user_label.setFont(font)
-        user_label.setStyleSheet('font-weight: bold')
-        name_label = QLabel('Name:')
-        name_label.setFont(font)
-        self.name_edit = QLineEdit()
-        self.name_edit.setFont(font)
-        surname_label = QLabel('Surname:')
-        surname_label.setFont(font)
-        self.surname_edit = QLineEdit()
-        self.surname_edit.setFont(font)
-        email_label = QLabel('Email:')
-        email_label.setFont(font)
-        self.email_edit = QLineEdit()
-        self.email_edit.setFont(font)
-
-        # Make all line edits required except email
-        self.name_edit.setPlaceholderText('Required')
-        self.surname_edit.setPlaceholderText('Required')
-        self.email_edit.setPlaceholderText('Optional')
-
-        # Create a submit button
-        self.submit_button = QPushButton('Submit')
-        self.submit_button.setFont(font)
-        self.submit_button.clicked.connect(self.submit_user_info)
-
-        # Create a layout for the form
-        layout = QVBoxLayout()
-
-        # User information label bold and as a separator
-        layout.addWidget(user_label)
-        layout.addWidget(name_label)
-        layout.addWidget(self.name_edit)
-        layout.addWidget(surname_label)
-        layout.addWidget(self.surname_edit)
-        layout.addWidget(email_label)
-        layout.addWidget(self.email_edit)
-        layout.addWidget(self.submit_button)
-
-        self.setLayout(layout)
-
-    # Open user information form
-    def open_user_form(self):
-        self.show()
-
-    # Close user information form
-    def close_user_form(self):
-        self.close()
-
-    def submit_user_info(self):
+    def set_email(self, email):
         """
-        Save user information in the 'user_info.txt' file.
+        Sets the user email.
         """
 
-        # Retrieve user information
-        self.name = self.name_edit.text()
-        self.surname = self.surname_edit.text()
-        self.email = self.email_edit.text()
+        self.email = email
 
-        if not self.name:
-            QMessageBox.warning(self, 'Error', 'Please enter your name.')
-            return
+    def get_email(self):
+        """
+        Gets the user email.
+        """
 
-        if not self.surname:
-            QMessageBox.warning(self, 'Error', 'Please enter your surname.')
-            return
-        
-        # Save the user information in the user_info.txt file
-        # os.path.dirname(os.getcwd()) returns the path of the parent folder of the current working directory
-        with open(os.path.join(os.getcwd(), 'user_info.txt'), 'w') as f:
-            f.write('User information:\n')
-            f.write(f'Name: {self.name}\n')
-            f.write(f'Surname: {self.surname}\n')
-            f.write(f'Email: {self.email}\n')
-            # Write the date and time when the user information was saved
-            now = datetime.datetime.now()
-            date_str = now.strftime("%d/%m/%Y")
-            time_str = now.strftime("%H:%M:%S")
-            f.write(f'Date: {date_str} \nTime: {time_str}\n')
+        return self.email
 
-        # Close the form
-        self.close()
+    def set_date(self, date):
+        """
+        Sets the user date.
+        """
+
+        self.date = date
+
+    def get_date(self):
+        """
+        Gets the user date.
+        """
+
+        return self.date
+
+    def set_time(self, time):
+        """
+        Sets the user time.
+        """
+
+        self.time = time
+
+    def get_time(self):
+        """
+        Gets the user time.
+        """
+
+        return self.time

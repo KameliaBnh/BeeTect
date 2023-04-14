@@ -244,7 +244,13 @@ else:
     html2 = create_styled_table(bc.overview_df)
 
     #creating a directory to save all the output graphs
-    output_directory_batch_comparison = os.path.join(bc.main_window.Projects[0].path,'Output_Graphs')
+    # Set the output_batch_comparison directory to the 'Batch_Comparison_i' folder with the highest i value
+    # set the number variable as the highest i value
+    number = 0
+    for i in range(1, len(bc.main_window.Projects[0].path)):
+        if os.path.exists(os.path.join(bc.main_window.Projects[0].path, 'Batch_Comparison_' + str(i))):
+            number = i
+    output_directory_batch_comparison = os.path.join(bc.main_window.Projects[0].path, 'Batch_Comparison_' + str(number), 'Output_Graphs')
     if not os.path.exists(output_directory_batch_comparison):
         os.makedirs(output_directory_batch_comparison)
 
