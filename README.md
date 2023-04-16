@@ -137,6 +137,14 @@ Once you submit the batches you want to comapre, an HTML report will be generate
 * torchvision 0.15.1
 * matplotlib 3.7.1
 * numpy 1.24.2
+* pandas 1.5.2
 * PyYAML 6.0
 * scipy 1.10.1
 * seaborn 0.12.2
+* psutil 5.9.4
+* tqdm 4.65.0
+* gitdb 4.0.10
+* gitpython 3.1.31
+* smmap 5.0.0
+* scikit-posthocs 0.7.0
+* pandas 1.5.2 (not the latest version)
