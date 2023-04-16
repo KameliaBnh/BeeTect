@@ -45,7 +45,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("BeeTect")
 
         # Set the icon of the application
-        self.setWindowIcon(QIcon(os.path.join(os.getcwd(), "resources/bee.png")))
+        self.setWindowIcon(QIcon(os.path.join(os.getcwd(), "resources/bee.jpg")))
 
         
         # Class attributes
