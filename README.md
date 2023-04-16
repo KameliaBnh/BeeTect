@@ -16,7 +16,6 @@ In recent years, computer vision and deep learning has become a vital component 
 ```
 conda create -n GUI-env python=3.9.13       # create new virtual env
 conda activate GUI-env                      # activate environment in terminal
-pip install -r https://raw.githubusercontent.com/ultralytics/yolov5/master/requirements.txt # install Yolov5 requirements
 pip install -r requirements.txt             # install requirements
 ```
 
