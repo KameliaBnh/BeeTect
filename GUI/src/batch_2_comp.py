@@ -396,15 +396,15 @@ if len(main_window.batch_results) > 1:
 
     if p > alpha:
         if len(main_window.batch_results)==2:
-                Output1, Levene_df, Output2, ttest_df, Conclusion1 = comp_stats(main_window.batch_results,filtered_counts_list, folder_names)
+                Output1, Levene_df, Output2, ttest_df, Conclusion1 = comp_stats(main_window.batch_results, folder_names)
         else:
-                p_value, Output1, anova_df, Conclusion2  = comp_stats(main_window.batch_results,filtered_counts_list, folder_names)
+                p_value, Output1, anova_df, Conclusion2  = comp_stats(main_window.batch_results, folder_names)
                 tukey_df = tukey(p_value)
     else: 
         if len(main_window.batch_results)==2:
-                Output1, whitney_df, Conclusion3 = comp_stats(main_window.batch_results,filtered_counts_list, folder_names)
+                Output1, whitney_df, Conclusion3 = comp_stats(main_window.batch_results, folder_names)
         else:
-                Output1, krushal_p, krushal_df, Conclusion4 = comp_stats(main_window.batch_results, filtered_counts_list, folder_names)
+                Output1, krushal_p, krushal_df, Conclusion4 = comp_stats(main_window.batch_results, folder_names)
 
                 if krushal_p < 0.05:
 

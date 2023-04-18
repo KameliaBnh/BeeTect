@@ -446,25 +446,26 @@ class MainWindow(QMainWindow):
                 break
 
         # Update the user_info.txt file
-        with open(os.path.join(os.getcwd(), 'user_info.txt'), 'r+') as file:
-            lines = file.readlines()
-            file.seek(0)
-            file.truncate()
+        if os.path.exists(os.path.join(os.getcwd(), 'user_info.txt')):
+            with open(os.path.join(os.getcwd(), 'user_info.txt'), 'r+') as file:
+                lines = file.readlines()
+                file.seek(0)
+                file.truncate()
 
-            # Write the user information to the file
-            for line in lines:
-                if line.startswith("Name:"):
-                    file.write(f"Name: {self.Users[0].name}\n")
-                elif line.startswith("Surname:"):
-                    file.write(f"Surname: {self.Users[0].surname}\n")
-                elif line.startswith("Email:"):
-                    file.write(f"Email: {self.Users[0].get_email()}\n")
-                elif line.startswith("Date:"):
-                    file.write(f"Date: {self.Users[0].get_date()}\n")
-                elif line.startswith("Time:"):
-                    file.write(f"Time: {self.Users[0].get_time()}\n")
-                else:
-                    file.write(line)
+                # Write the user information to the file
+                for line in lines:
+                    if line.startswith("Name:"):
+                        file.write(f"Name: {self.Users[0].name}\n")
+                    elif line.startswith("Surname:"):
+                        file.write(f"Surname: {self.Users[0].surname}\n")
+                    elif line.startswith("Email:"):
+                        file.write(f"Email: {self.Users[0].get_email()}\n")
+                    elif line.startswith("Date:"):
+                        file.write(f"Date: {self.Users[0].get_date()}\n")
+                    elif line.startswith("Time:"):
+                        file.write(f"Time: {self.Users[0].get_time()}\n")
+                    else:
+                        file.write(line)
 
         # Update the current user label
         self.ui.currentUser.setText(selected_user)
