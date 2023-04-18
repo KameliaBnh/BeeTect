@@ -30,7 +30,6 @@ main_window = mw.MainWindow()
 def read_results(file_path):
     with open(file_path) as f:
             bee_counts = {"amegilla":0, "ceratina":0, "meliponini":0, "xylocopa_aestuans":0, "pollinator":0, "apis":0, "unknown":0, "apis_cerana":0, "apis_florea":0} # creating empty dictionary to store the counts 
-            per_image_counts={}
             no_detection_images=0
             image_no=[]
         
@@ -91,10 +90,10 @@ def read_results(file_path):
 
                             species_dict[species_name.lower()] = count 
 
-                        per_image_counts[img_no] = species_dict
+                        
 
     filtered_counts = {k:v for k,v in bee_counts.items() if v > 0}
-    return (filtered_counts, per_image_counts, no_detection_images, image_no)
+    return (filtered_counts, no_detection_images, image_no)
 
 # Creating a grouped bar plot 
 def plot_filtered_counts(paths):
@@ -105,7 +104,7 @@ def plot_filtered_counts(paths):
     folder_names = []
     for path in paths:
         folder_name = os.path.basename(os.path.dirname(path))
-        filtered_counts, per_image_counts, no_detection_images, image_no = read_results(path)
+        filtered_counts, no_detection_images, image_no = read_results(path)
         filtered_counts_list.append(filtered_counts)
         folder_names.append(folder_name)
 
@@ -123,7 +122,6 @@ def plot_filtered_counts(paths):
     total_width = 0.8
     n = len(sorted_values_list)
     width = total_width / n
-    errors = [np.std(group_counts) for group_counts in sorted_values_list] # calculating the standard deviation
 
     for i in range(n):
         plt.bar(x + i * width, sorted_values_list[i], width=width, label=folder_names[i], edgecolor='white')
@@ -141,7 +139,7 @@ def plot_filtered_counts(paths):
     if len(paths) > 1:
         plt.savefig('bee_counts.png', dpi=300, bbox_inches='tight')
     plt.close()
-    return filtered_counts, filtered_counts_list, per_image_counts, no_detection_images, image_no, folder_names
+    return filtered_counts, filtered_counts_list, no_detection_images, image_no, folder_names
 
 # Creating a dataframe with all the counts 
 def filtered_counts_table(paths):
@@ -154,7 +152,7 @@ def filtered_counts_table(paths):
     metrics =[]
     for path in paths:
         folder_name = os.path.basename(os.path.dirname(path))
-        filtered_counts, _, _, _ = read_results(path)
+        filtered_counts, _, _ = read_results(path)
         data_dict = {'Batch Name': folder_name}
         for key, value in filtered_counts.items():
             data_dict[key] = value
@@ -243,7 +241,7 @@ def normality(df):
     return p, normality_df
 
 # Creating a function that will perform all the statistics 
-def comp_stats(paths, filtered_counts_list, folder_names):
+def comp_stats(paths, folder_names):
 
     if p > alpha:
         Output1 = " Conclusion: The data is normally distributed. Performing further parametric tests."
@@ -377,13 +375,10 @@ def dunn(krushal_p):
     return dunn_df
 
 
-        
-
-
 # Setting the significance level 
 alpha = 0.05
 
-filtered_counts, filtered_counts_list, per_image_counts, no_detection_images, image_no, folder_names = plot_filtered_counts(main_window.batch_results)
+filtered_counts, filtered_counts_list, no_detection_images, image_no, folder_names = plot_filtered_counts(main_window.batch_results)
 
 # Storing all the bee counts 
 batch_values = []
@@ -419,11 +414,10 @@ if len(main_window.batch_results) > 1:
 
 
 
+    # The paths to the images are encoded in the base64 files
     html_file_paths = []
     folder_name_paths = []
-   
-
-
+ 
     with open("selected_batches.txt", "r") as f:
         for line in f:
             path = line.strip()  # remove newline character and any extra whitespace
