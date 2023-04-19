@@ -30,6 +30,8 @@ The GUI then opens and you can follow the steps in the next section.
 
 ## Use of the GUI
 
+**Before opening the GUI, you should download the weights for the given models in the right folders. Indeed, the '.pt' files are too heavy to be shared on GitHub! You will find a '.txt' file for each model (Named with the following convention: 'Weights_*Name_of_the_Model*') in the 'models' folder containing a link to download the corresponding weights. This step has to be done first before carrying on with the BeeTect app!**
+
 #### Entering the user information
 
 Once the BeeTect app (GUI) is launched (for the first time), a form asking for the user information pops up:
@@ -81,9 +83,11 @@ All the projects have to be saved in the 'projects' folder.
 
 You can also select supplementary files for the model summary in the HTML report exported to be more complete: the confusion matric .png file, the F1 curve .png file, the results .png file and the opt.yaml file containing the YOLO model parameters. To add these files, you have to check the box and browse through your files via the file dialogs.
 
+When a new model is added, the dropdown menu showing the available models automatically updates itself.
+
 #### Results /  Batch folder
 
-* It is also mandatory to select a 'Batch folder' before testing the selected model on the selected images: to do that, click on the 'Select Batch Folder' button in the main window:
+* It is also mandatory to select a 'Batch folder' before testing the selected model on the selected images (You will not be able to start the detection if a folder has not been selected first): to do that, click on the 'Select Batch Folder' button in the main window:
 
 <img width="182" alt="image" src="https://user-images.githubusercontent.com/126243509/230939381-e16cd402-39ac-47cb-a375-48b9e5467f42.png">
 
