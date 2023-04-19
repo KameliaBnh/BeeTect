@@ -1,1 +1,2 @@
 To download the weights for the YOLO_v5_2022 model, go to the following page:
+https://www.dropbox.com/s/pg7vdat97zt1fmu/YOLO_v5_2022.pt?dl=0
