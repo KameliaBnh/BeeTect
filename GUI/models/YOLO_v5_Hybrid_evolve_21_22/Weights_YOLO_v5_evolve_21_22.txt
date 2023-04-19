@@ -1,0 +1,1 @@
+To download the weights for the YOLO_v5_Hybrid_evolve_21_22 model, go to the following page:
