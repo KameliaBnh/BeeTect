@@ -1496,12 +1496,12 @@ class MainWindow(QMainWindow):
             ('Counts.csv', self.ui.statsTable),
             ('Model_Summary.csv', self.ui.modelTable)
         ]
-
-        # Clear the tables
-        self.ui.statsTable.clear()
-        self.ui.modelTable.clear()
         
         for filename, table in tables:
+            # Clear the existing contents of the table
+            table.clearContents()
+            table.setRowCount(0)
+            
             with open(os.path.join(self.Batches[0].path, filename)) as file:
                 reader = csv.DictReader(file)
                 rows = [row for row in reader]
