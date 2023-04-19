@@ -837,6 +837,9 @@ class MainWindow(QMainWindow):
 
         dialog.setLayout(layout)
 
+        # Connect the submit button to the load_model function (Refresh the combobox)
+        dialog.submit_button.clicked.connect(self.load_models)
+
         dialog.show()
 
     def open_model_weight(self, dialog):
@@ -952,6 +955,7 @@ class MainWindow(QMainWindow):
         print("Adding new model...")
         # Add message to the status bar
         self.ui.status_bar.setText("Adding new model...")
+        self.load_models()
 
     def load_models(self):
         """
