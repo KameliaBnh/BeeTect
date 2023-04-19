@@ -30,7 +30,9 @@ The GUI then opens and you can follow the steps in the next section.
 
 ## Use of the GUI
 
-**Before opening the GUI, you should download the weights for the given models in the right folders. Indeed, the '.pt' files are too heavy to be shared on GitHub! You will find a '.txt' file for each model (Named with the following convention: 'Weights_*Name_of_the_Model*') in the 'models' folder containing a link to download the corresponding weights. This step has to be done first before carrying on with the BeeTect app!**
+**Before opening the GUI, you should download the weights for the given models in the right folders. Indeed, the '.pt' files are too heavy to be shared on GitHub! You will find a '.txt' file for each model (Named with the following convention: 'Weights_*Name_of_the_Model*') in the 'models' folder containing a link to download the corresponding weights. This step has to be done first before carrying on with the BeeTect app!
+
+You can also find the four provided weights to download in the following folder: https://www.dropbox.com/sh/0gsjrr63c385us4/AABUp3cplmssdUmVpY3SzwjJa?dl=0**
 
 #### Entering the user information
 
