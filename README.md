@@ -59,9 +59,9 @@ There are different options for you to use here:
 
 * To create a new project, open the 'File' menu item, and select 'New Project':
 
-<img width="268" alt="image" src="https://user-images.githubusercontent.com/126243509/230937968-72e3f121-f9d0-4860-82bb-2b70349cbf16.png"> <img width="252" alt="image" src="https://user-images.githubusercontent.com/126243509/230938062-5c29a169-515d-43c0-aeb1-d9b2f2813fcd.png">
+<img width="268" alt="image" src="https://user-images.githubusercontent.com/126243509/230937968-72e3f121-f9d0-4860-82bb-2b70349cbf16.png"> <img width="252" alt="image" src="https://user-images.githubusercontent.com/126243509/233342401-bbaf63c5-b5b4-4595-aac4-479c1a33846a.png">
 
-All the projects have to be saved in the 'projects' folder.
+All the projects will be saved in the 'projects' folder.
 
 * To open an existing project, use the 'Open Project' option in the 'File' menu:
 
