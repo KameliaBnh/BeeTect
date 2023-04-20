@@ -22,8 +22,6 @@ import Image
 import Batch
 from HelpWindow import HelpWindow
 
-
-
 class MainWindow(QMainWindow):
 
     def __init__(self):
@@ -141,11 +139,8 @@ class MainWindow(QMainWindow):
         # Connect the button to the function new_project
         self.ui.NewProject.triggered.connect(self.new_project)
 
-        # Connect the addModel button to the function new_model
-        self.ui.addModel.clicked.connect(self.add_new_model)
-
-        # Connect the editModels button to the function edit_models
-        self.ui.editModels.clicked.connect(self.edit_models)
+        # Connect the addModel button to the function edit_models
+        self.ui.addModel.clicked.connect(self.edit_models)
 
         # Deactivate the OpenFile and OpenFolder buttons until the user selects a project
         if self.ui.ProjectNameDisplay.text() == "":
@@ -946,7 +941,7 @@ class MainWindow(QMainWindow):
         window = QDialog()
         window.setWindowTitle('Edit Models')
         window.setModal(True)
-        window.setFixedSize(500, 300)
+        window.setFixedSize(900, 400)
         layout = QVBoxLayout(window)
         
         # Add window icon
@@ -1188,6 +1183,25 @@ class MainWindow(QMainWindow):
         The folder is created if it does not exist. It can be either the default subfolder of the current project or a renamed subfolder.
         """
 
+        while(self.Projects == []):
+            try:
+                # Show warning message
+                msg = QMessageBox()
+                msg.setIcon(QMessageBox.Warning)
+                msg.setText("No Project Created")
+                msg.setInformativeText("Please create a project before running the detection.")
+                msg.setWindowTitle("No Project Created")
+                msg.setStandardButtons(QMessageBox.Ok)
+                msg.button(QMessageBox.Ok).setText('Ok')
+
+                msg.exec_()
+            
+            except:
+                pass
+
+            finally:
+                return
+            
         # Set the window as modal
         self.setWindowModality(Qt.ApplicationModal)
 
@@ -1273,7 +1287,7 @@ class MainWindow(QMainWindow):
                             file.write(batch.path + '\n')
 
         # Display the folder path in the BatchFolder label
-        self.ui.BatchFolder.setText("Batch Folder: " + self.Batches[0].name)
+        self.ui.BatchFolder.setText("Output Folder: " + self.Batches[0].name)
 
         # Enable the Start button
         self.ui.Start.setEnabled(True)
@@ -1285,7 +1299,7 @@ class MainWindow(QMainWindow):
         Results are displayed in the image label and also saved in the Images list.
         The images are renamed after their original name.
         """
-
+            
         # If the selected model is not the first one, move it to the top of the list and at the top of the text file
         
         if self.Models[0].path != self.Models[self.ui.modelSelection.currentIndex()].path:
