@@ -617,38 +617,8 @@ class MainWindow(QMainWindow):
         # Disable start button
         self.ui.Start.setEnabled(False)
 
-    # Open a file dialog to select the project directory
-    def open_project_directory(self, project_directory_edit):
-        """
-        Open a file dialog to select the project directory.
-        """
-
-        # Set the window as modal
-        self.setWindowModality(Qt.ApplicationModal)
-
-        try:
-            # Open the project directory
-            project_directory = QFileDialog.getExistingDirectory(self, "Select Project Directory", os.getcwd())
-
-            print("Selecting project directory...")
-            # Add message to the status bar
-            self.ui.status_bar.setText("Selecting project directory...")
-
-        except Exception as e:
-            # Open message box
-            QMessageBox.warning(self, 'Error', f'Error opening project directory: {str(e)}', QMessageBox.Ok)
-            return
-        
-        else:
-            # Set the project directory
-            project_directory_edit.setText(project_directory)
-
-            print(project_directory + " selected successfully!")
-            # Add message to the status bar
-            self.ui.status_bar.setText(project_directory + " selected successfully!")
-
     # Save the new project
-    def save_new_project(self, project_name_edit, project_directory_edit):
+    def save_new_project(self, project_name_edit):
         """
         Save the new project. Add the project to the top of the list of projects. Save the project to the 'user_info.txt' file.
         """
@@ -660,7 +630,7 @@ class MainWindow(QMainWindow):
             self.ui.status_bar.setText("Creating project: " + project_name_edit.text())
 
             # Add the project to the list of projects
-            new_project_path = os.path.join(project_directory_edit.text(), project_name_edit.text())
+            new_project_path = os.path.join(os.path.join(os.getcwd(), 'projects'), project_name_edit.text())
             if new_project_path not in [project.path for project in self.Projects]:
                 # Create the project directory
                 os.mkdir(new_project_path)
@@ -713,27 +683,14 @@ class MainWindow(QMainWindow):
         project_name_edit.setPlaceholderText('Required')
         project_name_edit.setFont(font)
 
-        # Create a label and line edit for the project directory
-        project_directory_label = QLabel('Project directory:')
-        project_directory_label.setFont(font)
-        project_directory_edit = QLineEdit()
-        project_directory_edit.setFont(font)
-        project_directory_edit.setReadOnly(True)
-        project_directory_button = QPushButton('Browse')
-        project_directory_button.setFont(font)
-        project_directory_button.clicked.connect(lambda: self.open_project_directory(project_directory_edit))
-
         # Create a submit button
         submit_button = QPushButton('Submit')
         submit_button.setFont(font)
-        submit_button.clicked.connect(lambda: self.save_new_project(project_name_edit, project_directory_edit))
+        submit_button.clicked.connect(lambda: self.save_new_project(project_name_edit))
 
         # Add the widgets to the layout
         layout.addWidget(project_name_label)
         layout.addWidget(project_name_edit)
-        layout.addWidget(project_directory_label)
-        layout.addWidget(project_directory_edit)
-        layout.addWidget(project_directory_button)
         layout.addWidget(submit_button)
 
         # Show the dialog
