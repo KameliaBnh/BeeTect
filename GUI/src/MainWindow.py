@@ -687,6 +687,7 @@ class MainWindow(QMainWindow):
         submit_button = QPushButton('Submit')
         submit_button.setFont(font)
         submit_button.clicked.connect(lambda: self.save_new_project(project_name_edit))
+        submit_button.clicked.connect(dialog.close)
 
         # Add the widgets to the layout
         layout.addWidget(project_name_label)
