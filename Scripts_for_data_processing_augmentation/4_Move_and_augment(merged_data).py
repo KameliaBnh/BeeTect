@@ -41,13 +41,6 @@ shift_list = 'path/to/images_to_shift.txt'# file containing names of images that
 with open(shift_list, "r") as f:
     images_to_shift = [line.strip().split()[1] for line in f.readlines()]
 
-# Loop through the images and split them randomly if the corresponding annotation file exists
-#for class_name, file_name in images_to_shift:
-    #image_path = os.path.join(images_folder, file_name)
-    #annotation_path = os.path.join(annotations_folder, f"{os.path.splitext(file_name)[0]}.txt")
-
-#Set seed
-#random.seed(42)
 
 # Look for files in the train folder with the same names as the images to shift
 train_images = [f for f in os.listdir(images_folder) if os.path.isfile(os.path.join(images_folder, f)) and f in images_to_shift]
