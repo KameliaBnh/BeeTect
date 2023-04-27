@@ -12,7 +12,6 @@ import warnings
 warnings.filterwarnings("ignore", message="this method is deprecated")
 
 
-
 # Path of the text file storing the preferences of the user
 user_info_path = os.path.join(os.getcwd(), 'user_info.txt')
 
@@ -43,7 +42,9 @@ if os.path.isfile(os.path.join(model_path, 'F1_curve.png')):
     file_paths.append(os.path.join(model_path, 'F1_curve.png'))
 
 #Setting the short description for the Performance Graphs 
-titles = ['Title 1', 'Title 2', 'Title 3']
+titles = ['Model performance over the specified number of epochs.',
+          'Confusion Matrix: values in the diagonal are predicted more accurately.',
+          'F1 Confidence Curve: the model is more confident in predicting the classes with higher F1 score.']
 
 #Creating a function to style the tables 
 def create_styled_table(df):
