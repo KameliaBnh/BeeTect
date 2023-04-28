@@ -65,7 +65,7 @@ All the projects will be saved in the 'projects' folder.
 
 * To open an existing project, use the 'Open Project' option in the 'File' menu:
 
-<img width="265" alt="image" src="https://user-images.githubusercontent.com/126243509/230938342-c92f6297-c6e0-486f-92aa-a70682bdec45.png">
+<img width="168" alt="openProject" src="https://user-images.githubusercontent.com/126243509/235151295-94684f7c-696d-4b15-a9c5-91b66d85b72d.png">
 
 * There is also the possibility to access the five last opened projects from the 'File' menu:
 
