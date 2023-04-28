@@ -148,7 +148,7 @@ def image_encode(directory,width, height):
 
 # Creating a function to encode the image data from a list
 
-def image_encode_list(image_paths, width, height):
+def image_encode_list(image_paths, titles, width, height):
     img_tags = []
 
     for img_path in image_paths:
@@ -169,6 +169,9 @@ def image_encode_list(image_paths, width, height):
 
             img_tags.append(images)
     return img_tags
+
+
+titles = ['Title1', 'Title2', 'Title3']
 
 
 # Checking if the opt.yaml file is provided to create a model summary dataframe 
